@@ -7,8 +7,6 @@ android {
     defaultConfig {
         minSdkVersion project.minSdkVersion
         targetSdkVersion project.targetSdkVersion
-        versionCode 2
-        versionName "1.4"
         multiDexEnabled true
     }
     buildTypes {
@@ -25,6 +23,7 @@ android {
             includeAndroidResources = true
         }
     }
+    namespace 'com.thoughtbot.expandablerecyclerview'
 }
 
 dependencies {

@@ -12,6 +12,7 @@ android {
   lintOptions {
     abortOnError false
   }
+    namespace 'com.jaredrummler.android.colorpicker'
 }
 
 dependencies {

@@ -40,6 +40,7 @@ android {
         // but continue the build even when errors are found:
         abortOnError false
     }
+    namespace 'com.mrikso.apkrepacker'
 }
 
 dependencies {

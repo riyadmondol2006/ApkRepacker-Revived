@@ -7,20 +7,19 @@ android {
     defaultConfig {
         minSdkVersion project.minSdkVersion
         targetSdkVersion project.targetSdkVersion
-        versionCode 1// Integer.parseInt(VERSION_CODE)
-        versionName "1.0"// VERSION_NAME
+        // Integer.parseInt(VERSION_CODE)
+        // VERSION_NAME
     }
     buildTypes {
         release {
             minifyEnabled false
-            debuggable false
         }
 
         debug {
             minifyEnabled false
-            debuggable true
         }
     }
+    namespace 'com.github.clans.fab'
 }
 
 dependencies {

@@ -7,8 +7,6 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 29
-        versionCode 179
-        versionName "0.9.6.0"
         consumerProguardFiles 'progress-proguard.txt'
     }
     lintOptions {
@@ -21,6 +19,7 @@ android {
             'src/main/res-public'
         ]
     }
+    namespace 'com.afollestad.materialdialogs'
 }
 
 dependencies {
