@@ -146,7 +146,7 @@ Projects are stored in `Android/data/com.riyadm.apkrepacker/files/projects`.
 ## Releases
 
 Every push to `main` builds a **signed release APK** with GitHub Actions and publishes it as a
-GitHub Release, with the R8 mapping file and notes listing the new commits. To set it up for your
+GitHub Release, with notes listing the new commits. To set it up for your
 own fork you only add your signing key as repository secrets: **[docs/RELEASING.md](docs/RELEASING.md)**
 walks through it step by step.
 

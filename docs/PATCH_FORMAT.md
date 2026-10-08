@@ -157,8 +157,9 @@ Afterwards `${MAIN_CLASS}` can be used in later rules.
 
 ### `[MATCH_GOTO]` — conditional jump
 
-If the target matches, jump to the rule whose `NAME:` equals `GOTO:`. Keywords:
-`TARGET:`, `MATCH:`, `REGEX:`, `DOTALL:`, `GOTO:`.
+If the target matches, jump to the rule whose `NAME:` equals `GOTO:`; otherwise continue with the
+next rule. Keywords: `TARGET:`, `MATCH:`, `REGEX:`, `DOTALL:`, `GOTO:`. A patch that jumps in a loop is
+stopped after 100,000 executed rules.
 
 ### `[GOTO]` — unconditional jump
 
@@ -202,8 +203,12 @@ res/drawable/splash.png
 
 ### `[MERGE]` — merge a resource/smali bundle
 
-`SOURCE:` is a zip inside the patch; its resources and smali are merged into the
+`SOURCE:` is a zip inside the patch; its resources and smali are meant to be merged into the
 project, renumbering resource IDs in `res/values/public.xml` as needed.
+
+> **Not working at the moment.** This rule is an unfinished stub carried over from the original
+> engine: it logs an error and the patch carries on with the next rule. Add the files with
+> `[ADD_FILES]` and edit `res/values/*.xml` with `[MATCH_REPLACE]` instead.
 
 ### `[SIGNATURE_REVISE]` — fill signature placeholders
 
@@ -213,7 +218,8 @@ project's values. Used by signature-verification patches.
 ### `[EXECUTE_DEX]` — run code shipped in the patch
 
 Loads a `.dex` from the patch and calls one method. Only use patches from
-authors you trust — this runs real code with the app's permissions.
+authors you trust — this runs real code with the app's permissions. Keep the code in the patch
+self-contained: classes of the app itself are optimised away in release builds, so don't call them.
 
 | Keyword | Value |
 |---|---|
@@ -274,5 +280,5 @@ const/4 ${GROUP2}, 0x0
   blank lines) matters.
 - Keep a patch focused. Several small rules are easier to debug than one giant
   one.
-- `MIN_ENGINE_VER` higher than the installed engine will stop the patch, so set
+- A `MIN_ENGINE_VER` higher than the installed engine (currently 2) stops the patch with an error, so set
   it to the lowest version your rules actually need.

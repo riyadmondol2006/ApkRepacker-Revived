@@ -83,11 +83,10 @@ Open the **Actions** tab. The *Build and release* run takes roughly 5 to 10 minu
 containing:
 
 * `ApkRepackerRevived-v<version>-build<N>.apk`: the signed APK
-* `mapping-build<N>.txt`: the R8 mapping, to read obfuscated crash traces
 * notes with the commit, the APK's SHA-256 and the commits since the last release
 
-Releases are named `v<versionName>-build.<run number>` (for example `v1.0.4-beta-build.17`) and are
-marked *pre-release* while `versionName` contains `beta`, `alpha` or `rc`.
+Releases are named `v<versionName>-build.<run number>` (for example `v1.0.4-build.17`). A release is marked *pre-release* only while `versionName` contains
+`beta`, `alpha` or `rc`; a plain number such as `1.0.4` is published as a stable release.
 
 You can also start a build by hand: **Actions** → *Build and release* → **Run workflow**.
 
