@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="docs/icon.png" width="128" alt="Apk Repacker Revived icon">
+
 # Apk Repacker Revived
 
 **Decompile, patch, rebuild and sign Android apps. Entirely on your phone.**
