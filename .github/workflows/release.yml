@@ -38,18 +38,21 @@ jobs:
             exit 1
           fi
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0   # full history, for the release notes
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 21
 
-      # Installs the Android SDK command-line tools and accepts the licenses, so Gradle can
-      # download any platform or build-tools version the project asks for.
-      - uses: android-actions/setup-android@v3
+      # The runner image already has the Android SDK and sdkmanager. Accepting the licenses lets
+      # Gradle download any platform or build-tools version the project asks for.
+      - name: Accept the Android SDK licenses
+        run: |
+          SDKMANAGER=$(command -v sdkmanager || ls "$ANDROID_HOME"/cmdline-tools/*/bin/sdkmanager | head -n 1)
+          yes | "$SDKMANAGER" --licenses > /dev/null || true
 
       - uses: gradle/actions/setup-gradle@v4
 
