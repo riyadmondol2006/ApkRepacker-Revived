@@ -70,7 +70,10 @@ jobs:
         run: |
           if ! keytool -list -keystore "$SIGNING_STORE_FILE" -storepass "$SIGNING_STORE_PASSWORD" \
                  -alias "$SIGNING_KEY_ALIAS" > "$RUNNER_TEMP/keytool.txt" 2>&1; then
-            echo "::error title=The signing key could not be opened::$(tr '\n' ' ' < "$RUNNER_TEMP/keytool.txt" | cut -c1-300) (see docs/RELEASING.md)"
+            # Aliases are not secret: list them so a wrong SIGNING_KEY_ALIAS is easy to fix.
+            aliases=$(keytool -list -keystore "$SIGNING_STORE_FILE" -storepass "$SIGNING_STORE_PASSWORD" 2>/dev/null \
+                      | grep -E 'PrivateKeyEntry|trustedCertEntry' | cut -d, -f1 | tr '\n' ' ')
+            echo "::error title=The signing key could not be opened::$(tr '\n' ' ' < "$RUNNER_TEMP/keytool.txt" | cut -c1-200) Aliases in this keystore: ${aliases:-none found}. Set SIGNING_KEY_ALIAS to one of them (see docs/RELEASING.md)."
             exit 1
           fi
 
