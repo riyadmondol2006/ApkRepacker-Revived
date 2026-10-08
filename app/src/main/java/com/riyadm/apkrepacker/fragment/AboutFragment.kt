@@ -14,7 +14,9 @@ import androidx.fragment.app.Fragment
 import com.google.android.material.shape.CornerFamily
 import com.google.android.material.shape.ShapeAppearanceModel
 import com.google.android.material.snackbar.Snackbar
+import com.riyadm.apkrepacker.BuildConfig
 import com.riyadm.apkrepacker.R
+import com.riyadm.apkrepacker.databinding.CardAboutChannelBinding
 import com.riyadm.apkrepacker.databinding.CardAboutHeaderBinding
 import com.riyadm.apkrepacker.databinding.FragmentAboutBinding
 import com.riyadm.apkrepacker.databinding.ItemAboutLinkBinding
@@ -22,6 +24,7 @@ import com.riyadm.apkrepacker.fragment.dialogs.LicensesDialogFragment
 import com.riyadm.apkrepacker.ui.motion.pressSpring
 import com.riyadm.apkrepacker.ui.motion.springIn
 import com.riyadm.apkrepacker.ui.preferences.showBackIfOverlay
+import com.riyadm.apkrepacker.update.UpdateUi
 import com.riyadm.apkrepacker.utils.AppLogo
 import com.riyadm.apkrepacker.utils.AppUtils
 import com.riyadm.apkrepacker.utils.Constant
@@ -35,6 +38,7 @@ class AboutFragment : Fragment() {
         @DrawableRes val icon: Int,
         @StringRes val title: Int,
         @StringRes val subtitle: Int? = null,
+        val subtitleText: CharSequence? = null,
         val onClick: () -> Unit,
     )
 
@@ -48,6 +52,18 @@ class AboutFragment : Fragment() {
         ui.appBar.setLiftOnScrollTargetView(ui.scrollAbout)
 
         bindHeader(ui.aboutHeader)
+        bindChannel(ui.aboutChannel)
+
+        fill(
+            ui.groupApp,
+            listOf(
+                Link(
+                    R.drawable.ic_update,
+                    R.string.about_update_check,
+                    subtitleText = getString(R.string.about_sub_update_check, BuildConfig.VERSION_NAME),
+                ) { UpdateUi.checkNow(this) },
+            ),
+        )
 
         ui.aboutDeveloper.btnDevTelegram.setOnClickListener { openSite(Constant.DEV_TELEGRAM) }
         ui.aboutDeveloper.btnDevEmail.setOnClickListener { sendEmail() }
@@ -58,7 +74,7 @@ class AboutFragment : Fragment() {
             listOf(
                 Link(R.drawable.ic_telegram, R.string.about_telegram_dev, R.string.about_sub_telegram) { openSite(Constant.DEV_TELEGRAM) },
                 Link(R.drawable.ic_phone_android, R.string.about_whatsapp, R.string.about_sub_whatsapp) { openSite(Constant.DEV_WHATSAPP) },
-                Link(R.drawable.ic_email, R.string.about_email, R.string.about_sub_email, ::sendEmail),
+                Link(R.drawable.ic_email, R.string.about_email, R.string.about_sub_email, onClick = ::sendEmail),
                 Link(R.drawable.ic_link, R.string.about_website, R.string.about_sub_website) { openSite(Constant.MY_WEBSITE) },
             ),
         )
@@ -107,6 +123,14 @@ class AboutFragment : Fragment() {
         header.root.springIn(fromScale = 0.92f)
     }
 
+    /** The app's Telegram channel card: the whole card and its Join button open the channel. */
+    private fun bindChannel(channel: CardAboutChannelBinding) {
+        channel.root.setOnClickListener { openSite(Constant.TELEGRAM_CHANNEL) }
+        channel.btnChannelJoin.setOnClickListener { openSite(Constant.TELEGRAM_CHANNEL) }
+        channel.root.pressSpring()
+        channel.root.springIn(delayMs = 60L, fromScale = 0.94f)
+    }
+
     /** Fills [group] with one tile per link; outer tiles get large corners, inner ones small (segmented list). */
     private fun fill(group: ViewGroup, links: List<Link>) {
         val inflater = LayoutInflater.from(group.context)
@@ -114,8 +138,8 @@ class AboutFragment : Fragment() {
             val row = ItemAboutLinkBinding.inflate(inflater, group, false)
             row.aboutRowIcon.setImageResource(link.icon)
             row.aboutRowTitle.setText(link.title)
-            link.subtitle?.let {
-                row.aboutRowSubtitle.setText(it)
+            (link.subtitleText ?: link.subtitle?.let(::getString))?.let {
+                row.aboutRowSubtitle.text = it
                 row.aboutRowSubtitle.visibility = View.VISIBLE
             }
             row.aboutRow.shapeAppearanceModel = rowShape(first = index == 0, last = index == links.lastIndex)

@@ -182,6 +182,7 @@ pinning and integrity check bypass, and mobile forensics are the main areas of w
 | WhatsApp | [wa.me/8801711798409](https://wa.me/8801711798409) |
 | Email | [riyadmondol2006@gmail.com](mailto:riyadmondol2006@gmail.com) |
 | This project | [riyadmondol2006/ApkRepacker-Revived](https://github.com/riyadmondol2006/ApkRepacker-Revived) |
+| Telegram channel | [@ApkRepacker](https://t.me/ApkRepacker) (updates and releases) |
 | GitHub | [riyadmondol2006](https://github.com/riyadmondol2006) |
 | LinkedIn | [riyadmondol2006](https://www.linkedin.com/in/riyadmondol2006) |
 | YouTube | [@reversesio](https://www.youtube.com/@reversesio) |

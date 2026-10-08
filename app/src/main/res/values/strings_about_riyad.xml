@@ -8,6 +8,13 @@
     <string name="about_telegram_short" translatable="false">Telegram</string>
     <string name="about_email_short">Email</string>
 
+    <string name="about_channel_label">Official channel</string>
+    <string name="about_channel_title">Join the Telegram channel</string>
+    <string name="about_channel_body">News, updates and new releases of Apk Repacker Revived.</string>
+    <string name="about_channel_join">Join</string>
+    <string name="about_update_check">Check for updates</string>
+    <string name="about_sub_update_check">Version %1$s — tap to check</string>
+
     <string name="about_group_contact">Contact</string>
     <string name="about_group_social">Links and projects</string>
 
@@ -22,6 +29,7 @@
 
     <string name="about_sub_original_repo" translatable="false">github.com/MrIkso/ApkRepacker</string>
     <string name="about_sub_project_repo" translatable="false">riyadmondol2006/ApkRepacker-Revived</string>
+    <string name="about_sub_telegram_channel" translatable="false">t.me/ApkRepacker</string>
     <string name="about_sub_website" translatable="false">riyadm.com</string>
     <string name="about_sub_telegram" translatable="false">\@riyadmondol2006</string>
     <string name="about_sub_whatsapp" translatable="false">wa.me/8801711798409</string>

@@ -35,6 +35,12 @@
             android:key="pref_all_files_access"
             android:title="@string/pref_all_files_access" />
 
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:key="pref_check_updates"
+            android:summary="@string/pref_check_updates_summary"
+            android:title="@string/pref_check_updates" />
+
     </PreferenceCategory>
     <!-- Decompile defaults: keys and defaults match ApktoolOptionsStore / DecodeOptions -->
     <PreferenceCategory

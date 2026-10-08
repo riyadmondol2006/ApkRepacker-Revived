@@ -11,6 +11,7 @@ import com.google.android.material.navigation.NavigationBarView
 import com.google.android.material.navigationrail.NavigationRailView
 import com.riyadm.apkrepacker.App
 import com.riyadm.apkrepacker.R
+import com.riyadm.apkrepacker.update.UpdateUi
 import com.riyadm.apkrepacker.databinding.ActivityMainBinding
 import com.riyadm.apkrepacker.fragment.AboutFragment
 import com.riyadm.apkrepacker.fragment.AppsFragment
@@ -89,7 +90,11 @@ class MainActivity : BaseActivity(), FragmentNavigator.FragmentFactory {
         }
         setUpRailToggle(savedInstanceState?.getBoolean(STATE_RAIL_EXPANDED) ?: false)
 
-        if (savedInstanceState == null) navigator.switchTo(ProjectsFragment.TAG)
+        if (savedInstanceState == null) {
+            navigator.switchTo(ProjectsFragment.TAG)
+            // A fresh open (not a rotation): the channel invite the first time, else the update check.
+            UpdateUi.onAppOpen(this)
+        }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {

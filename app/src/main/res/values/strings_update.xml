@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App updates from GitHub releases -->
+    <string name="pref_check_updates">Check for updates on open</string>
+    <string name="pref_check_updates_summary">Look for a new version every time the app opens</string>
+    <string name="update_checking">Checking for updates…</string>
+    <string name="update_available_title">Update available: %1$s</string>
+    <string name="update_available_message">You have version %1$s.\n\nWhat\'s new:\n%2$s</string>
+    <string name="update_no_notes">Bug fixes and improvements.</string>
+    <string name="update_install">Update</string>
+    <string name="update_later">Later</string>
+    <string name="update_release_page">Release page</string>
+    <string name="update_none_title">You\'re up to date</string>
+    <string name="update_none_message">Version %1$s is the latest version.</string>
+    <string name="update_failed_title">Update failed</string>
+    <string name="update_check_failed">Couldn\'t check for updates: %1$s</string>
+    <string name="update_download_title">Downloading update</string>
+    <string name="update_downloading">Downloading version %1$s…</string>
+    <string name="update_downloading_progress">Downloading version %1$s… %2$.1f of %3$.1f MB</string>
+    <string name="update_download_failed">Couldn\'t download the update: %1$s</string>
+
+    <!-- First open: invitation to the app's Telegram channel -->
+    <string name="channel_invite_title">Join our Telegram channel</string>
+    <string name="channel_invite_message">Get news, updates and new releases of Apk Repacker Revived first on the Telegram channel @ApkRepacker.</string>
+    <string name="channel_invite_join">Join</string>
+    <string name="channel_invite_later">Not now</string>
+</resources>

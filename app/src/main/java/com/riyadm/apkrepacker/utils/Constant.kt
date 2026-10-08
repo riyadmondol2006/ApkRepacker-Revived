@@ -5,6 +5,7 @@ object Constant {
     const val EMAIL = "mailto:riyadmondol2006@gmail.com"
     const val GIT_HUB = "https://github.com/riyadmondol2006"
     const val PROJECT_REPO = "https://github.com/riyadmondol2006/ApkRepacker-Revived"
+    const val TELEGRAM_CHANNEL = "https://t.me/ApkRepacker"
     const val PATCH_DOC = "https://github.com/riyadmondol2006/ApkRepacker-Revived/blob/main/docs/PATCH_FORMAT.md"
     const val ORIGINAL_REPO = "https://github.com/MrIkso/ApkRepacker"
     const val MY_WEBSITE = "https://riyadm.com"

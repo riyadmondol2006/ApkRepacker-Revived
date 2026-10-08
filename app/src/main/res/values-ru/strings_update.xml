@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pref_check_updates">Проверять обновления при запуске</string>
+    <string name="pref_check_updates_summary">Искать новую версию при каждом открытии приложения</string>
+    <string name="update_checking">Проверка обновлений…</string>
+    <string name="update_available_title">Доступно обновление: %1$s</string>
+    <string name="update_available_message">У вас версия %1$s.\n\nЧто нового:\n%2$s</string>
+    <string name="update_no_notes">Исправления и улучшения.</string>
+    <string name="update_install">Обновить</string>
+    <string name="update_later">Позже</string>
+    <string name="update_release_page">Страница релиза</string>
+    <string name="update_none_title">Установлена последняя версия</string>
+    <string name="update_none_message">Версия %1$s — последняя.</string>
+    <string name="update_failed_title">Ошибка обновления</string>
+    <string name="update_check_failed">Не удалось проверить обновления: %1$s</string>
+    <string name="update_download_title">Загрузка обновления</string>
+    <string name="update_downloading">Загрузка версии %1$s…</string>
+    <string name="update_downloading_progress">Загрузка версии %1$s… %2$.1f из %3$.1f МБ</string>
+    <string name="update_download_failed">Не удалось загрузить обновление: %1$s</string>
+
+    <string name="channel_invite_title">Подпишитесь на наш канал в Telegram</string>
+    <string name="channel_invite_message">Новости, обновления и новые версии Apk Repacker Revived — первыми в Telegram-канале @ApkRepacker.</string>
+    <string name="channel_invite_join">Подписаться</string>
+    <string name="channel_invite_later">Не сейчас</string>
+</resources>

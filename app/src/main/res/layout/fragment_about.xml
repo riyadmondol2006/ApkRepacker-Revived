@@ -44,6 +44,17 @@
                 layout="@layout/card_about_header" />
 
             <include
+                android:id="@+id/about_channel"
+                layout="@layout/card_about_channel" />
+
+            <LinearLayout
+                android:id="@+id/group_app"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/space_4"
+                android:orientation="vertical" />
+
+            <include
                 android:id="@+id/about_developer"
                 layout="@layout/card_about_developer" />
 
