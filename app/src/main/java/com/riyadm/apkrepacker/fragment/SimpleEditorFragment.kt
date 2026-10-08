@@ -13,6 +13,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
+import androidx.core.view.isVisible
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.core.os.bundleOf
@@ -70,6 +71,7 @@ class SimpleEditorFragment : Fragment(), ProgressDialogFragment.ProgressDialogFr
         views.saveExFab.setOnClickListener { buildApp() }
         try {
             val info = AppInfo(view.context, selected)
+            if (!info.isValid()) throw IllegalStateException("AppInfo failed")
             appInfo = info
             val apk = checkNotNull(AppUtils.getApkInfo(view.context, selected.absolutePath))
             installLocation = apk[7] as Int
@@ -83,13 +85,19 @@ class SimpleEditorFragment : Fragment(), ProgressDialogFragment.ProgressDialogFr
                 appVersionCode.setText(apk[4].toString())
                 appMinimumSdk.setText(apk[5].toString())
                 appTargetSdk.setText(apk[6].toString())
-                appIconEdit.setOnClickListener { selectIcon() }
-                appIconChange.setOnClickListener { selectIcon() }
+                // No icon resource of its own (or none that resolves): nothing to replace.
+                val hasIcon = info.iconValue() != null
+                appIconChange.isVisible = hasIcon
+                if (hasIcon) {
+                    appIconEdit.setOnClickListener { selectIcon() }
+                    appIconChange.setOnClickListener { selectIcon() }
+                }
                 appPackage.addTextChangedListener(packageWatcher)
             }
             bindInstallLocation(views)
         } catch (ex: Exception) {
             ex.printStackTrace()
+            appInfo = null
             snack(getString(R.string.toast_error_cant_parse_apk))
         }
     }
@@ -173,7 +181,16 @@ class SimpleEditorFragment : Fragment(), ProgressDialogFragment.ProgressDialogFr
 
     private fun buildApp() {
         val views = binding?.form ?: return
-        val info = appInfo ?: return
+        val info = appInfo
+        if (info == null) {
+            // The APK couldn't be read when the editor opened: say so instead of doing nothing.
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.error)
+                .setMessage(R.string.toast_error_cant_parse_apk)
+                .setPositiveButton(android.R.string.ok, null)
+                .show()
+            return
+        }
         val minSdk = views.appMinimumSdk.text.toString().toIntOrNull()
         val targetSdk = views.appTargetSdk.text.toString().toIntOrNull()
         if (minSdk == null || targetSdk == null) {

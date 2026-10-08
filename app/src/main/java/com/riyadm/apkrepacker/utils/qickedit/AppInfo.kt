@@ -46,14 +46,23 @@ class AppInfo {
                 val appInfo = pInfo!!.applicationInfo!!
                 appInfo.sourceDir = path
                 appInfo.publicSourceDir = path
-                val resources = pManager!!.getResourcesForApplication(appInfo)
-                this.icon = appInfo.loadIcon(pManager!!)
-                this.iconValue = resources.getResourceName(appInfo.icon)
-                this.iconFiles = resolveIconFiles(resources, appInfo.icon)
-                this.label = appInfo.loadLabel(pManager!!)
                 this.pname = pInfo!!.packageName
                 this.version = pInfo!!.versionName
                 this.code = pInfo!!.versionCode
+                this.label = runCatching { appInfo.loadLabel(pManager!!) }.getOrNull()
+                    ?: ManifestAnalyser.getPackageLabel() ?: pname
+                this.icon = runCatching { appInfo.loadIcon(pManager!!) }.getOrNull()
+                // An app may have no icon of its own (icon id 0) or one that can't be resolved: the
+                // editor still works, only "Change icon" has nothing to replace.
+                if (appInfo.icon != 0) {
+                    try {
+                        val resources = pManager!!.getResourcesForApplication(appInfo)
+                        this.iconValue = resources.getResourceName(appInfo.icon)
+                        this.iconFiles = resolveIconFiles(resources, appInfo.icon)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
             } else {
                 this.label = ManifestAnalyser.getPackageLabel()
                 this.pname = ManifestAnalyser.getPackageName()
@@ -104,7 +113,7 @@ class AppInfo {
     }
 
     fun label(): String {
-        return label!!.toString()
+        return label?.toString().orEmpty()
     }
 
     fun pname(): String? {

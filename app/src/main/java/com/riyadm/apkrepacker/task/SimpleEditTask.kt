@@ -39,8 +39,10 @@ class SimpleEditTask(
     }
 
     override fun onPostExecute(result: Boolean?) {
-        simpleEditorFragment.hideProgress(result!!)
-        if (result) {
+        // null when the task itself failed: report it like any other failure, never leave the dialog up.
+        val success = result == true
+        simpleEditorFragment.hideProgress(success)
+        if (success) {
             resultFile?.let { SignUtil.v4SignatureFile(it) }?.takeIf { it.isFile }?.let {
                 simpleEditorFragment.showTaskMessage(R.string.toast_v4_signature_written, it.name)
             }

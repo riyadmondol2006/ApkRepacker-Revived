@@ -268,27 +268,26 @@ class SignUtil private constructor() {
                 }
                 warnMissingKey(context, missingKey, onFailure, onWarning) { callback.call(testKey) }
             } else if (!custom) {
-                try {
-                    val st = SignUtil()
-                    val cert = FileInputStream(helper.certPath)
-                    val key = FileInputStream(helper.privateKeyPath)
-                    val pkcs8 = PKCS8Key()
-                    pkcs8.decode(key)
-
-                    st.privateKey = pkcs8
-                    st.certificate = CertificateFactory.getInstance("X.509").generateCertificate(cert) as X509Certificate
-                    cert.close()
-                    key.close()
-                    callback.call(st)
-                } catch (e: InvalidKeyException) {
-                    e.printStackTrace()
-                } catch (e: CertificateException) {
-                    e.printStackTrace()
-                } catch (e: FileNotFoundException) {
-                    e.printStackTrace()
-                } catch (e: IOException) {
-                    e.printStackTrace()
+                // The test key copied to the app's files; if those copies are missing or unreadable
+                // (or the preferences still point at a custom key's file), the one bundled in the app.
+                val st = try {
+                    val signer = SignUtil()
+                    FileInputStream(helper.privateKeyPath).use { key -> signer.privateKey = PKCS8Key().apply { decode(key) } }
+                    FileInputStream(helper.certPath).use {
+                        signer.certificate = CertificateFactory.getInstance("X.509").generateCertificate(it) as X509Certificate
+                    }
+                    signer
+                } catch (e: Exception) {
+                    Log.w(TAG, "Default key files unusable, using the bundled test key", e)
+                    try {
+                        loadTestKey(context)
+                    } catch (e2: Exception) {
+                        Log.e(TAG, "Can't load the test key", e2)
+                        null
+                    }
                 }
+                // Outside the try: a failure in the caller's work must not look like a key problem.
+                if (st != null) callback.call(st) else error(context, helper.privateKeyPath, onFailure)
             }
         }
 

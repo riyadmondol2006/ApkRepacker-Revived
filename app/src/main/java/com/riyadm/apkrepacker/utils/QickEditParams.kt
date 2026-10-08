@@ -145,16 +145,13 @@ object QickEditParams {
         iconFiles = files
     }
 
+    /** The icon resource ("mipmap/ic_launcher"), or null when the app has none. */
     @JvmStatic
-    fun getIconName(): String? {
-        if (iconName!! != "")
-            return iconName
-        return null
-    }
+    fun getIconName(): String? = iconName?.takeIf { it.isNotEmpty() }
 
+    /** Set for every edit, also to empty/null: these params outlive one app, so never keep the last app's icon. */
     @JvmStatic
     fun setIconName(str: String?) {
-        if (str!! != "")
-            iconName = str
+        iconName = str?.takeIf { it.isNotEmpty() }
     }
 }
