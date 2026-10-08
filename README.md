@@ -163,7 +163,9 @@ Projects are stored in `Android/data/com.riyadm.apkrepacker/files/projects`.
 ## Releases
 
 Every push to `main` builds a **signed release APK** with GitHub Actions and publishes it as a
-GitHub Release, with notes listing the new commits. To set it up for your
+GitHub Release, with notes listing the new commits. The version goes up by itself: each push
+publishes the next patch version (`v1.0.6`, `v1.0.7`, ...) with a matching `versionCode`, and a
+new major or minor version starts when you raise `versionName` in `app/build.gradle`. To set it up for your
 own fork you only add your signing key as repository secrets: **[docs/RELEASING.md](docs/RELEASING.md)**
 walks through it step by step.
 

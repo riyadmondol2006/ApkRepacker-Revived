@@ -85,9 +85,10 @@ containing:
 * `ApkRepackerRevived-v<version>.apk`: the signed APK
 * notes with the commit, the APK's SHA-256 and the commits since the previous version
 
-Releases are named after the version only: `v<versionName>` (for example `v1.0.5`). Pushing again without
-changing `versionName` replaces that version's release. A release is marked *pre-release* only while `versionName` contains
-`beta`, `alpha` or `rc`; a plain number such as `1.0.4` is published as a stable release.
+Releases are named after the version only: `v<version>` (for example `v1.0.6`). Each push to
+`main` publishes the next patch version automatically (`v1.0.6`, `v1.0.7`, ...), so you never edit
+the version by hand for an ordinary release. Re-running a run for the same commit reuses its version
+and replaces that release. A plain number such as `1.0.6` is published as a stable release.
 
 You can also start a build by hand: **Actions** → *Build and release* → **Run workflow**.
 
@@ -95,9 +96,19 @@ You can also start a build by hand: **Actions** → *Build and release* → **Ru
 
 ## Changing the version
 
-Edit `versionName` and `versionCode` in [`app/build.gradle`](../app/build.gradle). Raise
-`versionCode` for every version you want users to be able to update to. A new `versionName` makes a
-new release; the same one updates the existing release.
+The workflow picks the version in its *Pick the version* step: the highest `vX.Y.Z` tag plus one
+patch (`v1.0.6` → `1.0.7`), passed to Gradle as `-PappVersionName` and `-PappVersionCode`.
+`versionCode` follows the version (`major × 1000000 + minor × 1000 + patch`, so `1.0.7` is
+`1000007`) and always goes up, so every release installs as an update.
+
+The `versionName` default in [`app/build.gradle`](../app/build.gradle) is the minimum version. To
+start a new major or minor version, raise it there (for example to `1.1.0` or `2.0.0`); the next push
+publishes exactly that and later pushes continue from it (`1.1.1`, ...). Local builds without the
+`-P` options use that default.
+
+A `versionName` with `beta`, `alpha` or `rc` (for example `1.1.0-beta1`) is used exactly as written,
+with no automatic bump: it is published as a *pre-release*, and each push replaces it until you change
+the name again.
 
 ## Troubleshooting
 

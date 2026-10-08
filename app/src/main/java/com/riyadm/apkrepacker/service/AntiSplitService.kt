@@ -206,7 +206,7 @@ class AntiSplitService : Service() {
         try {
             val result = if (sign) {
                 post(getString(R.string.antisplit_signing))
-                val signer = loadSigner()
+                val signer = loadSigner(log)
                 val minSdk = runCatching { com.reandroid.apk.ApkModule.loadApkFile(merged).use { it.androidManifest?.minSdkVersion } }.getOrNull()
                 // Signing also aligns stored native libraries to 16 KB pages, which apps with
                 // extractNativeLibs="false" need to install.
@@ -250,11 +250,12 @@ class AntiSplitService : Service() {
         }
     }
 
-    private fun loadSigner(): SignUtil {
+    private fun loadSigner(log: JobLog): SignUtil {
         var signer: SignUtil? = null
         var failure: String? = null
-        // With a failure callback this never shows a dialog and runs synchronously.
-        SignUtil.loadKey(this, { signer = it }, { failure = it })
+        // With a failure callback this never shows a dialog and runs synchronously. A missing key
+        // of the user's falls back to the test key; the warning goes with the job's result.
+        SignUtil.loadKey(this, { signer = it }, { failure = it }, { warning -> log.warnings += warning })
         return signer ?: throw AntiSplit.AntiSplitException(failure ?: getString(R.string.build_sign_key_load_failed))
     }
 

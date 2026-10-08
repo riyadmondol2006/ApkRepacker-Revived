@@ -13,7 +13,7 @@
     <string name="antisplit_sign_title">Save as one APK</string>
     <string name="antisplit_sign_message">The splits will be merged into a single APK. How should it be saved?</string>
     <string name="antisplit_sign_yes">Signed</string>
-    <string name="antisplit_sign_yes_desc">Ready to install. Uses the signing key set in Settings.</string>
+    <string name="antisplit_sign_yes_desc">Ready to install. Signed with the test key, or with your own key if you added one in Settings.</string>
     <string name="antisplit_sign_no">Unsigned</string>
     <string name="antisplit_sign_no_desc">To sign later with your own key. Android can\'t install it until it\'s signed.</string>
     <string name="antisplit_sign_recommended">Recommended</string>

@@ -13,8 +13,13 @@ android {
         applicationId = "com.riyadm.apkrepacker"
         minSdk = rootProject.ext.minSdkVersion
         targetSdk = rootProject.ext.targetSdkVersion
-        versionCode = 42
-        versionName = "1.0.5"
+        // The release workflow passes the next patch version as -PappVersionName/-PappVersionCode
+        // (docs/RELEASING.md). The name below is the minimum: raise it for a new major or minor.
+        versionName = (project.findProperty('appVersionName') ?: '1.0.6').toString()
+        // major * 1000000 + minor * 1000 + patch: 1.0.6 -> 1000006 (above the old 42, always rising).
+        versionCode = project.hasProperty('appVersionCode')
+                ? Integer.parseInt(project.property('appVersionCode').toString())
+                : (versionName.findAll(/\d+/)*.toInteger() + [0, 0, 0]).take(3).with { it[0] * 1000000 + it[1] * 1000 + it[2] }
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

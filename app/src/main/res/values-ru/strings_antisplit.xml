@@ -12,7 +12,7 @@
     <string name="antisplit_sign_title">Сохранить как один APK</string>
     <string name="antisplit_sign_message">Сплиты будут объединены в один APK. Как его сохранить?</string>
     <string name="antisplit_sign_yes">С подписью</string>
-    <string name="antisplit_sign_yes_desc">Готов к установке. Используется ключ подписи из настроек.</string>
+    <string name="antisplit_sign_yes_desc">Готов к установке. Подписывается тестовым ключом или вашим ключом, если он добавлен в настройках.</string>
     <string name="antisplit_sign_no">Без подписи</string>
     <string name="antisplit_sign_no_desc">Чтобы подписать позже своим ключом. Android не установит его без подписи.</string>
     <string name="antisplit_sign_recommended">Рекомендуется</string>

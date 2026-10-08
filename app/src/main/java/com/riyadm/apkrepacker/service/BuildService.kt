@@ -73,6 +73,14 @@ class BuildService : Service(), IBuilderCallback, ApktoolLogListener {
     private val mSuccessMutable = MutableLiveData<File?>()
     val success: LiveData<File?> = mSuccessMutable
 
+    /** Set when the user's own signing key wasn't found and the test key signed the APK. */
+    private val mSignWarningMutable = MutableLiveData<String?>()
+    val signWarning: LiveData<String?> = mSignWarningMutable
+
+    /** The same warning, readable at once from the worker thread for the "finished" notification. */
+    @Volatile
+    private var signWarningText: String? = null
+
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
@@ -117,6 +125,11 @@ class BuildService : Service(), IBuilderCallback, ApktoolLogListener {
                             failed = true
                             taskFailed(message)
                         },
+                        SignUtil.LoadKeyFailure { warning ->
+                            onLog(Level.WARNING, warning)
+                            signWarningText = warning
+                            mSignWarningMutable.postValue(warning)
+                        },
                     )
                     if (!started && !failed) {
                         taskFailed(getString(R.string.build_sign_key_load_failed))
@@ -139,6 +152,8 @@ class BuildService : Service(), IBuilderCallback, ApktoolLogListener {
         mTimeMutable.value = 0
         mFaliedMutable.value = null
         mSuccessMutable.value = null
+        mSignWarningMutable.value = null
+        signWarningText = null
     }
 
     private var mInForeground = false
@@ -271,7 +286,8 @@ class BuildService : Service(), IBuilderCallback, ApktoolLogListener {
         saveCompileLog()
         mSuccessMutable.postValue(file)
         endBuild(ownsBuild = true)
-        showCompletion(true, getString(R.string.notification_build_done_title), file?.name ?: getString(R.string.build_successful))
+        val done = file?.name ?: getString(R.string.build_successful)
+        showCompletion(true, getString(R.string.notification_build_done_title), signWarningText?.let { "$done\n$it" } ?: done)
     }
 
     /** Called once per failed build with the error (aapt2's error lines included). */

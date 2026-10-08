@@ -1,5 +1,6 @@
 package com.riyadm.apkrepacker.utils
 
+import android.app.Activity
 import android.content.Context
 import android.util.Log
 import android.view.LayoutInflater
@@ -8,6 +9,7 @@ import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import com.android.apksig.ApkSigner
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.android.apksig.apk.ApkUtils
 import com.android.apksig.util.DataSources
 import androidx.preference.PreferenceManager
@@ -213,18 +215,28 @@ class SignUtil private constructor() {
         @JvmStatic
         fun loadKey(context: Context, callback: LoadKeyCallback) = loadKey(context, callback, null)
 
+        @JvmStatic
+        fun loadKey(context: Context, callback: LoadKeyCallback, onFailure: LoadKeyFailure?) =
+            loadKey(context, callback, onFailure, null)
+
         /**
          * Like [loadKey] with an Activity, but with [onFailure] set nothing is ever shown: a custom
          * key that needs a password prompt or fails to load is reported through [onFailure]
          * instead. Safe to call from any thread and from a Service context.
+         *
+         * The test key is the default. When the user's own key is turned on but its file is gone,
+         * the APK is signed with the test key instead and the user is warned: through [onWarning]
+         * when given; an Activity caller ([onFailure] null) first shows a dialog, and signing
+         * starts only once the user agrees to use the test key.
          */
         @JvmStatic
-        fun loadKey(context: Context, callback: LoadKeyCallback, onFailure: LoadKeyFailure?) {
+        fun loadKey(context: Context, callback: LoadKeyCallback, onFailure: LoadKeyFailure?, onWarning: LoadKeyFailure?) {
             val helper = PreferenceHelper.getInstance(context)
             preferenceHelper = helper
             appContext = context.applicationContext
             msg = null
             var custom = helper.isCustomSign
+            var missingKey: String? = null
             if (custom) {
                 val type = helper.keyType!!
                 val keyPath = helper.privateKeyPath
@@ -239,8 +251,23 @@ class SignUtil private constructor() {
                 } catch (e: Exception) {
                     error(context, keyPath, onFailure)
                 }
+                if (!custom) missingKey = keyPath
             }
-            if (!custom) {
+            if (!custom && missingKey != null) {
+                // The user's key file is gone: the paths in the preferences are its paths, not the
+                // test key's, so sign with the test key bundled in the app.
+                val testKey = try {
+                    loadTestKey(context)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Can't load the test key", e)
+                    null
+                }
+                if (testKey == null) {
+                    error(context, missingKey, onFailure)
+                    return
+                }
+                warnMissingKey(context, missingKey, onFailure, onWarning) { callback.call(testKey) }
+            } else if (!custom) {
                 try {
                     val st = SignUtil()
                     val cert = FileInputStream(helper.certPath)
@@ -262,6 +289,33 @@ class SignUtil private constructor() {
                 } catch (e: IOException) {
                     e.printStackTrace()
                 }
+            }
+        }
+
+        /**
+         * Tells the user their own key wasn't found, then signs with the test key ([useTestKey]):
+         * right away for background callers, after the user's OK for an Activity caller.
+         */
+        private fun warnMissingKey(
+            context: Context, keyPath: String, onFailure: LoadKeyFailure?, onWarning: LoadKeyFailure?, useTestKey: () -> Unit,
+        ) {
+            val message = context.getString(R.string.sign_key_missing_warning, keyPath)
+            Log.w(TAG, message)
+            if (onWarning != null || onFailure != null || context !is Activity) {
+                // A background caller; without a warning channel the log line above is all it gets.
+                onWarning?.call(message)
+                useTestKey()
+                return
+            }
+            context.runOnUiThread {
+                if (context.isFinishing || context.isDestroyed) return@runOnUiThread
+                MaterialAlertDialogBuilder(context)
+                    .setIcon(R.drawable.ic_m3_error_circle)
+                    .setTitle(R.string.sign_key_missing_title)
+                    .setMessage(message)
+                    .setPositiveButton(R.string.sign_key_use_test_key) { _, _ -> useTestKey() }
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show()
             }
         }
 

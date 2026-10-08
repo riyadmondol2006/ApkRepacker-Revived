@@ -99,6 +99,9 @@
     <string name="signature_file_summary">Файл настроек (файл pk8 ​​или файл хранилища ключей). Если это файл pk8, автоматически будет создан файл x509.pem с тем же именем (например, testkey.pk8 соответствует testkey.x509.pem).</string>
     <string name="signature_file_missing">Файл подписи \'%1$s\' не найден, используется подпись по умолчанию!</string>
     <string name="load_signature_file_fail">Невозможно загрузить файл подписи \'%1$s\'.</string>
+    <string name="sign_key_missing_title">Ключ подписи не найден</string>
+    <string name="sign_key_missing_warning">Ваш ключ подписи \'%1$s\' не найден, поэтому APK будет подписан тестовым ключом. Чтобы использовать свой ключ, выберите его заново в настройках → «Пользовательский файл подписи».</string>
+    <string name="sign_key_use_test_key">Тестовый ключ</string>
     <string name="enter_password">Введите пароль:</string>
     <string name="key_type">Тип ключа:</string>
     <string name="key_path">Путь к ключу:</string>

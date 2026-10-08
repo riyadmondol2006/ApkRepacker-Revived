@@ -140,6 +140,9 @@
     <string name="signature_file_summary">The setting file (pk8 file or keystore file). If it is a pk8 file, will automatically generate an x509.pem file with the same name (for example, testkey.pk8 corresponds to testkey.x509.pem).</string>
     <string name="signature_file_missing">Signature file \'%1$s\' hasn`t been found, using default signature!</string>
     <string name="load_signature_file_fail">Unable to load signature file \'%1$s\'.</string>
+    <string name="sign_key_missing_title">Signing key not found</string>
+    <string name="sign_key_missing_warning">Your signing key \'%1$s\' wasn\'t found, so the APK will be signed with the test key instead. To use your key, pick it again under Settings → Custom signature file.</string>
+    <string name="sign_key_use_test_key">Use test key</string>
     <string name="enter_password">Enter password:</string>
     <string name="key_type">Key Type:</string>
     <string name="key_path">Key Path:</string>

@@ -41,8 +41,45 @@ jobs:
 
       - uses: actions/checkout@v5
         with:
-          fetch-depth: 0   # full history, for the release notes
+          fetch-depth: 0   # full history and tags, for the version and the release notes
           persist-credentials: false   # the build scripts don't need the token on disk
+
+      # Every push gets the next patch version (v1.0.6, v1.0.7, ...). The versionName default in
+      # app/build.gradle is the minimum, so raising it there (1.1.0, 2.0.0) starts a new series.
+      - name: Pick the version
+        id: version
+        run: |
+          BASE=$(grep -oP "appVersionName'\) \?: '\K[^']+" app/build.gradle || true)
+          if [ -z "$BASE" ]; then
+            echo "::error title=No versionName::Could not read the versionName default from app/build.gradle"
+            exit 1
+          fi
+          plain='^v[0-9]+\.[0-9]+\.[0-9]+$'
+          if ! [[ "$BASE" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            # beta/alpha/rc (or any non-plain number) is used exactly as written, with no bump.
+            VERSION_NAME="$BASE"
+          else
+            HERE=$(git tag --points-at HEAD | grep -E "$plain" | sort -V | tail -n 1 || true)
+            if [ -n "$HERE" ]; then
+              # This commit already has a version (a re-run): replace that release, no new version.
+              VERSION_NAME=${HERE#v}
+            else
+              LAST=$(git tag --list 'v*' | grep -E "$plain" | sort -V | tail -n 1 || true)
+              LAST=${LAST#v}
+              if [ -n "$LAST" ] && [ "$(printf '%s\n%s\n' "$BASE" "$LAST" | sort -V | tail -n 1)" = "$LAST" ]; then
+                IFS=. read -r MAJOR MINOR PATCH <<< "$LAST"
+                VERSION_NAME="$MAJOR.$MINOR.$((10#$PATCH + 1))"
+              else
+                VERSION_NAME="$BASE"
+              fi
+            fi
+          fi
+          # versionCode = major * 1000000 + minor * 1000 + patch (1.0.6 -> 1000006), same as app/build.gradle.
+          IFS=. read -r MAJOR MINOR PATCH <<< "$(grep -oE '^[0-9]+(\.[0-9]+){0,2}' <<< "$VERSION_NAME" || true)"
+          VERSION_CODE=$(( 10#${MAJOR:-0} * 1000000 + 10#${MINOR:-0} * 1000 + 10#${PATCH:-0} ))
+          echo "version_name=$VERSION_NAME" >> "$GITHUB_OUTPUT"
+          echo "version_code=$VERSION_CODE" >> "$GITHUB_OUTPUT"
+          echo "::notice title=Version::$VERSION_NAME (versionCode $VERSION_CODE)"
 
       - uses: actions/setup-java@v5
         with:
@@ -107,9 +144,12 @@ jobs:
           SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
           # SIGNING_KEY_ALIAS comes from the key check above (the cleaned value).
+          VERSION_NAME: ${{ steps.version.outputs.version_name }}
+          VERSION_CODE: ${{ steps.version.outputs.version_code }}
         run: |
           set +e
-          ./gradlew --no-daemon --stacktrace :app:assembleRelease 2>&1 | tee "$RUNNER_TEMP/build.log"
+          ./gradlew --no-daemon --stacktrace :app:assembleRelease \
+            -PappVersionName="$VERSION_NAME" -PappVersionCode="$VERSION_CODE" 2>&1 | tee "$RUNNER_TEMP/build.log"
           status=${PIPESTATUS[0]}
           if [ "$status" -ne 0 ]; then
             # Put the reason where it shows on the run summary page, not only in the long log.
@@ -120,14 +160,11 @@ jobs:
 
       - name: Name the release and collect the files
         id: meta
+        env:
+          VERSION_NAME: ${{ steps.version.outputs.version_name }}
         run: |
-          VERSION_NAME=$(grep -oP 'versionName = "\K[^"]+' app/build.gradle || true)
-          if [ -z "$VERSION_NAME" ]; then
-            echo "::error title=No versionName::Could not read versionName from app/build.gradle"
-            exit 1
-          fi
           SAFE_VERSION=${VERSION_NAME// /-}
-          # One release per version: pushing again without a new versionName replaces it.
+          # One release per version: a re-run of the same commit replaces it.
           TAG="v${SAFE_VERSION}"
           APK_SRC=$(ls app/build/outputs/apk/release/*.apk | head -n 1)
           APK="ApkRepackerRevived-v${SAFE_VERSION}.apk"
@@ -176,7 +213,7 @@ jobs:
           VERSION_NAME: ${{ steps.meta.outputs.version_name }}
           CHANNEL: ${{ steps.meta.outputs.channel }}
         run: |
-          # The same version again (a re-run, or a push without a new versionName): replace it.
+          # The same version again (a re-run of this commit, or a fixed beta/rc name): replace it.
           gh release delete "$TAG" --cleanup-tag --yes > /dev/null 2>&1 || true
           gh release create "$TAG" "$APK" \
             --title "Apk Repacker Revived $VERSION_NAME" \

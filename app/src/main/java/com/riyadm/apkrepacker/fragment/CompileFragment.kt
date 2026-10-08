@@ -302,7 +302,10 @@ class CompileFragment : Fragment(), ErrorAdapter.OnItemInteractionListener {
         b.progressTip.setText(R.string.build_successful)
         b.compileSubtitle.text = apk.name
         b.compileSubtitle.isVisible = true
-        b.messageBuildFileSaved.text = getString(R.string.build_apk_saved_to, apk.absolutePath)
+        val saved = getString(R.string.build_apk_saved_to, apk.absolutePath)
+        // Signed with the test key because the user's own key wasn't found: say so right here.
+        val signWarning = service?.signWarning?.value
+        b.messageBuildFileSaved.text = if (signWarning != null) "$saved\n\n⚠ $signWarning" else saved
         b.messageBuildFileTime.isVisible = b.messageBuildFileTime.text.isNotEmpty()
         b.messageBuildFileSaved.isVisible = true
         showStatusIcon(b, success = true)
