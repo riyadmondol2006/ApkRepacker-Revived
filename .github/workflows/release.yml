@@ -1,0 +1,126 @@
+name: Build and release
+
+# Every push to main builds a signed release APK and publishes it as a GitHub Release.
+# Setup (one time, about five minutes): docs/RELEASING.md
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Releases are published one at a time and never cancelled half-way.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: write   # create the release and its tag
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Check the signing secrets exist
+        env:
+          SIGNING_KEYSTORE_BASE64: ${{ secrets.SIGNING_KEYSTORE_BASE64 }}
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        run: |
+          missing=""
+          for name in SIGNING_KEYSTORE_BASE64 SIGNING_STORE_PASSWORD SIGNING_KEY_ALIAS SIGNING_KEY_PASSWORD; do
+            if [ -z "${!name}" ]; then missing="$missing $name"; fi
+          done
+          if [ -n "$missing" ]; then
+            echo "::error title=Signing secrets missing::Add these repository secrets:$missing  (see docs/RELEASING.md)"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history, for the release notes
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      # Installs the Android SDK command-line tools and accepts the licenses, so Gradle can
+      # download any platform or build-tools version the project asks for.
+      - uses: android-actions/setup-android@v3
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Restore the signing key
+        env:
+          SIGNING_KEYSTORE_BASE64: ${{ secrets.SIGNING_KEYSTORE_BASE64 }}
+        run: |
+          echo "$SIGNING_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/release.jks"
+          echo "SIGNING_STORE_FILE=$RUNNER_TEMP/release.jks" >> "$GITHUB_ENV"
+
+      - name: Build the release APK
+        env:
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        run: ./gradlew --no-daemon --stacktrace :app:assembleRelease
+
+      - name: Name the release and collect the files
+        id: meta
+        run: |
+          VERSION_NAME=$(grep -oP 'versionName = "\K[^"]+' app/build.gradle)
+          SAFE_VERSION=${VERSION_NAME// /-}
+          TAG="v${SAFE_VERSION}-build.${GITHUB_RUN_NUMBER}"
+          APK_SRC=$(ls app/build/outputs/apk/release/*.apk | head -n 1)
+          APK="ApkRepackerRevived-v${SAFE_VERSION}-build${GITHUB_RUN_NUMBER}.apk"
+          cp "$APK_SRC" "$APK"
+          if [ -f app/build/outputs/mapping/release/mapping.txt ]; then
+            cp app/build/outputs/mapping/release/mapping.txt "mapping-build${GITHUB_RUN_NUMBER}.txt"
+          fi
+          echo "version_name=$VERSION_NAME" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "apk=$APK" >> "$GITHUB_OUTPUT"
+          case "$VERSION_NAME" in
+            *beta*|*alpha*|*rc*|*RC*) echo "prerelease=--prerelease" >> "$GITHUB_OUTPUT" ;;
+            *) echo "prerelease=" >> "$GITHUB_OUTPUT" ;;
+          esac
+
+      - name: Check the APK is signed
+        run: |
+          APKSIGNER=$(ls -d "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -n 1)
+          "$APKSIGNER" verify --verbose --print-certs "${{ steps.meta.outputs.apk }}"
+
+      - name: Write the release notes
+        run: |
+          APK="${{ steps.meta.outputs.apk }}"
+          PREVIOUS=$(git describe --tags --abbrev=0 2>/dev/null || true)
+          {
+            echo "Automatic build of \`main\` at \`${GITHUB_SHA::7}\`."
+            echo
+            echo "**SHA-256** \`$(sha256sum "$APK" | cut -d' ' -f1)\`"
+            echo
+            echo "### Changes"
+            if [ -n "$PREVIOUS" ]; then
+              git log "$PREVIOUS"..HEAD --no-merges --pretty='- %s (%h)' | head -n 40
+            else
+              git log -n 20 --no-merges --pretty='- %s (%h)'
+            fi
+          } > release-notes.md
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          FILES=("${{ steps.meta.outputs.apk }}")
+          for f in mapping-build*.txt; do [ -f "$f" ] && FILES+=("$f"); done
+          gh release create "${{ steps.meta.outputs.tag }}" "${FILES[@]}" \
+            --title "Apk Repacker Revived ${{ steps.meta.outputs.version_name }} (build ${GITHUB_RUN_NUMBER})" \
+            --notes-file release-notes.md \
+            --target "$GITHUB_SHA" \
+            ${{ steps.meta.outputs.prerelease }}
+
+      - name: Remove the signing key from the runner
+        if: always()
+        run: rm -f "$RUNNER_TEMP/release.jks"
