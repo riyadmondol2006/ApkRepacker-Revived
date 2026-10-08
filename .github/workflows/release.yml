@@ -63,12 +63,32 @@ jobs:
           echo "$SIGNING_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/release.jks"
           echo "SIGNING_STORE_FILE=$RUNNER_TEMP/release.jks" >> "$GITHUB_ENV"
 
+      - name: Check the signing key opens
+        env:
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+        run: |
+          if ! keytool -list -keystore "$SIGNING_STORE_FILE" -storepass "$SIGNING_STORE_PASSWORD" \
+                 -alias "$SIGNING_KEY_ALIAS" > "$RUNNER_TEMP/keytool.txt" 2>&1; then
+            echo "::error title=The signing key could not be opened::$(tr '\n' ' ' < "$RUNNER_TEMP/keytool.txt" | cut -c1-300) (see docs/RELEASING.md)"
+            exit 1
+          fi
+
       - name: Build the release APK
         env:
           SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
           SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
-        run: ./gradlew --no-daemon --stacktrace :app:assembleRelease
+        run: |
+          set +e
+          ./gradlew --no-daemon --stacktrace :app:assembleRelease 2>&1 | tee "$RUNNER_TEMP/build.log"
+          status=${PIPESTATUS[0]}
+          if [ "$status" -ne 0 ]; then
+            # Put the reason where it shows on the run summary page, not only in the long log.
+            reason=$(grep -E -A8 "What went wrong|^e: |error:" "$RUNNER_TEMP/build.log" | head -n 30 | tr '\n' '|' | cut -c1-1500)
+            echo "::error title=Gradle build failed::$reason"
+          fi
+          exit "$status"
 
       - name: Name the release and collect the files
         id: meta
