@@ -1,31 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- File header row of the string search results (expandable group). -->
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/find_item"
+    style="@style/Widget.Revived.E.GroupRow"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="@dimen/checkbox_margin"
-    android:background="?selectableItemBackground">
+    android:layout_marginStart="@dimen/screen_margin"
+    android:layout_marginTop="@dimen/space_1"
+    android:layout_marginEnd="@dimen/screen_margin"
+    android:layout_marginBottom="@dimen/space_1">
 
-    <ImageView
-        android:src="@drawable/ic_arrow_right"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:scaleType="center"
-        android:visibility="gone"
-        android:id="@+id/mark"/>
-
-    <TextView
-        android:id="@+id/file_text_view"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
-        android:ellipsize="middle"
-        android:singleLine="true"
-        android:drawablePadding="5dp"
-        android:drawableEnd="@drawable/ic_arrow_down"
-        tools:text="File name"
-        android:textStyle="bold" />
-</LinearLayout>
+        android:minHeight="@dimen/space_12"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/space_4"
+        android:paddingTop="@dimen/space_3"
+        android:paddingEnd="@dimen/space_4"
+        android:paddingBottom="@dimen/space_3">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/mark"
+            android:layout_width="@dimen/space_5"
+            android:layout_height="@dimen/space_5"
+            android:layout_marginEnd="@dimen/space_3"
+            android:contentDescription="@string/m3e_replaced"
+            android:visibility="gone"
+            app:srcCompat="@drawable/ic_done"
+            app:tint="?attr/colorPrimary" />
+
+        <TextView
+            android:id="@+id/file_text_view"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ellipsize="middle"
+            android:singleLine="true"
+            android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
+            android:textColor="?attr/colorOnSurface"
+            tools:text="res/values/strings.xml" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/chevron"
+            android:layout_width="@dimen/space_6"
+            android:layout_height="@dimen/space_6"
+            android:layout_marginStart="@dimen/space_3"
+            android:contentDescription="@string/m3e_expand_collapse"
+            app:srcCompat="@drawable/ic_arrow_down"
+            app:tint="?attr/colorOnSurfaceVariant" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

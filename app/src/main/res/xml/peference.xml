@@ -6,7 +6,7 @@
         <Preference
             android:key="pref_ui_theme"
             android:title="@string/pref_app_theme" />
-        <SwitchPreference
+        <SwitchPreferenceCompat
             android:defaultValue="false"
             android:key="pref_auto_theme_mode"
             android:title="@string/pref_use_auto_theme" />
@@ -14,7 +14,7 @@
             android:key="pref_auto_theme_picker"
             android:title="@string/settings_main_auto_theme_picker"
             android:summary="@string/settings_main_auto_theme_picker_summary" />
-        <SwitchPreference
+        <SwitchPreferenceCompat
             android:defaultValue="true"
             android:key="pref_icon"
             android:title="@string/pref_use_circular_icons" />
@@ -22,72 +22,156 @@
     <PreferenceCategory
         android:title="@string/pref_general">
 
-        <SwitchPreference
+        <SwitchPreferenceCompat
             android:defaultValue="false"
             android:key="pref_show_hidden"
             android:title="@string/pref_show_hidden_files" />
 
-        <SwitchPreference
+        <SwitchPreferenceCompat
             android:key="pref_keep_screen_on"
             android:title="@string/pref_keep_screen_on" />
 
+        <Preference
+            android:key="pref_all_files_access"
+            android:title="@string/pref_all_files_access" />
+
     </PreferenceCategory>
+    <!-- Decompile defaults: keys and defaults match ApktoolOptionsStore / DecodeOptions -->
     <PreferenceCategory
-        android:title="@string/pref_general_decompiler">
+        android:title="@string/apktool_settings_decompile">
         <EditTextPreference
             android:key="pref_decode_folder"
             android:title="@string/pref_decode_folder" />
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:key="pref_apktool_ask_decode_options"
+            android:summary="@string/apktool_pref_ask_decode_summary"
+            android:title="@string/apktool_pref_ask_decode" />
         <ListPreference
-            android:defaultValue="0"
-            android:entries="@array/decoding_names"
-            android:entryValues="@array/decoding_values"
-            android:key="pref_decode_mode"
-            android:title="@string/pref_decode_mode" />
+            android:defaultValue="ALL"
+            android:entries="@array/apktool_decode_mode_names"
+            android:entryValues="@array/apktool_decode_mode_values"
+            android:key="pref_apktool_decode_mode"
+            android:title="@string/apktool_pref_decode_mode"
+            app:useSimpleSummaryProvider="true" />
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:key="pref_apktool_only_main_classes"
+            android:summary="@string/apktool_only_main_classes_summary"
+            android:title="@string/apktool_only_main_classes" />
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:key="pref_apktool_no_debug_info"
+            android:summary="@string/apktool_no_debug_info_summary"
+            android:title="@string/apktool_no_debug_info" />
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:key="pref_apktool_no_assets"
+            android:summary="@string/apktool_no_assets_summary"
+            android:title="@string/apktool_no_assets" />
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:key="pref_apktool_force_manifest"
+            android:summary="@string/apktool_force_manifest_summary"
+            android:title="@string/apktool_force_manifest" />
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:key="pref_apktool_keep_broken_res"
+            android:summary="@string/apktool_keep_broken_res_summary"
+            android:title="@string/apktool_keep_broken_res" />
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:key="pref_apktool_analysis_mode"
+            android:summary="@string/apktool_analysis_mode_summary"
+            android:title="@string/apktool_analysis_mode" />
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:key="pref_apktool_merge_splits"
+            android:summary="@string/apktool_merge_splits_summary"
+            android:title="@string/apktool_merge_splits" />
     </PreferenceCategory>
+    <!-- Build defaults: keys and defaults match ApktoolOptionsStore / BuildOptions -->
     <PreferenceCategory
-        android:title="@string/pref_general_recompile"
-       >
-        <SwitchPreference
+        android:title="@string/apktool_settings_build">
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:key="pref_apktool_ask_build_options"
+            android:summary="@string/apktool_pref_ask_build_summary"
+            android:title="@string/apktool_pref_ask_build" />
+        <SwitchPreferenceCompat
             android:defaultValue="false"
-            android:key="pref_use_aapt2"
-            android:title="@string/pref_use_aapt2" />
-        <SwitchPreference
+            android:key="pref_apktool_build_debuggable"
+            android:summary="@string/apktool_build_debuggable_summary"
+            android:title="@string/apktool_build_debuggable" />
+        <SwitchPreferenceCompat
             android:defaultValue="false"
-            android:key="pref_copy_original_files"
-            android:summary="@string/pref_copy_original_files_summary"
-            android:title="@string/pref_copy_original_files" />
-        <SwitchPreference
+            android:key="pref_apktool_build_net_sec_conf"
+            android:summary="@string/apktool_build_net_sec_conf_summary"
+            android:title="@string/apktool_build_net_sec_conf" />
+        <SwitchPreferenceCompat
             android:defaultValue="false"
-            android:key="pref_debug_mode"
-            android:summary="@string/pref_debug_mode_summary"
-            android:title="@string/pref_debug_mode" />
-        <SwitchPreference
+            android:key="pref_apktool_build_copy_original"
+            android:summary="@string/apktool_build_copy_original_summary"
+            android:title="@string/apktool_build_copy_original" />
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:key="pref_apktool_build_no_crunch"
+            android:summary="@string/apktool_build_no_crunch_summary"
+            android:title="@string/apktool_build_no_crunch" />
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:key="pref_apktool_build_force"
+            android:summary="@string/apktool_build_force_summary"
+            android:title="@string/apktool_build_force" />
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:key="pref_apktool_build_remove_split_requirement"
+            android:summary="@string/apktool_build_remove_split_requirement_summary"
+            android:title="@string/apktool_build_remove_split_requirement" />
+        <SwitchPreferenceCompat
             android:defaultValue="false"
             android:key="pref_verbose_mode"
             android:summary="@string/pref_verbose_mode_summary"
             android:title="@string/pref_verbose_mode" />
-        <SwitchPreference
+        <SwitchPreferenceCompat
             android:defaultValue="true"
-            android:key="pref_sign_apk"
-            android:title="@string/pref_sign_output_apk" />
-        <SwitchPreference
-            android:defaultValue="false"
+            android:key="pref_apktool_build_sign"
+            android:summary="@string/apktool_build_sign_summary"
+            android:title="@string/apktool_build_sign" />
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:key="pref_sign_v1"
+            android:summary="@string/pref_sign_v1_summary"
+            android:title="@string/pref_sign_v1" />
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
             android:key="pref_use_v2_signature"
-            android:title="@string/pref_use_v2_signature" />
-        <SwitchPreference
+            android:summary="@string/pref_sign_v2_summary"
+            android:title="@string/pref_sign_v2" />
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:key="pref_sign_v3"
+            android:summary="@string/pref_sign_v3_summary"
+            android:title="@string/pref_sign_v3" />
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:key="pref_sign_v4"
+            android:summary="@string/pref_sign_v4_summary"
+            android:title="@string/pref_sign_v4" />
+        <SwitchPreferenceCompat
             android:defaultValue="false"
             android:key="pref_confirm_build"
             android:title="@string/pref_confirm_build" />
-        <SwitchPreference
+        <SwitchPreferenceCompat
             android:defaultValue="false"
             android:key="pref_use_custom_sign"
             android:summary="@string/pref_custom_signature_file_summary"
             android:title="@string/pref_custom_signature_file" />
-        <com.mrikso.apkrepacker.ui.keydialog.KeystorePreference
+        <com.riyadm.apkrepacker.ui.keydialog.KeystorePreference
             android:key="pref_keystore_file"
             android:summary="@string/signature_file_summary"
             android:title="@string/signature_file" />
-        <!-- <com.mrikso.apkrepacker.ui.keydialog.GenKeystorePreference
+        <!-- <com.riyadm.apkrepacker.ui.keydialog.GenKeystorePreference
              android:title="@string/gen_key_title"
              android:key="gen_key"
              android:summary="@string/gen_key_summary"/>-->

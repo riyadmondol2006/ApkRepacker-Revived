@@ -1,13 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Full build log in a modal bottom sheet. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    style="@style/Material.CardView.BottomSheet"
-    app:strokeWidth="0dp">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-    <LinearLayout
+    <com.google.android.material.bottomsheet.BottomSheetDragHandleView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/log_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:paddingStart="@dimen/space_6"
+        android:paddingEnd="@dimen/space_6"
+        android:paddingBottom="@dimen/space_3"
+        android:text="@string/log_sheet_title"
+        android:textAppearance="@style/TextAppearance.Material3.TitleLarge.Emphasized"
+        android:textColor="?attr/colorOnSurface" />
+
+    <com.google.android.material.card.MaterialCardView
+        style="@style/Widget.Revived.Card.Filled"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginStart="@dimen/screen_margin"
+        android:layout_marginEnd="@dimen/screen_margin"
+        android:layout_weight="1"
+        app:cardBackgroundColor="?attr/colorSurfaceContainerHighest"
+        app:cardElevation="0dp">
 
         <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
@@ -15,21 +38,25 @@
             android:fillViewport="true"
             android:scrollbars="vertical">
 
-            <androidx.appcompat.widget.AppCompatTextView
+            <TextView
                 android:id="@+id/log"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="4dp"
-                android:textColor="?attr/textColor_1"
-                android:textSize="@dimen/labels_text_size"
-                android:typeface="monospace" />
+                android:fontFamily="monospace"
+                android:padding="@dimen/space_4"
+                android:scrollHorizontally="false"
+                android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+                android:textColor="?attr/colorOnSurface"
+                android:textIsSelectable="true"
+                tools:text="I: Using Apktool 3.0.3\nI: Smaling smali folder into classes.dex..." />
         </androidx.core.widget.NestedScrollView>
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_copy_log"
-            style="@style/MD2Button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/card_title_margin"
-            android:text="@string/action_copy_log" />
-    </LinearLayout>
-</com.google.android.material.card.MaterialCardView>
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_copy_log"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/screen_margin"
+        android:text="@string/action_copy_log"
+        app:icon="@drawable/ic_copy" />
+</LinearLayout>

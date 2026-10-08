@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pref_sign_v1">v1 (подпись JAR)</string>
+    <string name="pref_sign_v1_summary">Нужна для Android ниже 7.0 (API 24). Не отключайте, если minSdk приложения ниже 24.</string>
+    <string name="pref_sign_v2">v2 (APK Signature Scheme v2)</string>
+    <string name="pref_sign_v2_summary">Подпись всего APK (Android 7.0+). Обязательна для приложений под Android 11+: для них включается автоматически, если v2 и v3 выключены.</string>
+    <string name="pref_sign_v3">v3 (APK Signature Scheme v3, смена ключа)</string>
+    <string name="pref_sign_v3_summary">Добавляет поддержку смены ключа (Android 9+). Сама по себе тоже подходит для Android 11+, но без v1/v2 APK установится только на Android 9+.</string>
+    <string name="pref_sign_v4">v4 (APK Signature Scheme v4, .idsig для инкрементальной установки)</string>
+    <string name="pref_sign_v4_summary">Сохраняет &lt;apk&gt;.idsig рядом с APK, используется командой \"adb install --incremental\" (Android 11+). Требует v2 или v3: если обе выключены, включается v2.</string>
+    <string name="toast_v4_signature_written">Подпись v4 сохранена: %1$s</string>
+</resources>

@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Material 3 Expressive app themes. Parent: Theme.Material3Expressive (shape morphing, emphasized type, spring motion tokens).
+     Light + Dark are both first class; Rena is the alternative palette pair; Dynamic* take their colors from the wallpaper (Material You) via DynamicColors in BaseActivity. -->
+<resources>
+    <style name="Theme.Revived.Light" parent="Theme.Material3Expressive.Light.NoActionBar">
+        <item name="colorPrimary">@color/m3_revived_light_primary</item>
+        <item name="colorOnPrimary">@color/m3_revived_light_on_primary</item>
+        <item name="colorPrimaryContainer">@color/m3_revived_light_primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/m3_revived_light_on_primary_container</item>
+        <item name="colorSecondary">@color/m3_revived_light_secondary</item>
+        <item name="colorOnSecondary">@color/m3_revived_light_on_secondary</item>
+        <item name="colorSecondaryContainer">@color/m3_revived_light_secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/m3_revived_light_on_secondary_container</item>
+        <item name="colorTertiary">@color/m3_revived_light_tertiary</item>
+        <item name="colorOnTertiary">@color/m3_revived_light_on_tertiary</item>
+        <item name="colorTertiaryContainer">@color/m3_revived_light_tertiary_container</item>
+        <item name="colorOnTertiaryContainer">@color/m3_revived_light_on_tertiary_container</item>
+        <item name="colorError">@color/m3_revived_light_error</item>
+        <item name="colorOnError">@color/m3_revived_light_on_error</item>
+        <item name="colorErrorContainer">@color/m3_revived_light_error_container</item>
+        <item name="colorOnErrorContainer">@color/m3_revived_light_on_error_container</item>
+        <item name="android:colorBackground">@color/m3_revived_light_background</item>
+        <item name="colorOnBackground">@color/m3_revived_light_on_background</item>
+        <item name="colorSurface">@color/m3_revived_light_surface</item>
+        <item name="colorOnSurface">@color/m3_revived_light_on_surface</item>
+        <item name="colorSurfaceVariant">@color/m3_revived_light_surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/m3_revived_light_on_surface_variant</item>
+        <item name="colorOutline">@color/m3_revived_light_outline</item>
+        <item name="colorOutlineVariant">@color/m3_revived_light_outline_variant</item>
+        <item name="colorSurfaceInverse">@color/m3_revived_light_inverse_surface</item>
+        <item name="colorOnSurfaceInverse">@color/m3_revived_light_inverse_on_surface</item>
+        <item name="colorPrimaryInverse">@color/m3_revived_light_inverse_primary</item>
+        <item name="colorSurfaceDim">@color/m3_revived_light_surface_dim</item>
+        <item name="colorSurfaceBright">@color/m3_revived_light_surface_bright</item>
+        <item name="colorSurfaceContainerLowest">@color/m3_revived_light_surface_container_lowest</item>
+        <item name="colorSurfaceContainerLow">@color/m3_revived_light_surface_container_low</item>
+        <item name="colorSurfaceContainer">@color/m3_revived_light_surface_container</item>
+        <item name="colorSurfaceContainerHigh">@color/m3_revived_light_surface_container_high</item>
+        <item name="colorSurfaceContainerHighest">@color/m3_revived_light_surface_container_highest</item>
+        <item name="colorPrimaryFixed">@color/m3_revived_light_primary_fixed</item>
+        <item name="colorPrimaryFixedDim">@color/m3_revived_light_primary_fixed_dim</item>
+        <item name="colorOnPrimaryFixed">@color/m3_revived_light_on_primary_fixed</item>
+        <item name="colorOnPrimaryFixedVariant">@color/m3_revived_light_on_primary_fixed_variant</item>
+        <item name="colorSecondaryFixed">@color/m3_revived_light_secondary_fixed</item>
+        <item name="colorSecondaryFixedDim">@color/m3_revived_light_secondary_fixed_dim</item>
+        <item name="colorOnSecondaryFixed">@color/m3_revived_light_on_secondary_fixed</item>
+        <item name="colorOnSecondaryFixedVariant">@color/m3_revived_light_on_secondary_fixed_variant</item>
+        <item name="colorTertiaryFixed">@color/m3_revived_light_tertiary_fixed</item>
+        <item name="colorTertiaryFixedDim">@color/m3_revived_light_tertiary_fixed_dim</item>
+        <item name="colorOnTertiaryFixed">@color/m3_revived_light_on_tertiary_fixed</item>
+        <item name="colorOnTertiaryFixedVariant">@color/m3_revived_light_on_tertiary_fixed_variant</item>
+        <item name="scrimBackground">@color/m3_revived_light_scrim</item>
+        <!-- bars: edge-to-edge, EdgeToEdgeUtils paints the insets with surface colors -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:windowBackground">?attr/colorSurface</item>
+        <item name="android:windowAnimationStyle">@style/Animation.Revived.Activity</item>
+        <item name="android:textColorPrimary">?attr/colorOnSurface</item>
+        <item name="android:textColorSecondary">?attr/colorOnSurfaceVariant</item>
+        <item name="windowActionModeOverlay">true</item>
+        <item name="actionModeStyle">@style/Widget.Revived.E.ActionMode</item>
+        <item name="bottomSheetDialogTheme">@style/ThemeOverlay.Revived.BottomSheetDialog</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.Revived.MaterialAlertDialog</item>
+        <item name="alertDialogTheme">@style/ThemeOverlay.Revived.MaterialAlertDialog</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay.Revived</item>
+    </style>
+
+    <style name="Theme.Revived.Dark" parent="Theme.Material3Expressive.Dark.NoActionBar">
+        <item name="colorPrimary">@color/m3_revived_dark_primary</item>
+        <item name="colorOnPrimary">@color/m3_revived_dark_on_primary</item>
+        <item name="colorPrimaryContainer">@color/m3_revived_dark_primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/m3_revived_dark_on_primary_container</item>
+        <item name="colorSecondary">@color/m3_revived_dark_secondary</item>
+        <item name="colorOnSecondary">@color/m3_revived_dark_on_secondary</item>
+        <item name="colorSecondaryContainer">@color/m3_revived_dark_secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/m3_revived_dark_on_secondary_container</item>
+        <item name="colorTertiary">@color/m3_revived_dark_tertiary</item>
+        <item name="colorOnTertiary">@color/m3_revived_dark_on_tertiary</item>
+        <item name="colorTertiaryContainer">@color/m3_revived_dark_tertiary_container</item>
+        <item name="colorOnTertiaryContainer">@color/m3_revived_dark_on_tertiary_container</item>
+        <item name="colorError">@color/m3_revived_dark_error</item>
+        <item name="colorOnError">@color/m3_revived_dark_on_error</item>
+        <item name="colorErrorContainer">@color/m3_revived_dark_error_container</item>
+        <item name="colorOnErrorContainer">@color/m3_revived_dark_on_error_container</item>
+        <item name="android:colorBackground">@color/m3_revived_dark_background</item>
+        <item name="colorOnBackground">@color/m3_revived_dark_on_background</item>
+        <item name="colorSurface">@color/m3_revived_dark_surface</item>
+        <item name="colorOnSurface">@color/m3_revived_dark_on_surface</item>
+        <item name="colorSurfaceVariant">@color/m3_revived_dark_surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/m3_revived_dark_on_surface_variant</item>
+        <item name="colorOutline">@color/m3_revived_dark_outline</item>
+        <item name="colorOutlineVariant">@color/m3_revived_dark_outline_variant</item>
+        <item name="colorSurfaceInverse">@color/m3_revived_dark_inverse_surface</item>
+        <item name="colorOnSurfaceInverse">@color/m3_revived_dark_inverse_on_surface</item>
+        <item name="colorPrimaryInverse">@color/m3_revived_dark_inverse_primary</item>
+        <item name="colorSurfaceDim">@color/m3_revived_dark_surface_dim</item>
+        <item name="colorSurfaceBright">@color/m3_revived_dark_surface_bright</item>
+        <item name="colorSurfaceContainerLowest">@color/m3_revived_dark_surface_container_lowest</item>
+        <item name="colorSurfaceContainerLow">@color/m3_revived_dark_surface_container_low</item>
+        <item name="colorSurfaceContainer">@color/m3_revived_dark_surface_container</item>
+        <item name="colorSurfaceContainerHigh">@color/m3_revived_dark_surface_container_high</item>
+        <item name="colorSurfaceContainerHighest">@color/m3_revived_dark_surface_container_highest</item>
+        <item name="colorPrimaryFixed">@color/m3_revived_dark_primary_fixed</item>
+        <item name="colorPrimaryFixedDim">@color/m3_revived_dark_primary_fixed_dim</item>
+        <item name="colorOnPrimaryFixed">@color/m3_revived_dark_on_primary_fixed</item>
+        <item name="colorOnPrimaryFixedVariant">@color/m3_revived_dark_on_primary_fixed_variant</item>
+        <item name="colorSecondaryFixed">@color/m3_revived_dark_secondary_fixed</item>
+        <item name="colorSecondaryFixedDim">@color/m3_revived_dark_secondary_fixed_dim</item>
+        <item name="colorOnSecondaryFixed">@color/m3_revived_dark_on_secondary_fixed</item>
+        <item name="colorOnSecondaryFixedVariant">@color/m3_revived_dark_on_secondary_fixed_variant</item>
+        <item name="colorTertiaryFixed">@color/m3_revived_dark_tertiary_fixed</item>
+        <item name="colorTertiaryFixedDim">@color/m3_revived_dark_tertiary_fixed_dim</item>
+        <item name="colorOnTertiaryFixed">@color/m3_revived_dark_on_tertiary_fixed</item>
+        <item name="colorOnTertiaryFixedVariant">@color/m3_revived_dark_on_tertiary_fixed_variant</item>
+        <item name="scrimBackground">@color/m3_revived_dark_scrim</item>
+        <!-- bars: edge-to-edge, EdgeToEdgeUtils paints the insets with surface colors -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:windowBackground">?attr/colorSurface</item>
+        <item name="android:windowAnimationStyle">@style/Animation.Revived.Activity</item>
+        <item name="android:textColorPrimary">?attr/colorOnSurface</item>
+        <item name="android:textColorSecondary">?attr/colorOnSurfaceVariant</item>
+        <item name="windowActionModeOverlay">true</item>
+        <item name="actionModeStyle">@style/Widget.Revived.E.ActionMode</item>
+        <item name="bottomSheetDialogTheme">@style/ThemeOverlay.Revived.BottomSheetDialog</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.Revived.MaterialAlertDialog</item>
+        <item name="alertDialogTheme">@style/ThemeOverlay.Revived.MaterialAlertDialog</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay.Revived</item>
+    </style>
+
+    <style name="Theme.Revived.RenaLight" parent="Theme.Material3Expressive.Light.NoActionBar">
+        <item name="colorPrimary">@color/m3_rena_light_primary</item>
+        <item name="colorOnPrimary">@color/m3_rena_light_on_primary</item>
+        <item name="colorPrimaryContainer">@color/m3_rena_light_primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/m3_rena_light_on_primary_container</item>
+        <item name="colorSecondary">@color/m3_rena_light_secondary</item>
+        <item name="colorOnSecondary">@color/m3_rena_light_on_secondary</item>
+        <item name="colorSecondaryContainer">@color/m3_rena_light_secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/m3_rena_light_on_secondary_container</item>
+        <item name="colorTertiary">@color/m3_rena_light_tertiary</item>
+        <item name="colorOnTertiary">@color/m3_rena_light_on_tertiary</item>
+        <item name="colorTertiaryContainer">@color/m3_rena_light_tertiary_container</item>
+        <item name="colorOnTertiaryContainer">@color/m3_rena_light_on_tertiary_container</item>
+        <item name="colorError">@color/m3_rena_light_error</item>
+        <item name="colorOnError">@color/m3_rena_light_on_error</item>
+        <item name="colorErrorContainer">@color/m3_rena_light_error_container</item>
+        <item name="colorOnErrorContainer">@color/m3_rena_light_on_error_container</item>
+        <item name="android:colorBackground">@color/m3_rena_light_background</item>
+        <item name="colorOnBackground">@color/m3_rena_light_on_background</item>
+        <item name="colorSurface">@color/m3_rena_light_surface</item>
+        <item name="colorOnSurface">@color/m3_rena_light_on_surface</item>
+        <item name="colorSurfaceVariant">@color/m3_rena_light_surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/m3_rena_light_on_surface_variant</item>
+        <item name="colorOutline">@color/m3_rena_light_outline</item>
+        <item name="colorOutlineVariant">@color/m3_rena_light_outline_variant</item>
+        <item name="colorSurfaceInverse">@color/m3_rena_light_inverse_surface</item>
+        <item name="colorOnSurfaceInverse">@color/m3_rena_light_inverse_on_surface</item>
+        <item name="colorPrimaryInverse">@color/m3_rena_light_inverse_primary</item>
+        <item name="colorSurfaceDim">@color/m3_rena_light_surface_dim</item>
+        <item name="colorSurfaceBright">@color/m3_rena_light_surface_bright</item>
+        <item name="colorSurfaceContainerLowest">@color/m3_rena_light_surface_container_lowest</item>
+        <item name="colorSurfaceContainerLow">@color/m3_rena_light_surface_container_low</item>
+        <item name="colorSurfaceContainer">@color/m3_rena_light_surface_container</item>
+        <item name="colorSurfaceContainerHigh">@color/m3_rena_light_surface_container_high</item>
+        <item name="colorSurfaceContainerHighest">@color/m3_rena_light_surface_container_highest</item>
+        <item name="colorPrimaryFixed">@color/m3_rena_light_primary_fixed</item>
+        <item name="colorPrimaryFixedDim">@color/m3_rena_light_primary_fixed_dim</item>
+        <item name="colorOnPrimaryFixed">@color/m3_rena_light_on_primary_fixed</item>
+        <item name="colorOnPrimaryFixedVariant">@color/m3_rena_light_on_primary_fixed_variant</item>
+        <item name="colorSecondaryFixed">@color/m3_rena_light_secondary_fixed</item>
+        <item name="colorSecondaryFixedDim">@color/m3_rena_light_secondary_fixed_dim</item>
+        <item name="colorOnSecondaryFixed">@color/m3_rena_light_on_secondary_fixed</item>
+        <item name="colorOnSecondaryFixedVariant">@color/m3_rena_light_on_secondary_fixed_variant</item>
+        <item name="colorTertiaryFixed">@color/m3_rena_light_tertiary_fixed</item>
+        <item name="colorTertiaryFixedDim">@color/m3_rena_light_tertiary_fixed_dim</item>
+        <item name="colorOnTertiaryFixed">@color/m3_rena_light_on_tertiary_fixed</item>
+        <item name="colorOnTertiaryFixedVariant">@color/m3_rena_light_on_tertiary_fixed_variant</item>
+        <item name="scrimBackground">@color/m3_rena_light_scrim</item>
+        <!-- bars: edge-to-edge, EdgeToEdgeUtils paints the insets with surface colors -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:windowBackground">?attr/colorSurface</item>
+        <item name="android:windowAnimationStyle">@style/Animation.Revived.Activity</item>
+        <item name="android:textColorPrimary">?attr/colorOnSurface</item>
+        <item name="android:textColorSecondary">?attr/colorOnSurfaceVariant</item>
+        <item name="windowActionModeOverlay">true</item>
+        <item name="actionModeStyle">@style/Widget.Revived.E.ActionMode</item>
+        <item name="bottomSheetDialogTheme">@style/ThemeOverlay.Revived.BottomSheetDialog</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.Revived.MaterialAlertDialog</item>
+        <item name="alertDialogTheme">@style/ThemeOverlay.Revived.MaterialAlertDialog</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay.Revived</item>
+    </style>
+
+    <style name="Theme.Revived.Rena" parent="Theme.Material3Expressive.Dark.NoActionBar">
+        <item name="colorPrimary">@color/m3_rena_dark_primary</item>
+        <item name="colorOnPrimary">@color/m3_rena_dark_on_primary</item>
+        <item name="colorPrimaryContainer">@color/m3_rena_dark_primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/m3_rena_dark_on_primary_container</item>
+        <item name="colorSecondary">@color/m3_rena_dark_secondary</item>
+        <item name="colorOnSecondary">@color/m3_rena_dark_on_secondary</item>
+        <item name="colorSecondaryContainer">@color/m3_rena_dark_secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/m3_rena_dark_on_secondary_container</item>
+        <item name="colorTertiary">@color/m3_rena_dark_tertiary</item>
+        <item name="colorOnTertiary">@color/m3_rena_dark_on_tertiary</item>
+        <item name="colorTertiaryContainer">@color/m3_rena_dark_tertiary_container</item>
+        <item name="colorOnTertiaryContainer">@color/m3_rena_dark_on_tertiary_container</item>
+        <item name="colorError">@color/m3_rena_dark_error</item>
+        <item name="colorOnError">@color/m3_rena_dark_on_error</item>
+        <item name="colorErrorContainer">@color/m3_rena_dark_error_container</item>
+        <item name="colorOnErrorContainer">@color/m3_rena_dark_on_error_container</item>
+        <item name="android:colorBackground">@color/m3_rena_dark_background</item>
+        <item name="colorOnBackground">@color/m3_rena_dark_on_background</item>
+        <item name="colorSurface">@color/m3_rena_dark_surface</item>
+        <item name="colorOnSurface">@color/m3_rena_dark_on_surface</item>
+        <item name="colorSurfaceVariant">@color/m3_rena_dark_surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/m3_rena_dark_on_surface_variant</item>
+        <item name="colorOutline">@color/m3_rena_dark_outline</item>
+        <item name="colorOutlineVariant">@color/m3_rena_dark_outline_variant</item>
+        <item name="colorSurfaceInverse">@color/m3_rena_dark_inverse_surface</item>
+        <item name="colorOnSurfaceInverse">@color/m3_rena_dark_inverse_on_surface</item>
+        <item name="colorPrimaryInverse">@color/m3_rena_dark_inverse_primary</item>
+        <item name="colorSurfaceDim">@color/m3_rena_dark_surface_dim</item>
+        <item name="colorSurfaceBright">@color/m3_rena_dark_surface_bright</item>
+        <item name="colorSurfaceContainerLowest">@color/m3_rena_dark_surface_container_lowest</item>
+        <item name="colorSurfaceContainerLow">@color/m3_rena_dark_surface_container_low</item>
+        <item name="colorSurfaceContainer">@color/m3_rena_dark_surface_container</item>
+        <item name="colorSurfaceContainerHigh">@color/m3_rena_dark_surface_container_high</item>
+        <item name="colorSurfaceContainerHighest">@color/m3_rena_dark_surface_container_highest</item>
+        <item name="colorPrimaryFixed">@color/m3_rena_dark_primary_fixed</item>
+        <item name="colorPrimaryFixedDim">@color/m3_rena_dark_primary_fixed_dim</item>
+        <item name="colorOnPrimaryFixed">@color/m3_rena_dark_on_primary_fixed</item>
+        <item name="colorOnPrimaryFixedVariant">@color/m3_rena_dark_on_primary_fixed_variant</item>
+        <item name="colorSecondaryFixed">@color/m3_rena_dark_secondary_fixed</item>
+        <item name="colorSecondaryFixedDim">@color/m3_rena_dark_secondary_fixed_dim</item>
+        <item name="colorOnSecondaryFixed">@color/m3_rena_dark_on_secondary_fixed</item>
+        <item name="colorOnSecondaryFixedVariant">@color/m3_rena_dark_on_secondary_fixed_variant</item>
+        <item name="colorTertiaryFixed">@color/m3_rena_dark_tertiary_fixed</item>
+        <item name="colorTertiaryFixedDim">@color/m3_rena_dark_tertiary_fixed_dim</item>
+        <item name="colorOnTertiaryFixed">@color/m3_rena_dark_on_tertiary_fixed</item>
+        <item name="colorOnTertiaryFixedVariant">@color/m3_rena_dark_on_tertiary_fixed_variant</item>
+        <item name="scrimBackground">@color/m3_rena_dark_scrim</item>
+        <!-- bars: edge-to-edge, EdgeToEdgeUtils paints the insets with surface colors -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:windowBackground">?attr/colorSurface</item>
+        <item name="android:windowAnimationStyle">@style/Animation.Revived.Activity</item>
+        <item name="android:textColorPrimary">?attr/colorOnSurface</item>
+        <item name="android:textColorSecondary">?attr/colorOnSurfaceVariant</item>
+        <item name="windowActionModeOverlay">true</item>
+        <item name="actionModeStyle">@style/Widget.Revived.E.ActionMode</item>
+        <item name="bottomSheetDialogTheme">@style/ThemeOverlay.Revived.BottomSheetDialog</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.Revived.MaterialAlertDialog</item>
+        <item name="alertDialogTheme">@style/ThemeOverlay.Revived.MaterialAlertDialog</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay.Revived</item>
+    </style>
+
+    <style name="Theme.Revived.DynamicLight" parent="Theme.Material3Expressive.Light.NoActionBar">
+        <!-- bars: edge-to-edge, EdgeToEdgeUtils paints the insets with surface colors -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:windowBackground">?attr/colorSurface</item>
+        <item name="android:windowAnimationStyle">@style/Animation.Revived.Activity</item>
+        <item name="android:textColorPrimary">?attr/colorOnSurface</item>
+        <item name="android:textColorSecondary">?attr/colorOnSurfaceVariant</item>
+        <item name="windowActionModeOverlay">true</item>
+        <item name="actionModeStyle">@style/Widget.Revived.E.ActionMode</item>
+        <item name="bottomSheetDialogTheme">@style/ThemeOverlay.Revived.BottomSheetDialog</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.Revived.MaterialAlertDialog</item>
+        <item name="alertDialogTheme">@style/ThemeOverlay.Revived.MaterialAlertDialog</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay.Revived</item>
+    </style>
+
+    <style name="Theme.Revived.DynamicDark" parent="Theme.Material3Expressive.Dark.NoActionBar">
+        <!-- bars: edge-to-edge, EdgeToEdgeUtils paints the insets with surface colors -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:windowBackground">?attr/colorSurface</item>
+        <item name="android:windowAnimationStyle">@style/Animation.Revived.Activity</item>
+        <item name="android:textColorPrimary">?attr/colorOnSurface</item>
+        <item name="android:textColorSecondary">?attr/colorOnSurfaceVariant</item>
+        <item name="windowActionModeOverlay">true</item>
+        <item name="actionModeStyle">@style/Widget.Revived.E.ActionMode</item>
+        <item name="bottomSheetDialogTheme">@style/ThemeOverlay.Revived.BottomSheetDialog</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.Revived.MaterialAlertDialog</item>
+        <item name="alertDialogTheme">@style/ThemeOverlay.Revived.MaterialAlertDialog</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay.Revived</item>
+    </style>
+
+    <style name="ThemeOverlay.Revived.BottomSheetDialog" parent="ThemeOverlay.Material3.BottomSheetDialog" />
+
+    <style name="ThemeOverlay.Revived.MaterialAlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="android:windowAnimationStyle">@style/Animation.Revived.Dialog</item>
+    </style>
+
+    <!-- Activity transitions: spring-like emphasized fades/scales, replaced per screen by Material transitions in code -->
+    <style name="Animation.Revived.Activity" parent="@android:style/Animation.Activity">
+        <item name="android:activityOpenEnterAnimation">@anim/activity_open_enter</item>
+        <item name="android:activityOpenExitAnimation">@anim/activity_open_exit</item>
+        <item name="android:activityCloseEnterAnimation">@anim/activity_close_enter</item>
+        <item name="android:activityCloseExitAnimation">@anim/activity_close_exit</item>
+    </style>
+</resources>

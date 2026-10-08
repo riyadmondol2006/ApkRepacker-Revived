@@ -1,38 +1,29 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
-
-buildscript {
-    ext.kotlin_version = '1.6.21'
-    repositories {
-        maven { url "https://jitpack.io" }
-        google()
-        jcenter()
-        
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:8.4.0'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
-    }
-}
-
-allprojects {
-    repositories {
-        maven { url "https://jitpack.io" }
-        google()
-        jcenter()
-        
-    }
+plugins {
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.android.library) apply false
+    alias(libs.plugins.kotlin.android) apply false
 }
 
 ext {
-        kotlin_version = '1.6.21'
-        compileSdkVersion = 30
-        buildToolsVersion = '30.0.3'
-        targetSdkVersion = 28
-        minSdkVersion = 21
+    compileSdkVersion = libs.versions.compileSdk.get().toInteger()
+    minSdkVersion = libs.versions.minSdk.get().toInteger()
+    targetSdkVersion = libs.versions.targetSdk.get().toInteger()
 }
-task clean(type: Delete) {
-    delete rootProject.buildDir
+
+// apktool-lib depends on apktool's smali fork, which uses the same packages as Google's
+// com.android.tools.smali artifacts (pulled in by jadx). Use the fork everywhere so there is
+// exactly one copy of each class.
+subprojects {
+    configurations.configureEach {
+        resolutionStrategy.dependencySubstitution {
+            ['smali', 'smali-baksmali', 'smali-dexlib2', 'smali-util'].each { name ->
+                substitute module("com.android.tools.smali:$name") using module("com.github.iBotPeaches.smali:$name:${libs.versions.apktoolSmali.get()}") because 'apktool-lib needs its smali fork'
+            }
+        }
+    }
+}
+
+tasks.register('clean', Delete) {
+    delete rootProject.layout.buildDirectory
 }

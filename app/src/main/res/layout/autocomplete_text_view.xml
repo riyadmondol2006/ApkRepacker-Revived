@@ -1,33 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Suggestion row of the find bar: a past query and a button that forgets it. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?selectableItemBackground"
-    android:orientation="horizontal">
+    android:gravity="center_vertical"
+    android:minHeight="@dimen/touch_target"
+    android:orientation="horizontal"
+    android:paddingStart="@dimen/space_4"
+    android:paddingEnd="@dimen/space_1">
 
     <TextView
         android:id="@+id/item_autocomplete"
-        style="?android:attr/dropDownItemStyle"
         android:layout_width="0dp"
-        android:layout_height="48dp"
+        android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:ellipsize="marquee"
-        android:singleLine="true"
-        android:text="item"
-        android:textAppearance="?android:attr/textAppearanceLargePopupMenu" />
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+        android:textColor="?attr/colorOnSurface" />
 
-    <FrameLayout
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/delete_item_autocomplete"
+        style="@style/Widget.Material3Expressive.Button.IconButton.Standard"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
-
-        <TextView
-            android:id="@+id/delete_item_autocomplete"
-            style="?android:attr/dropDownItemStyle"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_gravity="center"
-            android:layout_margin="2.0dip"
-            android:drawableTint="?android:textColorSecondary"
-            android:drawableEnd="@drawable/ic_clear" />
-    </FrameLayout>
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/clear_history"
+        app:icon="@drawable/ic_clear"
+        app:iconTint="?attr/colorOnSurfaceVariant" />
 </LinearLayout>

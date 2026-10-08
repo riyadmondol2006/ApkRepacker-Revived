@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Owner D: decompile / build flows and the apktool option sheets. -->
+<resources>
+    <string name="m3d_mode_short_all">All</string>
+    <string name="m3d_mode_short_resources">Resources</string>
+    <string name="m3d_mode_short_sources">Sources</string>
+    <string name="m3d_mode_short_none">None</string>
+
+    <string name="m3d_group_code">Smali code</string>
+    <string name="m3d_group_resources">Resources and assets</string>
+    <string name="m3d_group_general">General</string>
+    <string name="m3d_group_build_output">Output</string>
+    <string name="m3d_group_build_manifest">Manifest and security</string>
+
+    <string name="m3d_decompile_log_title">Log</string>
+    <string name="m3d_decompile_saved_to">Project saved to %s</string>
+    <string name="m3d_decompile_failed_hint">Copy the log to see what went wrong.</string>
+    <string name="m3d_build_log_title">Build log</string>
+    <string name="m3d_steps_title">Build steps</string>
+    <string name="m3d_step_n">Step %d</string>
+    <string name="m3d_step_preparing">Preparing</string>
+    <string name="m3d_share">Share</string>
+    <string name="m3d_share_apk_title">Share APK</string>
+    <string name="m3d_status_done">Finished</string>
+    <string name="m3d_status_failed">Failed</string>
+    <string name="m3d_status_working">In progress</string>
+    <string name="m3d_step_done">Step done</string>
+    <string name="m3d_step_pending">Waiting</string>
+    <string name="m3d_step_running">Running</string>
+</resources>

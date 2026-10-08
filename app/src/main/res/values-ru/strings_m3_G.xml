@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="files_fab_open">Открыть действия</string>
+    <string name="files_fab_close">Закрыть действия</string>
+    <string name="files_input_name_hint">Имя</string>
+    <string name="files_error_name_empty">Введите имя</string>
+    <string name="files_error_name_invalid">Имя не может содержать слэш</string>
+    <string name="files_action_create">Создать</string>
+    <string name="files_action_clear_selection">Снять выделение</string>
+    <string name="files_action_more">Ещё действия</string>
+    <string name="files_action_home">Корень проекта</string>
+    <string name="files_action_paste_here">Вставить сюда</string>
+    <string name="files_action_new_folder_here">Новая папка</string>
+    <string name="files_action_cancel_paste">Очистить буфер</string>
+    <string name="files_path_bar">Текущее расположение</string>
+    <string name="files_loading">Загрузка файлов</string>
+    <string name="files_rename_multiple_unsupported">Переименование нескольких элементов пока не поддерживается</string>
+    <string name="files_copied_to_clipboard">Скопировано</string>
+    <string name="files_item_selected">%1$s, выбрано</string>
+    <string name="files_empty_hint">Нажмите +, чтобы добавить файлы или папки</string>
+    <string name="files_cant_open_file">Нет приложения для открытия этого файла</string>
+    <string name="files_fab_import_file">Импортировать файл</string>
+    <string name="files_fab_import_folder">Импортировать папку</string>
+    <string name="files_subtitle_both">%1$s, %2$s</string>
+</resources>

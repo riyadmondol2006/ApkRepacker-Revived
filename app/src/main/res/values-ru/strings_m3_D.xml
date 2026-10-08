@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="m3d_mode_short_all">Всё</string>
+    <string name="m3d_mode_short_resources">Ресурсы</string>
+    <string name="m3d_mode_short_sources">Код</string>
+    <string name="m3d_mode_short_none">Ничего</string>
+
+    <string name="m3d_group_code">Код smali</string>
+    <string name="m3d_group_resources">Ресурсы и assets</string>
+    <string name="m3d_group_general">Общее</string>
+    <string name="m3d_group_build_output">Результат</string>
+    <string name="m3d_group_build_manifest">Манифест и безопасность</string>
+
+    <string name="m3d_decompile_log_title">Лог</string>
+    <string name="m3d_decompile_saved_to">Проект сохранён в %s</string>
+    <string name="m3d_decompile_failed_hint">Скопируйте лог, чтобы увидеть, что пошло не так.</string>
+    <string name="m3d_build_log_title">Лог сборки</string>
+    <string name="m3d_steps_title">Этапы сборки</string>
+    <string name="m3d_step_n">Этап %d</string>
+    <string name="m3d_step_preparing">Подготовка</string>
+    <string name="m3d_share">Поделиться</string>
+    <string name="m3d_share_apk_title">Поделиться APK</string>
+    <string name="m3d_status_done">Готово</string>
+    <string name="m3d_status_failed">Ошибка</string>
+    <string name="m3d_status_working">Выполняется</string>
+    <string name="m3d_step_done">Этап выполнен</string>
+    <string name="m3d_step_pending">Ожидание</string>
+    <string name="m3d_step_running">Выполняется</string>
+</resources>

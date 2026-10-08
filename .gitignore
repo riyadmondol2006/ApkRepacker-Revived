@@ -5,3 +5,10 @@
 .DS_Store
 build/
 .externalNativeBuild
+
+# Local tooling / secrets
+.kotlin/
+*.jks
+*.keystore
+*.jks.b64
+keystore.properties

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.recyclerview.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/recycler_licenses"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clipToPadding="false"
+    android:paddingStart="@dimen/space_4"
+    android:paddingTop="@dimen/space_2"
+    android:paddingEnd="@dimen/space_4"
+    android:paddingBottom="@dimen/space_2" />

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- FabMenu: expandable Large FAB that fans out labeled small extended FABs. -->
+    <declare-styleable name="FabMenu">
+        <!-- Icon of the main FAB while collapsed; rotated into a "close" glyph while expanded. -->
+        <attr name="fabMenuIcon" format="reference" />
+        <attr name="fabMenuOpenDescription" format="string|reference" />
+        <attr name="fabMenuCloseDescription" format="string|reference" />
+    </declare-styleable>
+    <!-- SelectableIconTile: tonal leading tile that morphs into a checked tile. -->
+    <declare-styleable name="SelectableIconTile">
+        <attr name="tileSize" format="dimension" />
+    </declare-styleable>
+</resources>

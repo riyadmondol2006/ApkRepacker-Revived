@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Owner E: editor shell, tool grid, search and find results. -->
+<resources>
+    <!-- Square-ish icon-only action for ImageButton consumers (cast to AppCompatImageButton elsewhere). -->
+    <style name="Widget.Revived.E.ActionImageButton" parent="">
+        <item name="android:layout_width">@dimen/touch_target</item>
+        <item name="android:layout_height">@dimen/touch_target</item>
+        <item name="android:background">@drawable/bg_e_action_icon</item>
+        <item name="android:scaleType">center</item>
+        <item name="android:tint">?attr/colorOnSurfaceVariant</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+
+    <style name="ShapeAppearanceOverlay.Revived.E.AppIcon" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/shape_corner_medium</item>
+    </style>
+
+    <style name="ShapeAppearanceOverlay.Revived.E.IconContainer" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
+    <style name="ShapeAppearanceOverlay.Revived.E.Tile" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/shape_corner_extra_large</item>
+    </style>
+
+    <style name="Widget.Revived.E.Tile" parent="Widget.Material3.CardView.Filled">
+        <item name="shapeAppearance">@style/ShapeAppearance.Material3.Corner.ExtraLarge</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:layout_marginTop">@dimen/space_1</item>
+        <item name="android:layout_marginBottom">@dimen/space_1</item>
+    </style>
+
+    <style name="Widget.Revived.E.GroupRow" parent="Widget.Material3.CardView.Filled">
+        <item name="shapeAppearance">@style/ShapeAppearance.Material3.Corner.Large</item>
+        <item name="cardBackgroundColor">?attr/colorSurfaceContainerHigh</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+
+    <style name="Widget.Revived.E.ChildRow" parent="Widget.Material3.CardView.Filled">
+        <item name="shapeAppearance">@style/ShapeAppearance.Material3.Corner.Small</item>
+        <item name="cardBackgroundColor">?attr/colorSurfaceContainerLow</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+
+    <style name="Widget.Revived.E.FilterChip" parent="Widget.Material3.Chip.Filter" />
+
+    <!-- Outlined text field with a rounder box than the M3 default. -->
+    <style name="Widget.Revived.E.TextInput" parent="Widget.Revived.TextInput">
+        <item name="shapeAppearance">@style/ShapeAppearance.Material3.Corner.Large</item>
+    </style>
+
+    <!-- Top-rounded panel that docks at the bottom of a screen (search panel). -->
+    <style name="ShapeAppearance.Revived.E.Panel" parent="ShapeAppearance.Material3.Corner.ExtraLarge">
+        <item name="cornerSizeBottomLeft">0dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+    </style>
+
+    <!-- Contextual action bar (windowActionModeOverlay): a secondary-container bar, not a recolored app bar.
+         Themes opt in with <item name="actionModeStyle">@style/Widget.Revived.E.ActionMode</item>. -->
+    <style name="Widget.Revived.E.ActionMode" parent="Widget.Material3.ActionMode">
+        <item name="background">?attr/colorSecondaryContainer</item>
+        <item name="backgroundSplit">?attr/colorSecondaryContainer</item>
+        <item name="titleTextStyle">@style/TextAppearance.Revived.E.ActionModeTitle</item>
+        <item name="subtitleTextStyle">@style/TextAppearance.Revived.E.ActionModeSubtitle</item>
+    </style>
+
+    <style name="TextAppearance.Revived.E.ActionModeTitle" parent="TextAppearance.Material3.TitleLarge.Emphasized">
+        <item name="android:textColor">?attr/colorOnSecondaryContainer</item>
+    </style>
+
+    <style name="TextAppearance.Revived.E.ActionModeSubtitle" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textColor">?attr/colorOnSecondaryContainer</item>
+    </style>
+</resources>

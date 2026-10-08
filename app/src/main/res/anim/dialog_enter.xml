@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Dialog window enter: springy 0.9 -> 1 scale with a gentle overshoot, fast fade in. -->
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shareInterpolator="false">
+    <alpha
+        android:duration="120"
+        android:fromAlpha="0"
+        android:toAlpha="1"
+        android:interpolator="@interpolator/revived_standard_effects" />
+    <scale
+        android:duration="450"
+        android:fromXScale="0.9"
+        android:toXScale="1"
+        android:fromYScale="0.9"
+        android:toYScale="1"
+        android:pivotX="50%"
+        android:pivotY="50%"
+        android:interpolator="@interpolator/revived_spring_overshoot" />
+    <translate
+        android:duration="450"
+        android:fromYDelta="12dp"
+        android:toYDelta="0"
+        android:interpolator="@interpolator/revived_emphasized_decelerate" />
+</set>

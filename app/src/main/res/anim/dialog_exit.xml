@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Dialog window exit: quick shrink + fade, 150ms. -->
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shareInterpolator="false">
+    <alpha
+        android:duration="100"
+        android:fromAlpha="1"
+        android:toAlpha="0"
+        android:interpolator="@interpolator/revived_emphasized_accelerate" />
+    <scale
+        android:duration="150"
+        android:fromXScale="1"
+        android:toXScale="0.94"
+        android:fromYScale="1"
+        android:toYScale="0.94"
+        android:pivotX="50%"
+        android:pivotY="50%"
+        android:interpolator="@interpolator/revived_emphasized_accelerate" />
+</set>

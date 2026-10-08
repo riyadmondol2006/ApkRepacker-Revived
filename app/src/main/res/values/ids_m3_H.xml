@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tag keys used by the resource editors' shape-morph springs -->
+    <item name="h_tag_corner_spring" type="id" />
+</resources>

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="files_large_app_bar_height">176dp</dimen>
+</resources>

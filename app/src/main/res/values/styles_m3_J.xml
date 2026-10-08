@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Window animation styles for dialogs and bottom sheets (owner J / motion). Wire them via the
+     theme's android:windowAnimationStyle on dialog / sheet overlays or per dialog window. -->
+<resources>
+    <style name="Animation.Revived.Dialog" parent="@android:style/Animation.Dialog">
+        <item name="android:windowEnterAnimation">@anim/dialog_enter</item>
+        <item name="android:windowExitAnimation">@anim/dialog_exit</item>
+    </style>
+
+    <style name="Animation.Revived.BottomSheet" parent="@android:style/Animation">
+        <item name="android:windowEnterAnimation">@anim/sheet_enter</item>
+        <item name="android:windowExitAnimation">@anim/sheet_exit</item>
+    </style>
+</resources>

@@ -1,143 +1,118 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    style="@style/Material.CardView.BottomSheet"
-    app:strokeWidth="0dp">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/space_6">
 
-        <LinearLayout
+        <com.google.android.material.bottomsheet.BottomSheetDragHandleView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/tv_dialog_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:paddingStart="@dimen/space_6"
+            android:paddingEnd="@dimen/space_6"
+            android:text="@string/translate_string"
+            android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
+            android:textColor="?attr/colorOnSurface" />
 
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/tv_dialog_title"
-                android:layout_width="0dp"
-                android:layout_height="56dp"
-                android:layout_gravity="center_vertical"
-                android:layout_weight="1"
-                android:gravity="center_vertical"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:textAppearance="?attr/textAppearanceSubtitle1"
-                android:textColor="?attr/colorOnSurface"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:text="@string/translate_string" />
+        <TextView
+            android:id="@+id/tv_string_key"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="middle"
+            android:paddingStart="@dimen/space_6"
+            android:paddingTop="@dimen/space_1"
+            android:paddingEnd="@dimen/space_6"
+            android:singleLine="true"
+            android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
+            android:textColor="?attr/colorPrimary"
+            tools:text="status_bar_notification_info_overflow" />
 
-            <!--<LinearLayout
+        <HorizontalScrollView
+            android:id="@+id/action_scroll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_3"
+            android:scrollbars="none">
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/popup_menu"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:animateLayoutChanges="true"
-                android:orientation="horizontal"
-                android:layout_marginEnd="@dimen/card_title_margin">-->
+                android:layout_height="wrap_content"
+                android:paddingStart="@dimen/space_6"
+                android:paddingEnd="@dimen/space_6"
+                app:singleLine="true" />
+        </HorizontalScrollView>
 
-               <!-- <androidx.appcompat.widget.AppCompatImageButton
-                    android:id="@+id/button_paste"
-                    style="@style/ActionItem"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:layout_gravity="center_vertical"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:tint="?android:textColorSecondary"
-                    app:srcCompat="@drawable/ic_paste" />
-
-                <androidx.appcompat.widget.AppCompatImageButton
-                    android:id="@+id/button_copy"
-                    style="@style/ActionItem"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:layout_gravity="center_vertical"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:tint="?android:textColorSecondary"
-                    app:srcCompat="@drawable/ic_copy" />
-
-                <androidx.appcompat.widget.AppCompatImageButton
-                    android:id="@+id/button_clear"
-                    style="@style/ActionItem"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:layout_gravity="center_vertical"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:tint="?android:textColorSecondary"
-                    app:srcCompat="@drawable/ic_clear" />-->
-                <androidx.appcompat.widget.AppCompatImageButton
-                    android:id="@+id/popup_menu"
-                    android:layout_marginEnd="@dimen/item_margin"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:layout_gravity="center_vertical"
-                    android:background="?selectableItemBackgroundBorderless"
-                    app:srcCompat="@drawable/ic_more" />
-          <!--  </LinearLayout>-->
-
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="?dividerColor" />
-
-        <LinearLayout
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/text_input_layout_old"
+            style="@style/Widget.Revived.TextInput.Filled"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/card_title_margin"
-            android:layout_marginTop="@dimen/card_title_margin"
-            android:layout_marginEnd="@dimen/card_title_margin"
-            android:orientation="vertical">
+            android:layout_marginStart="@dimen/space_6"
+            android:layout_marginTop="@dimen/space_4"
+            android:layout_marginEnd="@dimen/space_6"
+            android:hint="@string/h_original_text">
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/text_input_layout_old"
-                style="@style/TextInputLayout"
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/old_value"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/normal_padding"
-                android:theme="@style/TextInputLayout.OutlinedBox">
+                android:cursorVisible="false"
+                android:focusable="false"
+                android:inputType="none"
+                android:maxLines="8"
+                android:textIsSelectable="true"
+                tools:text="Text" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/old_value"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="none"
-                    android:maxLines="8"
-                    android:textIsSelectable="true"
-                    tools:text="Text"/>
-            </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/new_value_text_layout"
+            style="@style/Widget.Revived.TextInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/space_6"
+            android:layout_marginTop="@dimen/space_3"
+            android:layout_marginEnd="@dimen/space_6"
+            android:hint="@string/text_after_translation">
 
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/TextInputLayout"
-                android:id="@+id/new_value_text_layout"
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/new_value"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/text_after_translation"
-                android:theme="@style/TextInputLayout.OutlinedBox">
+                android:inputType="textMultiLine"
+                android:maxLines="8" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/new_value"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textMultiLine"
-                    android:maxLines="8"
-                    android:textIsSelectable="true" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-
-        </LinearLayout>
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/translate_progress"
+            style="@style/Widget.Material3Expressive.LinearProgressIndicator.Wavy"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/space_6"
+            android:layout_marginTop="@dimen/space_2"
+            android:layout_marginEnd="@dimen/space_6"
+            android:indeterminate="true"
+            android:visibility="invisible" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_add_lang_ok"
-            style="@style/MD2Button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/card_title_margin"
+            android:layout_marginStart="@dimen/space_6"
+            android:layout_marginTop="@dimen/space_4"
+            android:layout_marginEnd="@dimen/space_6"
             android:text="@string/ok"
-            tools:ignore="PrivateResource" />
-
+            app:icon="@drawable/ic_check" />
     </LinearLayout>
-
-</com.google.android.material.card.MaterialCardView>
+</androidx.core.widget.NestedScrollView>

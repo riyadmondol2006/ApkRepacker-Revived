@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="m3e_close_project">Close project</string>
+    <string name="m3e_build">Build</string>
+    <string name="m3e_find_empty_title">Search this project</string>
+    <string name="m3e_find_empty_body">Look for text inside files or find files by name. Results show up here.</string>
+    <string name="m3e_pick_folder">Choose folder</string>
+    <string name="m3e_folder">Folder</string>
+    <string name="m3e_extension_hint">Extension</string>
+    <string name="m3e_extension_remove">Remove extension</string>
+    <string name="m3e_expand_collapse">Expand or collapse</string>
+    <string name="m3e_replaced">Replaced</string>
+    <string name="m3e_in_development">Update checks are coming soon</string>
+    <string name="m3e_tools_updates_hint">Look for a newer release</string>
+    <string name="m3e_tools_settings_hint">Appearance, editor and build options</string>
+    <string name="m3e_tools_about_hint">Version, credits and links</string>
+    <string name="m3e_batch_variables">Insert variable</string>
+    <string name="m3e_replace_failed">Could not replace in %1$s</string>
+    <string name="m3e_open_file_options">More options</string>
+    <string name="m3e_search_hint">Search in project</string>
+    <string name="m3e_replace_all_in_files">Replace in all files</string>
+    <string name="m3e_cut">Cut</string>
+    <string name="m3e_clear">Clear</string>
+</resources>

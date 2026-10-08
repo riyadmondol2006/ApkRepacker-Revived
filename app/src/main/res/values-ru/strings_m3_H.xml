@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="h_search_strings">Поиск строк</string>
+    <string name="h_search_colors">Поиск цветов</string>
+    <string name="h_search_dimens">Поиск размеров</string>
+    <string name="h_clear_search">Очистить поиск</string>
+    <string name="h_no_results">Ничего не найдено</string>
+    <string name="h_empty_strings">В этом файле пока нет строк</string>
+    <string name="h_empty_colors">В этом файле пока нет цветов</string>
+    <string name="h_empty_dimens">В этом файле пока нет размеров</string>
+
+    <string name="h_unsaved_title">Несохранённые изменения</string>
+    <string name="h_unsaved_message">В этом языке есть несохранённые изменения. Сохранить их перед переключением?</string>
+    <string name="h_action_discard">Отменить</string>
+    <string name="h_saved">Сохранено</string>
+    <string name="h_save_failed">Не удалось сохранить файл</string>
+    <string name="h_loading_failed">Не удалось прочитать файл</string>
+
+    <string name="h_section_strings">Строки</string>
+    <string name="h_section_language">Языки</string>
+    <string name="h_section_translate">Перевод</string>
+
+    <string name="h_original_text">Исходный текст</string>
+    <string name="h_translate_failed">Не удалось перевести. Проверьте соединение и повторите.</string>
+    <string name="h_translating">Перевод…</string>
+    <string name="h_translated_marker">Переведено</string>
+    <string name="h_more_for_string">Действия со строкой</string>
+    <string name="h_progress_percent">%1$d%%</string>
+
+    <string name="h_color_hex">HEX-значение</string>
+    <string name="h_color_hex_hint">#RRGGBB или #AARRGGBB</string>
+    <string name="h_color_hex_invalid">Используйте #RRGGBB или #AARRGGBB</string>
+    <string name="h_color_pick">Выбрать цвет</string>
+    <string name="h_color_preview">Образец цвета</string>
+    <string name="h_color_unresolved">Ссылка не найдена</string>
+    <string name="h_color_saved">Цвет сохранён</string>
+    <string name="h_color_deleted">Цвет удалён</string>
+    <string name="h_color_added">Цвет добавлен</string>
+
+    <string name="h_dimen_edit_title">Изменить размер</string>
+    <string name="h_dimen_name">Имя</string>
+    <string name="h_dimen_value">Значение</string>
+    <string name="h_dimen_value_hint">Например: 16dp</string>
+    <string name="h_dimen_saved">Размер сохранён</string>
+    <string name="h_dimen_invalid">Укажите число с единицей (16dp, 14sp, 1px) или ссылку (@dimen/name)</string>
+</resources>

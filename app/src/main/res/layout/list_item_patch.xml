@@ -1,50 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_height="wrap_content"
+    style="@style/Widget.Revived.Card.Filled"
     android:layout_width="match_parent"
-    android:paddingLeft="16dp"
-    android:paddingTop="8dp"
-    android:paddingRight="16dp"
-    android:paddingBottom="8dp"
-    android:background="@drawable/selectable_background">
+    android:layout_height="wrap_content"
+    android:layout_marginTop="@dimen/space_1"
+    android:layout_marginBottom="@dimen/space_1"
+    android:checkable="true"
+    app:cardBackgroundColor="?attr/colorSurfaceContainerHighest"
+    app:cardElevation="0dp"
+    app:checkedIconTint="?attr/colorOnSecondaryContainer">
 
     <LinearLayout
-        android:id="@+id/linearLayout"
         android:layout_width="match_parent"
-        android:layout_height="25dp"
-        android:layout_toStartOf="@+id/btn_preview"
+        android:layout_height="wrap_content"
         android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:minHeight="@dimen/list_item_leading_size"
+        android:orientation="horizontal"
+        android:paddingTop="@dimen/space_2"
+        android:paddingBottom="@dimen/space_2"
+        android:paddingStart="@dimen/space_3"
+        android:paddingEnd="@dimen/space_1">
 
-        <androidx.appcompat.widget.AppCompatImageView
+        <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/img_icon"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:scaleType="center"
-            app:srcCompat="@drawable/ic_zip" />
+            android:layout_width="@dimen/list_item_leading_size"
+            android:layout_height="@dimen/list_item_leading_size"
+            android:background="?attr/colorSecondaryContainer"
+            android:importantForAccessibility="no"
+            android:padding="@dimen/space_3"
+            app:shapeAppearance="@style/ShapeAppearance.Material3.Corner.Full"
+            app:srcCompat="@drawable/ic_m3_patch"
+            app:tint="?attr/colorOnSecondaryContainer" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/patch_name"
-            android:layout_width="match_parent"
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="5dp"
-            android:gravity="center_vertical"
-            tools:text="FuckAss.zip" />
+            android:layout_marginStart="@dimen/space_3"
+            android:layout_weight="1"
+            android:orientation="vertical">
 
+            <TextView
+                android:id="@+id/patch_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="middle"
+                android:maxLines="1"
+                android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+                android:textColor="?attr/colorOnSurface"
+                tools:text="patch_remove_ads.zip" />
+
+            <TextView
+                android:id="@+id/patch_subtitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:visibility="gone"
+                tools:text="HTC 600 · 19 rules"
+                tools:visibility="visible" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/patch_chip_smali"
+                style="@style/Widget.Material3.Chip.Assist"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_1"
+                android:checkable="false"
+                android:clickable="false"
+                android:focusable="false"
+                android:text="@string/patcher_needs_code"
+                android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
+                android:visibility="gone"
+                app:chipIcon="@drawable/ic_m3_code"
+                app:chipMinHeight="28dp"
+                app:ensureMinTouchTargetSize="false"
+                tools:visibility="visible" />
+        </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_remove"
+            style="@style/Widget.Material3Expressive.Button.IconButton.Standard"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/patcher_remove_patch"
+            app:icon="@drawable/ic_close"
+            app:iconTint="?attr/colorOnSurfaceVariant" />
     </LinearLayout>
-
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/btn_preview"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_alignBottom="@+id/linearLayout"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
-        android:background="?selectableItemBackground"
-        android:clickable="true"
-        android:focusable="true"
-        app:srcCompat="@drawable/ic_preview" />
-
-</RelativeLayout>
+</com.google.android.material.card.MaterialCardView>

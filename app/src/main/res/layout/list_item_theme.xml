@@ -1,40 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- One editor (syntax highlight) theme: name, live code sample, select button. -->
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/card_editor_theme"
+    style="@style/Widget.Revived.Card.Filled"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="4dp"
-    android:orientation="vertical">
+    android:layout_marginStart="@dimen/screen_margin"
+    android:layout_marginEnd="@dimen/screen_margin"
+    android:layout_marginTop="@dimen/space_2"
+    android:layout_marginBottom="@dimen/space_2"
+    app:shapeAppearance="@style/ShapeAppearance.Revived.Card.Large">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp">
+        android:orientation="vertical">
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/txt_name"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:padding="4dp"
-            android:textAppearance="@style/TextAppearance.AppCompat.Title" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="@dimen/space_5"
+            android:paddingTop="@dimen/space_3"
+            android:paddingEnd="@dimen/space_3"
+            android:paddingBottom="@dimen/space_3">
 
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btn_select"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/select" />
+            <TextView
+                android:id="@+id/txt_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textAppearance="@style/TextAppearance.Material3.TitleMedium.Emphasized"
+                android:textColor="?attr/colorOnSurface"
+                tools:text="1. Idea" />
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_select"
+                style="?attr/materialButtonTonalStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/select" />
+        </LinearLayout>
+
+        <com.riyadm.apkrepacker.ide.editor.view.CodeEditor
+            android:id="@+id/editor_view"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/theme_preview_height"
+            android:enabled="false"
+            android:typeface="monospace" />
     </LinearLayout>
-
-    <com.mrikso.apkrepacker.ide.editor.view.CodeEditor
-        android:id="@+id/editor_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:enabled="false"
-        android:typeface="monospace">
-
-    </com.mrikso.apkrepacker.ide.editor.view.CodeEditor>
-
-</LinearLayout>
+</com.google.android.material.card.MaterialCardView>

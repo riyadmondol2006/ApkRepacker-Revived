@@ -1,19 +1,19 @@
-<menu
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto" >
-    <item
-        android:id="@+id/action_sd_card"
-        android:title="@string/action_sd_card" />
-
-
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/action_sort"
         android:icon="@drawable/ic_sort"
         android:title="@string/action_sort"
-         />
+        app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_select_all"
         android:icon="@drawable/ic_select_all"
         android:title="@string/action_select_all"
-        />
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_sd_card"
+        android:icon="@drawable/ic_sd_card"
+        android:title="@string/action_sd_card"
+        app:showAsAction="never" />
 </menu>

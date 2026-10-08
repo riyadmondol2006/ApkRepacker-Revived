@@ -2,76 +2,65 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="?actionBarSize"
-    android:background="?colorPrimary"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:minHeight="72dp"
     android:orientation="horizontal"
-    android:gravity="center">
+    android:paddingStart="@dimen/space_1"
+    android:paddingEnd="@dimen/space_2">
 
-    <com.mrikso.apkrepacker.view.ElevationImageView
-        android:layout_marginBottom="4dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="4dp"
-        android:paddingLeft="2dp"
-        android:paddingRight="2dp"
+    <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/app_icon"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_gravity="center_vertical"
-        android:src="@mipmap/ic_launcher" />
+        android:layout_width="@dimen/space_10"
+        android:layout_height="@dimen/space_10"
+        android:contentDescription="@null"
+        android:scaleType="centerCrop"
+        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.Revived.E.AppIcon"
+        app:srcCompat="@mipmap/ic_launcher" />
 
     <LinearLayout
         android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:layout_weight="1.0"
-        android:gravity="center"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/space_3"
+        android:layout_marginEnd="@dimen/space_2"
+        android:layout_weight="1"
         android:orientation="vertical">
 
         <TextView
             android:id="@+id/app_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ellipsize="marquee"
-            android:padding="2dp"
-            android:singleLine="true"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="?attr/textColor" />
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textAppearance="@style/TextAppearance.Material3.TitleMedium.Emphasized"
+            android:textColor="?attr/colorOnSurface" />
 
         <TextView
             android:id="@+id/app_pkg"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="2dp"
-            android:ellipsize="marquee"
-            android:paddingStart="2dp"
-            android:paddingEnd="2dp"
-            android:singleLine="true"
-            android:textSize="12.0sp"
-            android:textColor="?attr/textColor" />
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+            android:textColor="?attr/colorOnSurfaceVariant" />
     </LinearLayout>
 
-    <androidx.appcompat.widget.AppCompatImageButton
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/patch_app"
-        android:layout_width="28dp"
-        android:layout_height="28dp"
-        android:scaleType="centerCrop"
-        android:layout_marginStart="@dimen/normal_padding"
-        android:layout_marginEnd="@dimen/checkbox_margin"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:tint="?android:textColorSecondary"
-        app:srcCompat="@drawable/ic_patch" />
+        style="@style/Widget.Material3Expressive.Button.IconButton.Tonal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/patch"
+        app:icon="@drawable/ic_patch"
+        app:iconSize="@dimen/space_6" />
 
-    <androidx.appcompat.widget.AppCompatImageButton
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/build_app"
-        android:layout_width="28dp"
-        android:layout_height="28dp"
-        android:scaleType="centerCrop"
-        android:layout_marginStart="@dimen/checkbox_margin"
-        android:layout_marginEnd="@dimen/normal_padding"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:tint="?android:textColorSecondary"
-        app:srcCompat="@drawable/ic_build" />
-
+        style="@style/Widget.Material3Expressive.Button.IconButton.Filled"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/space_1"
+        android:contentDescription="@string/m3e_build"
+        app:icon="@drawable/ic_build"
+        app:iconSize="@dimen/space_6" />
 </LinearLayout>

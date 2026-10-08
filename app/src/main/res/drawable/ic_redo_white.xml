@@ -1,9 +1,11 @@
-<!-- drawable/redo.xml -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:height="24dp"
     android:width="24dp"
-    android:viewportWidth="24"
-    android:viewportHeight="24"
-    android:tint="?colorControlNormal">
-    <path android:fillColor="#ffffff" android:pathData="M18.4,10.6C16.55,9 14.15,8 11.5,8C6.85,8 2.92,11.03 1.54,15.22L3.9,16C4.95,12.81 7.95,10.5 11.5,10.5C13.45,10.5 15.23,11.22 16.62,12.38L13,16H22V7L18.4,10.6Z" />
+    android:height="24dp"
+    android:viewportWidth="960"
+    android:viewportHeight="960"
+    android:tint="?attr/colorControlNormal"
+    android:autoMirrored="true">
+  <path
+      android:fillColor="@android:color/white"
+      android:pathData="M648,400L396,400Q333,400 286.5,440Q240,480 240,540Q240,600 286.5,640Q333,680 396,680L640,680Q657,680 668.5,691.5Q680,703 680,720Q680,737 668.5,748.5Q657,760 640,760L396,760Q299,760 229.5,697Q160,634 160,540Q160,446 229.5,383Q299,320 396,320L648,320L572,244Q561,233 561,216Q561,199 572,188Q583,177 600,177Q617,177 628,188L772,332Q778,338 780.5,345Q783,352 783,360Q783,368 780.5,375Q778,382 772,388L628,532Q617,543 600,543Q583,543 572,532Q561,521 561,504Q561,487 572,476L648,400Z"/>
 </vector>

@@ -9,8 +9,8 @@
     </notice>
 
     <notice>
-        <name>Google Material Design Icons</name>
-        <url>https://material.io/icons/</url>
+        <name>Google Material Symbols</name>
+        <url>https://fonts.google.com/icons</url>
         <copyright>Copyright (c) Google, Inc. All rights reserved.</copyright>
         <license>Apache Software License 2.0</license>
     </notice>
@@ -43,12 +43,6 @@
         <license>Apache Software License 2.0</license>
     </notice>
 
-    <notice>
-        <name>Material Dialogs</name>
-        <url>https://github.com/afollestad/material-dialogs</url>
-        <copyright>Copyright (c) 2018 Aidan Follestad. All rights reserved.</copyright>
-        <license>Apache Software License 2.0</license>
-    </notice>
 
     <notice>
         <name>Glide</name>
@@ -57,12 +51,6 @@
         <license>BSD 2-Clause License</license>
     </notice>
 
-    <notice>
-        <name>Android-SpinKit</name>
-        <url>https://github.com/ybq/Android-SpinKit</url>
-        <copyright>Copyright (c) 2016 ybq. All rights reserved.</copyright>
-        <license>MIT License</license>
-    </notice>
 
     <notice>
         <name>PhotoView</name>
@@ -106,12 +94,6 @@
         <license>MIT License</license>
     </notice>
 
-    <notice>
-        <name>FloatingActionButton</name>
-        <url>https://github.com/Clans/FloatingActionButton</url>
-        <copyright>Copyright (c) 2015 Dmytro Tarianyk</copyright>
-        <license>Apache Software License 2.0</license>
-    </notice>
 
     <notice>
         <name>smali</name>

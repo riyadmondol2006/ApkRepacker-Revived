@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="m3f_open_files">Открытые файлы</string>
+    <string name="m3f_project_files">Файлы проекта</string>
+    <string name="m3f_more_actions">Ещё</string>
+    <string name="m3f_no_open_files">Нет открытых файлов</string>
+    <string name="m3f_close_tab">Закрыть вкладку</string>
+    <string name="m3f_unsaved_changes">Есть несохранённые изменения</string>
+    <string name="m3f_prev_match">Предыдущее совпадение</string>
+    <string name="m3f_next_match">Следующее совпадение</string>
+    <string name="m3f_close_find">Закрыть поиск</string>
+    <string name="m3f_toggle_replace">Показать замену</string>
+    <string name="m3f_replace_hint">Заменить на</string>
+    <string name="m3f_find_hint">Найти в файле</string>
+    <string name="m3f_line_hint">Номер строки</string>
+    <string name="m3f_line_range">Строка от 1 до %d</string>
+    <string name="m3f_invalid_line">Введите номер строки</string>
+    <string name="m3f_goto">Перейти</string>
+    <string name="m3f_saved">Сохранено</string>
+    <string name="m3f_saved_all">Все файлы сохранены</string>
+    <string name="m3f_save_failed">Не удалось сохранить: %s</string>
+    <string name="m3f_decompiling">Декомпиляция smali в Java</string>
+    <string name="m3f_smali_only">Работает только с файлами .smali</string>
+    <string name="m3f_press_back_again">Нажмите «Назад» ещё раз, чтобы выйти</string>
+    <string name="m3f_class_package_hint">Пакет</string>
+    <string name="m3f_create">Создать</string>
+    <string name="m3f_file_name_hint">Имя файла</string>
+    <string name="m3f_folder_hint">Папка</string>
+    <string name="m3f_extension_hint">Расширение</string>
+    <string name="m3f_choose_folder">Выбрать папку</string>
+    <string name="m3f_icon_edit">Сменить иконку</string>
+    <string name="m3f_identity">Основное</string>
+    <string name="m3f_version">Версия</string>
+    <string name="m3f_compatibility">Совместимость</string>
+    <string name="m3f_install_failed">Не удалось установить</string>
+    <string name="m3f_filter_charsets">Фильтр кодировок</string>
+    <string name="m3f_encoding_language">%1$s · %2$s</string>
+    <string name="m3f_file_type_icon">Тип файла</string>
+    <string name="m3f_switch_storage">Сменить хранилище</string>
+</resources>

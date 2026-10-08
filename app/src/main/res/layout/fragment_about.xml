@@ -1,269 +1,106 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?android:windowBackground">
+    android:background="?attr/colorSurface">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:id="@+id/collapsing_toolbar"
+            style="?attr/collapsingToolbarLayoutLargeStyle"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/collapsingToolbarLayoutLargeSize"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+            app:title="@string/about_title">
+
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:layout_collapseMode="pin" />
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+    </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scroll_about"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="@dimen/normal_padding">
+            android:paddingBottom="@dimen/space_8">
 
-            <include layout="@layout/card_about_header" />
+            <include
+                android:id="@+id/about_header"
+                layout="@layout/card_about_header" />
 
-            <com.google.android.material.card.MaterialCardView style="@style/Material.CardView">
+            <include
+                android:id="@+id/about_developer"
+                layout="@layout/card_about_developer" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="@dimen/pref_row_padding_horizontal"
+                android:paddingTop="@dimen/space_2"
+                android:paddingEnd="@dimen/pref_row_padding_horizontal"
+                android:paddingBottom="@dimen/space_2"
+                android:text="@string/about_group_contact"
+                android:textAppearance="@style/TextAppearance.Revived.SectionHeader" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/text_margin"
-                        android:layout_marginTop="@dimen/text_margin"
-                        android:layout_marginBottom="@dimen/checkbox_margin"
-                        android:text="@string/about_title_more"
-                        android:textColor="?colorAccent"
-                        android:textStyle="bold" />
+            <LinearLayout
+                android:id="@+id/group_links"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
 
-                    <LinearLayout
-                        android:id="@+id/ll_card_about_2_email"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="?android:selectableItemBackground"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:orientation="horizontal">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="@dimen/pref_row_padding_horizontal"
+                android:paddingTop="@dimen/pref_group_gap"
+                android:paddingEnd="@dimen/pref_row_padding_horizontal"
+                android:paddingBottom="@dimen/space_2"
+                android:text="@string/about_group_social"
+                android:textAppearance="@style/TextAppearance.Revived.SectionHeader" />
 
-                        <androidx.appcompat.widget.AppCompatImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:layout_margin="@dimen/text_margin"
-                            app:srcCompat="@drawable/ic_email" />
+            <LinearLayout
+                android:id="@+id/group_social"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:layout_margin="@dimen/text_margin"
-                            android:text="@string/about_email"
-                            android:textStyle="italic" />
-                    </LinearLayout>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="@dimen/pref_row_padding_horizontal"
+                android:paddingTop="@dimen/pref_group_gap"
+                android:paddingEnd="@dimen/pref_row_padding_horizontal"
+                android:paddingBottom="@dimen/space_2"
+                android:text="@string/about_group_team"
+                android:textAppearance="@style/TextAppearance.Revived.SectionHeader" />
 
-                    <LinearLayout
-                        android:id="@+id/ll_card_about_2_git_hub"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="?android:selectableItemBackground"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:orientation="horizontal">
+            <LinearLayout
+                android:id="@+id/group_team"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
 
-                        <androidx.appcompat.widget.AppCompatImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:layout_margin="@dimen/text_margin"
-                            app:srcCompat="@drawable/ic_github" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:layout_margin="@dimen/text_margin"
-                            android:text="@string/about_git_hub"
-                            android:textStyle="italic" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/ll_card_about_2_website"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="?android:selectableItemBackground"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:orientation="horizontal">
-
-                        <androidx.appcompat.widget.AppCompatImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:layout_margin="@dimen/text_margin"
-                            app:srcCompat="@drawable/ic_link" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:layout_margin="@dimen/text_margin"
-                            android:text="@string/about_website"
-                            android:textStyle="italic" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/ll_card_about_2_telegram_channel"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="?android:selectableItemBackground"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:orientation="horizontal">
-
-                        <androidx.appcompat.widget.AppCompatImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:layout_margin="@dimen/text_margin"
-                            app:srcCompat="@drawable/ic_telegram" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:layout_margin="@dimen/text_margin"
-                            android:text="@string/about_telegram"
-                            android:textStyle="italic" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/ll_card_about_2_mrikso"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="?android:selectableItemBackground"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:orientation="horizontal">
-
-                        <androidx.appcompat.widget.AppCompatImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:layout_margin="@dimen/text_margin"
-                            app:srcCompat="@drawable/ic_telegram" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:layout_margin="@dimen/text_margin"
-                            android:text="@string/about_telegram_developer_mrikso"
-                            android:textStyle="italic" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/ll_card_about_2_phoenix"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="?android:selectableItemBackground"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:orientation="horizontal">
-
-                        <androidx.appcompat.widget.AppCompatImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:layout_margin="@dimen/text_margin"
-                            app:srcCompat="@drawable/ic_telegram" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:layout_margin="@dimen/text_margin"
-                            android:text="@string/about_telegram_developer_phoenix"
-                            android:textStyle="italic" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/ll_card_about_2_alex_strannik"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="?android:selectableItemBackground"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:orientation="horizontal">
-
-                        <androidx.appcompat.widget.AppCompatImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:layout_margin="@dimen/text_margin"
-                            app:srcCompat="@drawable/ic_telegram" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:layout_margin="@dimen/text_margin"
-                            android:text="@string/about_telegram_sponsor_alex_modz"
-                            android:textStyle="italic" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/ll_card_about_2_easy_apk"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="?android:selectableItemBackground"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:orientation="horizontal">
-
-                        <androidx.appcompat.widget.AppCompatImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:layout_margin="@dimen/text_margin"
-                            app:srcCompat="@drawable/ic_telegram" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:layout_margin="@dimen/text_margin"
-                            android:text="@string/about_telegram_sponsor"
-                            android:textStyle="italic" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/ll_card_about_source_licenses"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="?android:selectableItemBackground"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:orientation="horizontal">
-
-                        <androidx.appcompat.widget.AppCompatImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:layout_margin="@dimen/text_margin"
-                            app:srcCompat="@drawable/ic_copyring" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:layout_margin="@dimen/text_margin"
-                            android:text="@string/about_source_licenses"
-                            android:textStyle="italic" />
-                    </LinearLayout>
-
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
+            <LinearLayout
+                android:id="@+id/group_legal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/pref_group_gap"
+                android:orientation="vertical" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
-
-</FrameLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

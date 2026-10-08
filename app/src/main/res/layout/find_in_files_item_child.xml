@@ -1,19 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- One matching line under a file in the string search results. -->
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/Widget.Revived.E.ChildRow"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:background="?selectableItemBackground">
+    android:layout_marginStart="@dimen/space_8"
+    android:layout_marginTop="@dimen/space_half_e"
+    android:layout_marginEnd="@dimen/screen_margin"
+    android:layout_marginBottom="@dimen/space_half_e">
 
     <TextView
         android:id="@+id/match_line_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:gravity="center_vertical"
-        android:paddingStart="@dimen/checkbox_margin"
-        android:paddingEnd="@dimen/checkbox_margin"
-        android:textSize="@dimen/text_size_12"
-        tools:text="File Name"/>
-
-</RelativeLayout>
+        android:fontFamily="monospace"
+        android:paddingStart="@dimen/space_3"
+        android:paddingTop="@dimen/space_2"
+        android:paddingEnd="@dimen/space_3"
+        android:paddingBottom="@dimen/space_2"
+        android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        tools:text="&lt;string name=&quot;app_name&quot;&gt;Demo&lt;/string&gt;" />
+</com.google.android.material.card.MaterialCardView>

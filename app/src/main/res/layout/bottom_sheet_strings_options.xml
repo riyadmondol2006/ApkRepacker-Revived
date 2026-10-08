@@ -1,61 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    style="@style/Material.CardView.BottomSheet"
-    app:strokeWidth="0dp">
-
-    <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/space_4">
 
-        <View
-            android:layout_width="@dimen/checkbox_dimens"
-            android:layout_height="5dp"
-            android:layout_gravity="center"
-            android:layout_marginTop="12dp"
-            android:layout_marginBottom="4dp"
-            android:background="@drawable/bottom_sheet_dialog_indicator" />
-        <TextView
-            android:id="@+id/open_with"
-            android:drawableStart="@drawable/ic_open_with"
-            android:text="@string/action_open_with"
-            style="@style/ActionItem" />
+        <com.google.android.material.bottomsheet.BottomSheetDragHandleView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
         <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/space_6"
+            android:paddingTop="@dimen/space_2"
+            android:paddingEnd="@dimen/space_6"
+            android:paddingBottom="@dimen/space_1"
+            android:text="@string/h_section_strings"
+            android:textAppearance="@style/TextAppearance.Revived.SectionHeader" />
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/add_new_string"
-            android:drawableStart="@drawable/ic_add"
+            style="@style/Widget.Revived.SheetAction"
             android:text="@string/action_add_new_string"
-            style="@style/ActionItem" />
+            app:icon="@drawable/ic_add" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/open_with"
+            style="@style/Widget.Revived.SheetAction"
+            android:text="@string/action_open_with"
+            app:icon="@drawable/ic_open_with" />
 
         <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/space_6"
+            android:paddingTop="@dimen/space_4"
+            android:paddingEnd="@dimen/space_6"
+            android:paddingBottom="@dimen/space_1"
+            android:text="@string/h_section_language"
+            android:textAppearance="@style/TextAppearance.Revived.SectionHeader" />
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/add_new_language"
-            android:drawableStart="@drawable/ic_add"
+            style="@style/Widget.Revived.SheetAction"
             android:text="@string/action_add_new_lang"
-            style="@style/ActionItem" />
+            app:icon="@drawable/ic_add" />
 
         <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/space_6"
+            android:paddingTop="@dimen/space_4"
+            android:paddingEnd="@dimen/space_6"
+            android:paddingBottom="@dimen/space_1"
+            android:text="@string/h_section_translate"
+            android:textAppearance="@style/TextAppearance.Revived.SectionHeader" />
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/auto_translate_language"
-            android:drawableStart="@drawable/ic_translate"
+            style="@style/Widget.Revived.SheetAction"
             android:text="@string/action_auto_translate_lang"
-            style="@style/ActionItem" />
+            app:icon="@drawable/ic_translate" />
 
-        <TextView
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/auto_translate_language_with"
-            android:drawableStart="@drawable/ic_dictionary"
+            style="@style/Widget.Revived.SheetAction"
             android:text="@string/action_auto_translate_lang_dictionary"
-            style="@style/ActionItem" />
+            app:icon="@drawable/ic_dictionary" />
 
-        <TextView
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/save_as_dictionary"
-            android:drawableStart="@drawable/ic_save_white"
+            style="@style/Widget.Revived.SheetAction"
             android:text="@string/action_save_as_dictionary"
-            style="@style/ActionItem" />
-
+            app:icon="@drawable/ic_save_white" />
     </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
-</com.google.android.material.card.MaterialCardView>
+</androidx.core.widget.NestedScrollView>

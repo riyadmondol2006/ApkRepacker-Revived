@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Contextual (selection / clipboard) bar: tonal, flat top, generous bottom corners -->
+    <style name="ShapeAppearance.Revived.SelectionBar" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">0dp</item>
+        <item name="cornerSizeTopRight">0dp</item>
+        <item name="cornerSizeBottomLeft">@dimen/shape_corner_extra_large</item>
+        <item name="cornerSizeBottomRight">@dimen/shape_corner_extra_large</item>
+    </style>
+    <style name="Widget.Revived.Card.SelectionBar" parent="Widget.Material3.CardView.Filled">
+        <item name="shapeAppearance">@style/ShapeAppearance.Revived.SelectionBar</item>
+        <item name="cardBackgroundColor">?attr/colorSecondaryContainer</item>
+        <item name="cardElevation">0dp</item>
+    </style>
+
+    <!-- Breadcrumb chip: tonal, no outline -->
+    <style name="Widget.Revived.Chip.Path" parent="Widget.Material3.Chip.Assist">
+        <item name="chipStrokeWidth">0dp</item>
+        <item name="chipBackgroundColor">?attr/colorSurfaceContainerHigh</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
+        <item name="android:textAppearance">?attr/textAppearanceLabelLarge</item>
+        <item name="chipMinHeight">40dp</item>
+        <item name="ensureMinTouchTargetSize">true</item>
+    </style>
+
+    <!-- Entry of the FAB menu -->
+    <style name="Widget.Revived.FabMenuItem" parent="Widget.Material3Expressive.ExtendedFloatingActionButton.Small">
+        <item name="backgroundTint">?attr/colorSecondaryContainer</item>
+        <item name="iconTint">?attr/colorOnSecondaryContainer</item>
+        <item name="android:textColor">?attr/colorOnSecondaryContainer</item>
+    </style>
+
+    <!-- Contextual toolbar buttons -->
+    <style name="Widget.Revived.ToolbarIconButton" parent="Widget.Material3.FloatingToolbar.IconButton.Vibrant" />
+    <style name="Widget.Revived.BarIconButton" parent="Widget.Material3Expressive.Button.IconButton.Standard">
+        <item name="iconTint">?attr/colorOnSecondaryContainer</item>
+    </style>
+
+    <style name="TextAppearance.Revived.EmptyTitle" parent="TextAppearance.Material3.TitleMedium.Emphasized">
+        <item name="android:textColor">?attr/colorOnSurface</item>
+    </style>
+</resources>

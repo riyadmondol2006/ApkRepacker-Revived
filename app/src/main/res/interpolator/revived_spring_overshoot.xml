@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Spring-feeling curve for resource animations that can't use a real spring: settles with ~6% overshoot -->
+<pathInterpolator xmlns:android="http://schemas.android.com/apk/res/android"
+    android:controlX1="0.34"
+    android:controlY1="1.3"
+    android:controlX2="0.64"
+    android:controlY2="1" />

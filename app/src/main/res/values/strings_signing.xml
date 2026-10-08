@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pref_sign_v1">v1 (JAR signature)</string>
+    <string name="pref_sign_v1_summary">Needed for Android older than 7.0 (API 24). Keep it on unless the app\'s minSdk is 24 or higher.</string>
+    <string name="pref_sign_v2">v2 (APK Signature Scheme v2)</string>
+    <string name="pref_sign_v2_summary">Whole-APK signature (Android 7.0+). Required for apps targeting Android 11+: turned on automatically for them when v2 and v3 are both off.</string>
+    <string name="pref_sign_v3">v3 (APK Signature Scheme v3, key rotation)</string>
+    <string name="pref_sign_v3_summary">Adds key rotation support (Android 9+). Also satisfies the Android 11+ requirement on its own, but only installs on Android 9+ without v1/v2.</string>
+    <string name="pref_sign_v4">v4 (APK Signature Scheme v4, .idsig for incremental install)</string>
+    <string name="pref_sign_v4_summary">Writes &lt;apk&gt;.idsig next to the APK, used by \"adb install --incremental\" (Android 11+). Requires v2 or v3: v2 is turned on if both are off.</string>
+    <string name="toast_v4_signature_written">V4 signature saved as %1$s</string>
+</resources>

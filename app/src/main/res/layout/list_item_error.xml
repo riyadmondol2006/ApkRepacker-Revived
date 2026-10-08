@@ -1,26 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- One line of build error output; the preview button shows when the line points at an existing file. -->
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    style="@style/Widget.Revived.Card.Filled"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="center"
-    android:orientation="horizontal"
-    android:background="?selectableItemBackground">
+    android:layout_marginStart="@dimen/screen_margin"
+    android:layout_marginEnd="@dimen/screen_margin"
+    android:layout_marginTop="@dimen/space_1"
+    android:layout_marginBottom="@dimen/space_1"
+    app:cardBackgroundColor="?attr/colorErrorContainer"
+    app:cardElevation="0dp">
 
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/message"
-        android:layout_width="0dp"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:typeface="monospace"
-        tools:text="Error: Token not valid" />
+        android:gravity="center_vertical"
+        android:minHeight="@dimen/touch_target"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/space_4"
+        android:paddingEnd="@dimen/space_2">
 
-    <androidx.appcompat.widget.AppCompatImageButton
-        android:id="@+id/btn_preview"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_margin="@dimen/circular_progress_border"
-        android:background="?selectableItemBackground"
-        app:srcCompat="@drawable/ic_preview" />
-</LinearLayout>
+        <TextView
+            android:id="@+id/message"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="monospace"
+            android:paddingTop="@dimen/space_3"
+            android:paddingBottom="@dimen/space_3"
+            android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+            android:textColor="?attr/colorOnErrorContainer"
+            tools:text="Error: Token not valid" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_preview"
+            style="@style/Widget.Material3Expressive.Button.IconButton.Standard"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/patcher_open_file"
+            app:icon="@drawable/ic_preview"
+            app:iconTint="?attr/colorOnErrorContainer" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

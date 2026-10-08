@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="log_sheet_title">Журнал сборки</string>
+    <string name="log_empty">Журнал пуст.</string>
+    <string name="patcher_no_patches">Патчи ещё не добавлены</string>
+    <string name="patcher_no_patches_hint">Добавьте один или несколько патчей .zip и примените их к открытому проекту.</string>
+    <string name="patcher_log_title">Журнал</string>
+    <string name="patcher_rules_progress">Правила</string>
+    <string name="patcher_patches_progress">Патчи</string>
+    <string name="patcher_remove_patch">Убрать патч</string>
+    <string name="patcher_open_file">Открыть файл</string>
+    <string name="notification_action_open">Открыть</string>
+</resources>

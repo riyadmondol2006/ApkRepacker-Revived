@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Bottom sheet window exit: slides down, 200ms. -->
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shareInterpolator="false">
+    <translate
+        android:duration="200"
+        android:fromYDelta="0"
+        android:toYDelta="100%"
+        android:interpolator="@interpolator/revived_emphasized_accelerate" />
+    <alpha
+        android:duration="200"
+        android:startOffset="50"
+        android:fromAlpha="1"
+        android:toAlpha="0"
+        android:interpolator="@interpolator/revived_emphasized_accelerate" />
+</set>

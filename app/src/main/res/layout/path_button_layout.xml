@@ -1,17 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.appcompat.widget.AppCompatTextView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/textView"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="?selectableItemBackground"
-    android:drawablePadding="8dp"
-    android:drawableEnd="@drawable/ic_arrow_right"
     android:gravity="center_vertical"
-    android:paddingStart="@dimen/checkbox_margin"
-    android:paddingEnd="@dimen/checkbox_margin"
-    android:textAppearance="@style/TextAppearance.Design.Tab"
-    tools:text="Path">
+    android:orientation="horizontal">
 
-</androidx.appcompat.widget.AppCompatTextView>
+    <com.google.android.material.chip.Chip
+        android:id="@+id/path_chip"
+        style="@style/Widget.Revived.Chip.Path"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="Path" />
+
+    <ImageView
+        android:id="@+id/path_separator"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_arrow_right"
+        app:tint="?attr/colorOnSurfaceVariant"
+ />
+
+</LinearLayout>

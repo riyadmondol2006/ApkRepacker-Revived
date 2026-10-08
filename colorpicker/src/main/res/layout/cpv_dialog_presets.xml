@@ -1,96 +1,73 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:orientation="vertical">
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="215dp"
-        android:overScrollMode="never"
-        android:scrollbars="none"
-        android:requiresFadingEdge="vertical"
-        android:fadingEdge="vertical"
-        android:fadingEdgeLength="20dp">
-
-        <com.jaredrummler.android.colorpicker.NestedGridView
-            android:id="@+id/gridView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:cacheColorHint="@android:color/transparent"
-            android:clickable="false"
-            android:columnWidth="@dimen/cpv_column_width"
-            android:horizontalSpacing="0dp"
-            android:listSelector="@android:color/transparent"
-            android:numColumns="auto_fit"
-            android:stretchMode="spacingWidthUniform"
-            android:verticalSpacing="8dp" />
-    </ScrollView>
-
-    <View
-        android:id="@+id/shades_divider"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginBottom="12dp"
-        android:layout_marginTop="12dp"
-        android:background="?android:attr/dividerVertical" />
-
-    <HorizontalScrollView
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/cpv_grid"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:overScrollMode="never"
-        android:requiresFadingEdge="horizontal"
-        android:fadingEdge="horizontal"
-        android:fadingEdgeLength="20dp"
-        android:scrollbars="none">
+        android:nestedScrollingEnabled="false"
+        android:overScrollMode="never" />
+
+    <TextView
+        android:id="@+id/cpv_shades_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/cpv_section_gap"
+        android:layout_marginBottom="8dp"
+        android:text="@string/cpv_shades"
+        android:textAppearance="?attr/textAppearanceLabelLarge"
+        android:textColor="?attr/colorOnSurfaceVariant" />
+
+    <LinearLayout
+        android:id="@+id/cpv_shades"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/cpv_shade_height"
+        android:orientation="horizontal" />
+
+    <LinearLayout
+        android:id="@+id/cpv_transparency_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/cpv_section_gap"
+        android:orientation="vertical">
 
         <LinearLayout
-            android:id="@+id/shades_layout"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="0dp"
-            android:layout_marginRight="0dp"
             android:orientation="horizontal">
 
-            <!-- views added dynamically -->
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/cpv_transparency"
+                android:textAppearance="?attr/textAppearanceLabelLarge"
+                android:textColor="?attr/colorOnSurfaceVariant" />
+
+            <TextView
+                android:id="@+id/cpv_transparency_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceLabelLarge"
+                android:textColor="?attr/colorOnSurface"
+                tools:text="100%" />
 
         </LinearLayout>
 
-    </HorizontalScrollView>
-
-    <TextView
-        android:id="@+id/transparency_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="12dp"
-        android:text="@string/cpv_transparency" />
-
-    <LinearLayout
-        android:id="@+id/transparency_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:weightSum="100">
-
-        <SeekBar
-            android:id="@+id/transparency_seekbar"
-            android:layout_width="0dp"
+        <com.google.android.material.slider.Slider
+            android:id="@+id/cpv_transparency_slider"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginRight="4dp"
-            android:layout_weight="85" />
-
-        <TextView
-            android:id="@+id/transparency_text"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_weight="15"
-            android:textStyle="bold"
-            android:typeface="monospace"
-            tools:text="100%" />
+            android:contentDescription="@string/cpv_transparency"
+            android:valueFrom="0"
+            android:stepSize="1"
+            android:valueTo="255"
+            app:labelBehavior="gone" />
 
     </LinearLayout>
 

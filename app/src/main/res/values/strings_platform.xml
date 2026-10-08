@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strings for runtime permissions and other platform (target SDK) behavior. -->
+<resources>
+    <string name="storage_access_title">Allow access to all files</string>
+    <string name="storage_access_message">Apk Repacker Revived has a file manager for your shared storage: it opens APKs from any folder, copies and edits files, and saves built APKs. Android only allows this with the \"All files access\" permission.\n\nOn the next screen, turn on \"Allow access to manage all files\" for this app, then come back.\n\nWithout it, your projects keep working, but the file manager and file pickers can\'t browse shared storage.</string>
+    <string name="storage_access_denied_settings">Storage permission is turned off for this app. You can turn it on in the app settings.</string>
+    <string name="storage_access_denied_hint">Without storage access the file manager can\'t browse shared storage. Your projects still work.</string>
+    <string name="storage_access_grant">Grant access</string>
+    <string name="storage_access_open_settings">Open settings</string>
+    <string name="storage_access_not_now">Not now</string>
+    <string name="storage_access_settings_unavailable">Could not open the permission settings. Please allow \"All files access\" for this app in system settings.</string>
+
+    <string name="install_unknown_sources_title">Allow installing apps</string>
+    <string name="install_unknown_sources_message">To install the APK, allow Apk Repacker Revived to install unknown apps on the next screen, then come back and tap Install again.</string>
+
+    <string name="notification_channel_build">Build Apk</string>
+    <string name="notification_channel_patch">Patch</string>
+    <string name="notification_channel_done">Completed tasks</string>
+    <string name="notification_build_done_title">Build finished</string>
+    <string name="notification_build_failed_title">Build failed</string>
+    <string name="notification_build_timeout">The build was stopped because Android limits how long it can run in the background.</string>
+    <string name="build_service_start_failed">Could not start the build while the app is in the background. Open the app and try again.</string>
+    <string name="notification_copying">Copying files…</string>
+
+    <!-- Decompile in the background -->
+    <string name="notification_channel_decompile">Decompile</string>
+    <string name="decompile_notification_title">Decompiling</string>
+    <string name="decompile_notification_starting">Starting…</string>
+    <string name="decompile_notification_running">Decompiling %1$s…</string>
+    <string name="decompile_notification_done">%1$s was decompiled.</string>
+    <string name="decompile_notification_failed">Decompiling %1$s failed.</string>
+    <string name="decompile_done_title">Decompile finished</string>
+    <string name="decompile_failed_title">Decompile failed</string>
+</resources>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Owner C: settings, about, theme picker, key dialogs. -->
+<resources>
+    <dimen name="pref_row_min_height">64dp</dimen>
+    <dimen name="pref_row_gap">2dp</dimen>
+    <dimen name="pref_row_padding_horizontal">20dp</dimen>
+    <dimen name="pref_row_padding_vertical">14dp</dimen>
+    <dimen name="pref_group_gap">24dp</dimen>
+    <dimen name="about_icon_size">96dp</dimen>
+    <dimen name="about_row_icon_container">40dp</dimen>
+    <dimen name="theme_preview_height">148dp</dimen>
+    <dimen name="theme_preview_badge">28dp</dimen>
+    <dimen name="theme_card_stroke">1dp</dimen>
+    <dimen name="theme_card_stroke_selected">3dp</dimen>
+</resources>

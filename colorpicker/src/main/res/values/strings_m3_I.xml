@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="cpv_hex">Hex</string>
+  <string name="cpv_hue">Hue</string>
+  <string name="cpv_saturation">Saturation</string>
+  <string name="cpv_brightness">Brightness</string>
+  <string name="cpv_opacity">Opacity</string>
+  <string name="cpv_old_color">Current colour</string>
+  <string name="cpv_new_color">New colour</string>
+  <string name="cpv_shades">Tonal shades</string>
+</resources>

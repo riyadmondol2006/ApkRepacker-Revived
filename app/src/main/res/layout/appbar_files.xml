@@ -1,69 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- My Files: Large collapsing app bar; the breadcrumb stays pinned beneath it. -->
+<com.google.android.material.appbar.AppBarLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/action_bar_panel"
-    style="?attr/actionBarStyle"
+    android:id="@+id/files_app_bar"
     android:layout_width="match_parent"
-    android:layout_height="?actionBarSize"
-    android:background="?colorPrimary"
-    android:orientation="horizontal">
+    android:layout_height="wrap_content"
+    app:liftOnScroll="true"
+    app:liftOnScrollTargetViewId="@id/file_list">
 
-    <LinearLayout
-        android:id="@+id/ab_title_container"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:layout_weight="1.0"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:layout_marginStart="24dp">
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/ab_title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:singleLine="true"
-            android:padding="2dp"
-            android:text="@string/title_my_files"
-            android:textSize="18sp"
-            android:textColor="?attr/textColor"
-            android:textStyle="bold" />
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/ab_subtitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="2dp"
-            android:ellipsize="marquee"
-            android:paddingStart="2dp"
-            android:paddingEnd="2dp"
-            android:singleLine="true"
-            android:textSize="12.0sp" />
-    </LinearLayout>
-
-    <!--<EditText
-        android:id="@+id/search_view"
+    <com.google.android.material.appbar.CollapsingToolbarLayout
+        android:id="@+id/files_collapsing"
+        style="@style/Widget.Material3Expressive.CollapsingToolbar.Large"
         android:layout_width="match_parent"
-        android:layout_height="?actionBarSize"
-        android:nextFocusLeft="@+id/ab_icon"
-        android:nextFocusRight="@+id/action_overflow"
-        android:nextFocusDown="@+id/breadcrumb" />-->
-    <androidx.appcompat.widget.AppCompatImageButton
-        android:id="@+id/action_search"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:tint="?android:textColorSecondary"
-        style="@style/ActionItem"
-        app:srcCompat="@drawable/ic_search_dark" />
-    <androidx.appcompat.widget.AppCompatImageButton
-        android:id="@+id/action_overflow_toolbar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:tint="?android:textColorSecondary"
-        style="@style/ActionItem"
-        app:srcCompat="@drawable/ic_more" />
-</LinearLayout>
+        android:layout_height="@dimen/files_large_app_bar_height"
+        app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+        app:title="@string/title_my_files"
+        app:titleCollapseMode="scale">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/files_toolbar"
+            style="@style/Widget.Material3Expressive.Toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:layout_collapseMode="pin"
+            app:menu="@menu/filemanager_menu" />
+    </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+    <include
+        android:id="@+id/path_bar"
+        layout="@layout/layout_files_path_bar" />
+
+</com.google.android.material.appbar.AppBarLayout>

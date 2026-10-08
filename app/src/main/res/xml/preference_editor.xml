@@ -7,41 +7,41 @@
             android:summary="@string/default_value"
             android:title="@string/font_size" />
 
-        <SwitchPreference
+        <SwitchPreferenceCompat
             android:key="@string/pref_touch_to_adjust_text_size"
             android:summary="@string/touch_to_adjust_text_size_summary"
             android:title="@string/touch_to_adjust_text_size_title" />
 
-        <SwitchPreference
+        <SwitchPreferenceCompat
             android:defaultValue="false"
             android:key="@string/pref_word_wrap"
             android:title="@string/word_wrap_in_editor_title" />
         <!--            android:summary="@string/word_wrap_in_editor_summary"-->
 
-        <SwitchPreference
+        <SwitchPreferenceCompat
             android:key="@string/pref_show_linenumber"
             android:title="@string/show_linenumber" />
 
-        <SwitchPreference
+        <SwitchPreferenceCompat
             android:key="@string/pref_show_whitespace"
             android:title="@string/show_whitespace" />
 
-<!--        <SwitchPreference
+<!--        <SwitchPreferenceCompat
             android:defaultValue="true"
             android:key="@string/pref_auto_complete"
             android:summary="@string/auto_complete_summary"
             android:title="@string/auto_complete_title" />-->
 
-        <SwitchPreference
+        <SwitchPreferenceCompat
             android:key="@string/pref_auto_indent"
             android:title="@string/auto_indent" />
 
-<!--        <SwitchPreference
+<!--        <SwitchPreferenceCompat
             android:key="@string/pref_auto_pair"
             android:summary="@string/pref_desc_auto_pair"
             android:title="@string/auto_pair" />-->
 
-        <SwitchPreference
+        <SwitchPreferenceCompat
             android:key="@string/pref_insert_space_for_tab"
             android:title="@string/insert_space_for_tab" />
 
@@ -53,7 +53,7 @@
             android:summary="4"
             android:title="@string/tab_size" />
 
-        <SwitchPreference
+        <SwitchPreferenceCompat
             android:key="@string/pref_auto_capitalize"
             android:summary="@string/auto_capitalize_summary"
             android:title="@string/auto_capitalize_title" />
@@ -65,7 +65,7 @@
             android:scrollbars="vertical"
             android:title="@string/custom_symbol_list" />
 
-<!--        <SwitchPreference
+<!--        <SwitchPreferenceCompat
             android:defaultValue="true"
             android:key="@string/pref_volume_move"
             android:summary="@string/volume_move_summary"
@@ -76,12 +76,12 @@
     <PreferenceCategory
         android:title="@string/highlight_and_theme">
 
-        <SwitchPreference
+        <SwitchPreferenceCompat
             android:checked="false"
             android:key="@string/pref_key_fullscreen"
             android:title="@string/fullscreen_mode" />
 
-        <SwitchPreference
+        <SwitchPreferenceCompat
             android:checked="false"
             android:key="pref_enable_highlight"
             android:title="@string/enable_highlight" />
@@ -98,12 +98,12 @@
     <PreferenceCategory
         android:title="@string/other">
 
-        <SwitchPreference
+        <SwitchPreferenceCompat
             android:defaultValue="true"
             android:key="@string/pref_auto_save"
             android:title="@string/auto_save" />
 
-        <SwitchPreference
+        <SwitchPreferenceCompat
             android:key="@string/pref_remember_last_opened_files"
             android:summary="@string/remember_last_opened_files_summary"
             android:title="@string/remember_last_opened_files" />
@@ -114,11 +114,11 @@
             android:key="@string/pref_screen_orientation"
             android:title="@string/screen_orientation" />
 
-        <SwitchPreference
+        <SwitchPreferenceCompat
             android:key="@string/pref_keep_screen_on"
             android:title="@string/keep_screen_on" />
 
-        <SwitchPreference
+        <SwitchPreferenceCompat
             android:key="@string/pref_confirm_exit"
             android:title="@string/confirm_exit" />
 

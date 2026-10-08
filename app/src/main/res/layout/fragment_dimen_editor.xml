@@ -1,87 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="?attr/colorSurface"
     tools:context=".fragment.DimensEditorFragment">
 
-    <LinearLayout
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/search_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:background="?colorPrimary"
-        android:clickable="true"
-        android:focusable="true">
+        android:layout_height="wrap_content"
+        app:liftOnScroll="true">
 
-        <LinearLayout
-            android:id="@+id/search_container"
+        <com.google.android.material.search.SearchBar
+            android:id="@+id/search_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:stateListAnimator="@animator/appbar_elevation"
-            android:paddingBottom="@dimen/checkbox_margin">
+            android:layout_marginStart="@dimen/screen_margin"
+            android:layout_marginTop="@dimen/space_2"
+            android:layout_marginEnd="@dimen/screen_margin"
+            android:layout_marginBottom="@dimen/space_2"
+            android:hint="@string/h_search_dimens"
+            app:layout_scrollFlags="scroll|enterAlways|snap" />
+    </com.google.android.material.appbar.AppBarLayout>
 
-            <com.google.android.material.card.MaterialCardView style="@style/Material.CardView">
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/dimens"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingTop="@dimen/space_2"
+        android:paddingBottom="@dimen/fab_clearance"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        tools:listitem="@layout/item_dimens" />
 
-                <LinearLayout
-                    android:layout_margin="8.0dip"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="horizontal">
+    <com.google.android.material.loadingindicator.LoadingIndicator
+        android:id="@+id/loading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone" />
 
-                    <androidx.appcompat.widget.AppCompatImageView
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginStart="4dp"
-                        android:padding="6dp"
-                        android:tint="?android:textColorSecondary"
-                        app:srcCompat="@drawable/ic_search" />
+    <TextView
+        android:id="@+id/empty_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:padding="@dimen/space_6"
+        android:text="@string/h_empty_dimens"
+        android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        android:visibility="gone" />
 
-                    <androidx.appcompat.widget.AppCompatEditText
-                        android:id="@+id/dimens_search"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_marginStart="4dp"
-                        android:layout_weight="1"
-                        android:background="@android:color/transparent"
-                        android:ems="10"
-                        android:hint="@string/search_request"
-                        android:inputType="text"
-                        android:padding="4dp"
-                        android:singleLine="true"
-                        android:textColorHint="?android:textColorSecondary"
-                        android:textSize="16sp" />
-
-                    <androidx.appcompat.widget.AppCompatImageButton
-                        android:id="@+id/button_clear"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:layout_gravity="center_vertical"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:tint="?android:textColorSecondary"
-                        app:srcCompat="@drawable/ic_clear" />
-
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-        </LinearLayout>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/dimens"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:listitem="@layout/item_dimens"/>
-    </LinearLayout>
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/fab_go_editor"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="end|bottom|center"
-        android:layout_margin="16.0dip"
-        app:backgroundTint="?colorAccent"
-        app:tint="@color/white"
-        android:src="@drawable/ic_rename" />
-</FrameLayout>
+        android:layout_gravity="bottom|end"
+        android:layout_margin="@dimen/screen_margin"
+        android:text="@string/action_open_in_editor"
+        app:icon="@drawable/ic_rename" />
+
+    <com.google.android.material.search.SearchView
+        android:id="@+id/search_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:hint="@string/h_search_dimens"
+        app:layout_anchor="@id/search_bar">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/search_results"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingTop="@dimen/space_2"
+            android:paddingBottom="@dimen/space_6"
+            tools:listitem="@layout/item_dimens" />
+    </com.google.android.material.search.SearchView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

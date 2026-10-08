@@ -1,5 +1,0 @@
-<manifest xmlns:tools="http://schemas.android.com/tools">
-
-  <uses-sdk tools:overrideLibrary="me.zhanghai.android.materialprogressbar" />
-  <application />
-</manifest>

@@ -1,52 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    style="@style/Material.CardView.BottomSheet"
-    app:strokeWidth="0dp">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/space_4">
+
+    <com.google.android.material.bottomsheet.BottomSheetDragHandleView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/sheet_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ellipsize="middle"
+        android:maxLines="1"
+        android:paddingStart="@dimen/space_6"
+        android:paddingEnd="@dimen/space_6"
+        android:paddingBottom="@dimen/space_2"
+        android:textAppearance="@style/TextAppearance.Material3.TitleLarge.Emphasized"
+        android:textColor="?attr/colorOnSurface" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingStart="@dimen/space_2"
+        android:paddingEnd="@dimen/space_2">
 
-        <View
-            android:layout_width="@dimen/checkbox_dimens"
-            android:layout_height="5dp"
-            android:layout_gravity="center"
-            android:layout_marginTop="12dp"
-            android:layout_marginBottom="4dp"
-            android:background="@drawable/bottom_sheet_dialog_indicator" />
-
-        <TextView
-            android:id="@+id/open_with"
-            android:drawableStart="@drawable/ic_open_with"
-            android:text="@string/action_open_with"
-            style="@style/ActionItem" />
-
-        <TextView
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/open_in_editor"
-            android:drawableStart="@drawable/ic_rename"
+            style="@style/Widget.Revived.SheetAction"
             android:text="@string/action_open_in_editor"
-            style="@style/ActionItem" />
+            app:icon="@drawable/ic_rename" />
 
-        <TextView
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/open_with"
+            style="@style/Widget.Revived.SheetAction"
+            android:text="@string/action_open_with"
+            app:icon="@drawable/ic_open_with" />
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/action_copy_path"
-            android:drawableStart="@drawable/ic_copy"
+            style="@style/Widget.Revived.SheetAction"
             android:text="@string/action_copy_path"
-            style="@style/ActionItem"/>
-
-        <!--<TextView
-            android:id="@+id/add_new_folder"
-            android:drawableStart="@drawable/ic_create_new_folder_dark"
-            android:text="@string/action_create_new_folder"
-            style="@style/ActionItem" />
-
-        <TextView
-            android:id="@+id/delete_file"
-            android:drawableStart="@drawable/ic_delete"
-            android:text="@string/action_delete"
-            style="@style/ActionItem" />-->
+            app:icon="@drawable/ic_copy" />
 
     </LinearLayout>
-</com.google.android.material.card.MaterialCardView>
+</LinearLayout>

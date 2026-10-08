@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="ShapeAppearanceOverlay.Revived.B.Circle" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
+
+    <!-- Tonal action in the project action group: icon over label so three fit in a phone-wide card -->
+    <style name="Widget.Revived.B.ProjectAction" parent="Widget.Material3Expressive.Button.TonalButton">
+        <item name="iconGravity">textTop</item>
+        <item name="iconPadding">@dimen/space_1</item>
+        <item name="android:paddingStart">@dimen/space_2</item>
+        <item name="android:paddingEnd">@dimen/space_2</item>
+        <item name="android:paddingTop">@dimen/space_3</item>
+        <item name="android:paddingBottom">@dimen/space_3</item>
+        <item name="android:minWidth">0dp</item>
+    </style>
+    <style name="Widget.Revived.B.ProjectAction.Primary">
+        <item name="backgroundTint">?attr/colorPrimary</item>
+        <item name="android:textColor">?attr/colorOnPrimary</item>
+        <item name="iconTint">?attr/colorOnPrimary</item>
+    </style>
+    <style name="Widget.Revived.B.ProjectAction.Destructive">
+        <item name="backgroundTint">?attr/colorErrorContainer</item>
+        <item name="android:textColor">?attr/colorOnErrorContainer</item>
+        <item name="iconTint">?attr/colorOnErrorContainer</item>
+    </style>
+
+    <style name="Widget.Revived.B.TonalDestructive" parent="Widget.Material3Expressive.Button.TonalButton">
+        <item name="backgroundTint">?attr/colorErrorContainer</item>
+        <item name="android:textColor">?attr/colorOnErrorContainer</item>
+        <item name="iconTint">?attr/colorOnErrorContainer</item>
+    </style>
+
+    <style name="Widget.Revived.B.SheetAction.Destructive" parent="Widget.Revived.SheetAction">
+        <item name="android:textColor">?attr/colorError</item>
+        <item name="iconTint">?attr/colorError</item>
+    </style>
+</resources>

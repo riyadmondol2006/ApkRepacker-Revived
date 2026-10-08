@@ -4,39 +4,46 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- This layout also clips the toolbar in order to avoid overlap with status bar. -->
-    <com.mrikso.apkrepacker.ui.imageviewer.FixIllegalArgumentExceptionViewPager
+    <!-- Pages are transparent, so this background (checkerboard / flat color) is what shows behind images. -->
+    <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/view_pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/alpha" />
 
-<!--    <FrameLayout
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:backgroundTint="?colorPrimary"
-        android:fitsSystemWindows="true">
+        android:layout_height="wrap_content">
 
-        <androidx.appcompat.widget.Toolbar
+        <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?actionBarSize"
-            android:backgroundTint="?colorPrimary"
-            app:navigationIcon="@drawable/ic_back"
-            app:popupTheme="?actionBarPopupTheme" />
-    </FrameLayout>-->
+            android:layout_height="?attr/actionBarSize"
+            app:navigationContentDescription="@string/viewer_back"
+            app:navigationIcon="@drawable/ic_back">
 
-    <include layout="@layout/appbar" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_switch_background"
+                style="@style/Widget.Material3Expressive.Button.IconButton.Tonal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end|center_vertical"
+                android:layout_marginEnd="@dimen/space_2"
+                android:contentDescription="@string/viewer_switch_background"
+                app:icon="@drawable/ic_heme_light_dark" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        </com.google.android.material.appbar.MaterialToolbar>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/fab_go_editor"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="end|bottom|center"
-        android:layout_margin="16.0dip"
-        app:backgroundTint="?colorAccent"
-        app:tint="@color/white"
-        android:fitsSystemWindows="true"
-        android:src="@drawable/ic_rename" />
+        android:layout_gravity="end|bottom"
+        android:layout_margin="@dimen/screen_margin"
+        android:text="@string/action_open_in_editor"
+        android:visibility="gone"
+        app:icon="@drawable/ic_rename" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

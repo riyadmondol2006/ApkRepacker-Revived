@@ -1,73 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    style="@style/Material.CardView">
+    android:id="@+id/app_card"
+    style="@style/Widget.Revived.Card.Filled"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="@dimen/screen_margin"
+    android:layout_marginEnd="@dimen/screen_margin"
+    android:layout_marginTop="@dimen/b_group_gap"
+    android:layout_marginBottom="@dimen/b_group_gap"
+    android:clickable="true"
+    android:focusable="true">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal">
+        android:minHeight="@dimen/list_item_min_height"
+        android:paddingStart="@dimen/space_4"
+        android:paddingEnd="@dimen/space_4"
+        android:paddingTop="@dimen/space_3"
+        android:paddingBottom="@dimen/space_3">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/tv_app_icon"
+            android:layout_width="@dimen/b_icon_size"
+            android:layout_height="@dimen/b_icon_size"
+            android:importantForAccessibility="no"
+            android:scaleType="centerInside"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.Revived.B.Circle"
+            tools:src="@mipmap/ic_launcher" />
 
         <LinearLayout
-            android:id="@+id/icon_layout"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            android:padding="@dimen/checkbox_margin"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
-            <com.mrikso.apkrepacker.view.ElevationImageView
-                android:id="@+id/tv_app_icon"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:scaleType="fitCenter"
-                android:src="@mipmap/ic_launcher" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
+            android:id="@+id/title_row"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginEnd="@dimen/checkbox_margin"
-            android:orientation="vertical">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <TextView
-                    android:id="@+id/tv_app_name"
-                    android:layout_width="0dip"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="@dimen/checkbox_margin"
-                    android:layout_weight="1"
-                    android:singleLine="false"
-                    android:ellipsize="marquee"
-                    android:textColor="?attr/textColor_1"
-                    android:textStyle="bold"
-                    android:textSize="@dimen/text_size"
-                    tools:text="@string/app_name" />
-
-                <TextView
-                    android:id="@+id/tv_app_version"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="marquee"
-                    android:gravity="end"
-                    android:marqueeRepeatLimit="marquee_forever"
-                    android:maxWidth="150dp"
-                    android:singleLine="true"
-                    tools:text="1.0" />
-
-            </LinearLayout>
+            android:layout_marginStart="@dimen/space_4"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toTopOf="@id/tv_app_package"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/tv_app_icon"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="packed">
 
             <TextView
-                android:id="@+id/tv_app_package"
+                android:id="@+id/tv_app_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textAppearance="@style/TextAppearance.Material3.TitleMedium.Emphasized"
+                android:textColor="?attr/colorOnSurface"
+                tools:text="@string/app_name" />
+
+            <!-- Shown for apps installed as split APKs (a base APK plus config splits). -->
+            <TextView
+                android:id="@+id/tv_split_badge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                tools:text="com.mrikso.apkrepacker" />
-
+                android:layout_marginStart="@dimen/space_2"
+                android:background="@drawable/bg_badge_split"
+                android:paddingStart="@dimen/space_2"
+                android:paddingEnd="@dimen/space_2"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp"
+                android:text="@string/apps_badge_split"
+                android:textAppearance="@style/TextAppearance.Material3.LabelSmall.Emphasized"
+                android:textColor="?attr/colorOnTertiaryContainer"
+                android:visibility="gone"
+                tools:visibility="visible" />
         </LinearLayout>
-    </LinearLayout>
+
+        <TextView
+            android:id="@+id/tv_app_package"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            app:layout_constraintBottom_toTopOf="@id/tv_app_version"
+            app:layout_constraintEnd_toEndOf="@id/title_row"
+            app:layout_constraintStart_toStartOf="@id/title_row"
+            app:layout_constraintTop_toBottomOf="@id/title_row"
+            tools:text="com.riyadm.apkrepacker" />
+
+        <TextView
+            android:id="@+id/tv_app_version"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
+            android:textColor="?attr/colorPrimary"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/title_row"
+            app:layout_constraintStart_toStartOf="@id/title_row"
+            app:layout_constraintTop_toBottomOf="@id/tv_app_package"
+            tools:text="1.0 (10)" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

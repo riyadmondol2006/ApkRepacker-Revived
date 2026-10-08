@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One decompile log line ("I: ...", "W: ...", "E: ..."), colored by level from code. -->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/apktool_log_line"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="@dimen/space_1"
+    android:paddingBottom="@dimen/space_1"
+    android:textAppearance="@style/TextAppearance.Revived.Log"
+    android:textIsSelectable="false" />

@@ -1,41 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/string_card"
+    style="@style/Widget.Revived.Card.ListItem"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minHeight="44dp"
-    android:clickable="true"
-    android:focusable="true"
-    android:foreground="?attr/selectableItemBackground">
+    android:layout_marginStart="@dimen/screen_margin"
+    android:layout_marginTop="@dimen/space_1"
+    android:layout_marginEnd="@dimen/screen_margin"
+    android:layout_marginBottom="@dimen/space_1">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal"
-        android:minHeight="44dp"
-        tools:ignore="UselessParent">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/space_4">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/string_key"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="middle"
+                android:singleLine="true"
+                android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
+                android:textColor="?attr/colorPrimary"
+                tools:text="status_bar_notification_info_overflow" />
+
+            <ImageView
+                android:id="@+id/string_status"
+                android:layout_width="@dimen/space_5"
+                android:layout_height="@dimen/space_5"
+                android:layout_marginStart="@dimen/space_2"
+                android:contentDescription="@string/h_translated_marker"
+                android:src="@drawable/ic_check"
+                android:visibility="gone"
+                app:tint="?attr/colorTertiary"
+                tools:visibility="visible" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/string_name"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center_vertical"
-            android:padding="@dimen/checkbox_margin"
-            android:textSize="@dimen/text_size_14"
-            tools:text="@string/app_name" />
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_1"
+            android:ellipsize="end"
+            android:maxLines="4"
+            android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            tools:text="999+" />
 
-        <TextView
-            android:id="@+id/string_value"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center_vertical"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/string_value_layout"
+            style="@style/Widget.Revived.TextInput.Dense"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_3"
+            android:hint="@string/text_after_translation">
 
-            android:maxLines="6"
-            android:padding="@dimen/checkbox_margin"
-            android:textSize="@dimen/text_size_14"
-            tools:text="@string/app_name" />
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/string_value"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textMultiLine"
+                android:maxLines="6"
+                tools:text="999+" />
+        </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>
-</FrameLayout>
+</com.google.android.material.card.MaterialCardView>

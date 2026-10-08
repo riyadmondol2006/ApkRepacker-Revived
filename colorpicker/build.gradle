@@ -1,25 +1,32 @@
-apply plugin: 'com.android.library'
+plugins {
+    alias(libs.plugins.android.library)
+}
 
 android {
-    compileSdk 34
-    buildToolsVersion rootProject.ext.buildToolsVersion
+    namespace = 'com.jaredrummler.android.colorpicker'
+    compileSdk = rootProject.ext.compileSdkVersion
+    resourcePrefix = "cpv_"
 
-  resourcePrefix "cpv_"
-  defaultConfig {
-    minSdkVersion 21
-    targetSdkVersion 29
-  }
-  lintOptions {
-    abortOnError false
-  }
-    namespace 'com.jaredrummler.android.colorpicker'
+    defaultConfig {
+        minSdk = rootProject.ext.minSdkVersion
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+    lint {
+        abortOnError = false
+    }
 }
 
 dependencies {
-    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation libs.androidx.appcompat
+    implementation libs.androidx.core.ktx
+    implementation libs.androidx.recyclerview
+    implementation libs.androidx.dynamicanimation
+    implementation libs.google.material
 
-  // tests
-  testImplementation 'junit:junit:4.13'
-  androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-  androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    // tests
+    testImplementation libs.junit
+    androidTestImplementation libs.bundles.android.test
 }

@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Owner C: settings / preferences, about, theme picker, key dialogs. -->
+<resources>
+    <!-- Preference screens as grouped, rounded sections (M3 Expressive "segmented list").
+         Point the app theme's preferenceTheme at this style; the preference fragments also apply it
+         themselves through ThemeOverlay.Revived.Preferences, so settings look right either way. -->
+    <style name="PreferenceThemeOverlay.Revived" parent="PreferenceThemeOverlay">
+        <item name="preferenceCategoryStyle">@style/Preference.Category.Revived</item>
+        <item name="preferenceStyle">@style/Preference.Revived</item>
+        <item name="preferenceScreenStyle">@style/Preference.Revived</item>
+        <item name="dialogPreferenceStyle">@style/Preference.DialogPreference.Revived</item>
+        <item name="editTextPreferenceStyle">@style/Preference.DialogPreference.EditTextPreference.Revived</item>
+        <item name="dropdownPreferenceStyle">@style/Preference.DropDown.Revived</item>
+        <item name="switchPreferenceCompatStyle">@style/Preference.SwitchPreferenceCompat.Revived</item>
+        <item name="switchPreferenceStyle">@style/Preference.SwitchPreference.Revived</item>
+        <item name="checkBoxPreferenceStyle">@style/Preference.CheckBoxPreference.Revived</item>
+        <item name="preferenceFragmentCompatStyle">@style/PreferenceFragment.Revived</item>
+        <item name="preferenceCategoryTitleTextAppearance">@style/TextAppearance.Revived.SectionHeader</item>
+        <item name="preferenceCategoryTitleTextColor">?attr/colorPrimary</item>
+    </style>
+
+    <!-- Applied on top of the activity theme by the preference fragments (see RevivedPreferenceFragment). -->
+    <style name="ThemeOverlay.Revived.Preferences" parent="">
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay.Revived</item>
+    </style>
+
+    <style name="Preference.Revived" parent="Preference.Material">
+        <item name="android:layout">@layout/preference_m3</item>
+        <item name="allowDividerAbove">false</item>
+        <item name="allowDividerBelow">false</item>
+        <item name="singleLineTitle">false</item>
+        <item name="iconSpaceReserved">false</item>
+    </style>
+
+    <style name="Preference.Category.Revived" parent="Preference.Category.Material">
+        <item name="android:layout">@layout/preference_m3_category</item>
+        <item name="allowDividerAbove">false</item>
+        <item name="allowDividerBelow">false</item>
+        <item name="iconSpaceReserved">false</item>
+    </style>
+
+    <style name="Preference.DialogPreference.Revived" parent="Preference.DialogPreference.Material">
+        <item name="android:layout">@layout/preference_m3</item>
+        <item name="allowDividerAbove">false</item>
+        <item name="allowDividerBelow">false</item>
+        <item name="iconSpaceReserved">false</item>
+    </style>
+
+    <style name="Preference.DialogPreference.EditTextPreference.Revived" parent="Preference.DialogPreference.EditTextPreference.Material">
+        <item name="android:layout">@layout/preference_m3</item>
+        <item name="android:dialogLayout">@layout/preference_m3_dialog_edittext</item>
+        <item name="allowDividerAbove">false</item>
+        <item name="allowDividerBelow">false</item>
+        <item name="singleLineTitle">false</item>
+        <item name="iconSpaceReserved">false</item>
+    </style>
+
+    <style name="Preference.DropDown.Revived" parent="Preference.DropDown.Material">
+        <item name="allowDividerAbove">false</item>
+        <item name="allowDividerBelow">false</item>
+        <item name="iconSpaceReserved">false</item>
+    </style>
+
+    <style name="Preference.SwitchPreferenceCompat.Revived" parent="Preference.SwitchPreferenceCompat.Material">
+        <item name="android:layout">@layout/preference_m3</item>
+        <item name="android:widgetLayout">@layout/preference_m3_widget_switch</item>
+        <item name="allowDividerAbove">false</item>
+        <item name="allowDividerBelow">false</item>
+        <item name="iconSpaceReserved">false</item>
+    </style>
+
+    <style name="Preference.SwitchPreference.Revived" parent="Preference.SwitchPreference.Material">
+        <item name="android:layout">@layout/preference_m3</item>
+        <item name="android:widgetLayout">@layout/preference_m3_widget_switch</item>
+        <item name="allowDividerAbove">false</item>
+        <item name="allowDividerBelow">false</item>
+        <item name="singleLineTitle">false</item>
+        <item name="iconSpaceReserved">false</item>
+    </style>
+
+    <style name="Preference.CheckBoxPreference.Revived" parent="Preference.CheckBoxPreference.Material">
+        <item name="android:layout">@layout/preference_m3</item>
+        <item name="allowDividerAbove">false</item>
+        <item name="allowDividerBelow">false</item>
+        <item name="iconSpaceReserved">false</item>
+    </style>
+
+    <style name="PreferenceFragment.Revived" parent="PreferenceFragment.Material">
+        <item name="android:divider">@null</item>
+        <item name="android:dividerHeight">0dp</item>
+        <item name="allowDividerAfterLastItem">false</item>
+    </style>
+
+    <!-- Group shapes: outer corners large, inner corners small -->
+    <style name="ShapeAppearance.Revived.Group.Single" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/shape_corner_extra_large</item>
+    </style>
+    <style name="ShapeAppearance.Revived.Group.Top" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">@dimen/shape_corner_extra_large</item>
+        <item name="cornerSizeTopRight">@dimen/shape_corner_extra_large</item>
+        <item name="cornerSizeBottomLeft">@dimen/shape_corner_extra_small</item>
+        <item name="cornerSizeBottomRight">@dimen/shape_corner_extra_small</item>
+    </style>
+    <style name="ShapeAppearance.Revived.Group.Middle" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/shape_corner_extra_small</item>
+    </style>
+    <style name="ShapeAppearance.Revived.Group.Bottom" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">@dimen/shape_corner_extra_small</item>
+        <item name="cornerSizeTopRight">@dimen/shape_corner_extra_small</item>
+        <item name="cornerSizeBottomLeft">@dimen/shape_corner_extra_large</item>
+        <item name="cornerSizeBottomRight">@dimen/shape_corner_extra_large</item>
+    </style>
+
+    <!-- Rows of the About screen -->
+    <style name="Widget.Revived.Card.GroupRow" parent="Widget.Material3.CardView.Filled">
+        <item name="cardBackgroundColor">?attr/colorSurfaceContainer</item>
+        <item name="cardElevation">0dp</item>
+        <item name="android:layout_marginStart">@dimen/screen_margin</item>
+        <item name="android:layout_marginEnd">@dimen/screen_margin</item>
+        <item name="android:layout_marginTop">@dimen/pref_row_gap</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+
+    <!-- Theme picker preview card -->
+    <style name="Widget.Revived.Card.ThemePreview" parent="Widget.Material3.CardView.Outlined">
+        <item name="shapeAppearance">@style/ShapeAppearance.Revived.Card.Large</item>
+        <item name="cardBackgroundColor">?attr/colorSurfaceContainerLow</item>
+        <item name="strokeColor">?attr/colorOutlineVariant</item>
+        <item name="strokeWidth">@dimen/theme_card_stroke</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+</resources>

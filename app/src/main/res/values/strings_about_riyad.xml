@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="about_developer_label">Developer</string>
+    <string name="about_developer_name" translatable="false">Riyad M.</string>
+    <string name="about_developer_role" translatable="false">Mobile Application Security Consultant</string>
+    <string name="about_developer_tagline" translatable="false">Mobile security researcher and reverse engineer. Mobile security for products that can\'t afford blind spots. Based in Bangladesh, working with teams worldwide.</string>
+    <string name="about_developer_skills" translatable="false">Android security · Frida · APKTool · Jadx · Radare2 · Burp Suite · Digital forensics</string>
+    <string name="about_telegram_short" translatable="false">Telegram</string>
+    <string name="about_email_short">Email</string>
+
+    <string name="about_group_contact">Contact</string>
+    <string name="about_group_social">Links and projects</string>
+
+    <string name="about_whatsapp" translatable="false">WhatsApp</string>
+    <string name="about_telegram_dev" translatable="false">Telegram (preferred)</string>
+    <string name="about_linkedin" translatable="false">LinkedIn</string>
+    <string name="about_youtube" translatable="false">YouTube</string>
+    <string name="about_x" translatable="false">X (Twitter)</string>
+    <string name="about_reversesio" translatable="false">Reversesio</string>
+    <string name="about_project_repo">This project (source code)</string>
+    <string name="about_original_repo">Original repository</string>
+
+    <string name="about_sub_original_repo" translatable="false">github.com/MrIkso/ApkRepacker</string>
+    <string name="about_sub_project_repo" translatable="false">riyadmondol2006/ApkRepacker-Revived</string>
+    <string name="about_sub_website" translatable="false">riyadm.com</string>
+    <string name="about_sub_telegram" translatable="false">\@riyadmondol2006</string>
+    <string name="about_sub_whatsapp" translatable="false">wa.me/8801711798409</string>
+    <string name="about_sub_email" translatable="false">riyadmondol2006\@gmail.com</string>
+    <string name="about_sub_github" translatable="false">github.com/riyadmondol2006</string>
+    <string name="about_sub_linkedin" translatable="false">linkedin.com/in/riyadmondol2006</string>
+    <string name="about_sub_youtube" translatable="false">\@reversesio</string>
+    <string name="about_sub_x" translatable="false">\@riyadmondol2006</string>
+    <string name="about_sub_reversesio" translatable="false">reversesio.com</string>
+    <string name="about_patch_doc">How to make patches</string>
+    <string name="about_sub_patch_doc">Guide to the patch format</string>
+</resources>

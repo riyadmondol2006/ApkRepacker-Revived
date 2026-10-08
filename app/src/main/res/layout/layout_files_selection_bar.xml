@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container_selection_bar"
+    style="@style/Widget.Revived.Card.SelectionBar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:visibility="gone">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/space_2"
+        android:paddingEnd="@dimen/space_2">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/ib_clear_selection"
+            style="@style/Widget.Revived.BarIconButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/files_action_clear_selection"
+            app:icon="@drawable/ic_close" />
+
+        <TextView
+            android:id="@+id/tv_selection_status"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/space_2"
+            android:layout_marginEnd="@dimen/space_2"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textAppearance="?attr/textAppearanceTitleLarge"
+            android:textColor="?attr/colorOnSecondaryContainer"
+            tools:text="3 selected" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/action_select_all"
+            style="@style/Widget.Revived.BarIconButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/action_select_all"
+            app:icon="@drawable/ic_select_all" />
+
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

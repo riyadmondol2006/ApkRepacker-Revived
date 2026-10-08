@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="log_sheet_title">Build log</string>
+    <string name="log_empty">The log is empty.</string>
+    <string name="patcher_no_patches">No patches added yet</string>
+    <string name="patcher_no_patches_hint">Add one or more .zip patches, then apply them to the open project.</string>
+    <string name="patcher_log_title">Log</string>
+    <string name="patcher_rules_progress">Rules</string>
+    <string name="patcher_patches_progress">Patches</string>
+    <string name="patcher_remove_patch">Remove patch</string>
+    <string name="patcher_open_file">Open file</string>
+    <string name="notification_action_open">Open</string>
+
+    <!-- Patch list / apply -->
+    <string name="patcher_needs_code">Edits code</string>
+    <string name="patcher_applying_patch">Applying %1$s…</string>
+    <string name="patcher_applying_n_of_m">Applying patch %1$d of %2$d…</string>
+    <string name="patcher_nothing_to_do">Nothing to patch.</string>
+    <string name="patcher_decoding_smali">Decompiling code (smali) from the source APK…</string>
+    <string name="patcher_decoded_smali">Code decompiled.</string>
+    <string name="patcher_decode_no_source">The source APK is unavailable, so code can\'t be decompiled. Continuing anyway.</string>
+    <string name="patcher_failed_summary">Patching failed.</string>
+    <string name="patcher_done_title">Patches applied</string>
+    <string name="patcher_failed_title">Patching failed</string>
+    <string name="patcher_smali_dialog_title">Decompile code first?</string>
+    <string name="patcher_smali_dialog_message">This patch edits code (smali), but the project was decompiled without it. Decompile the code now and apply, or continue anyway — code rules will be skipped.</string>
+    <string name="patcher_continue_anyway">Continue anyway</string>
+    <string name="patcher_decompile_and_apply">Decompile &amp; apply</string>
+    <plurals name="patcher_rule_count">
+        <item quantity="one">%d rule</item>
+        <item quantity="other">%d rules</item>
+    </plurals>
+    <plurals name="patcher_done_summary">
+        <item quantity="one">%d patch applied.</item>
+        <item quantity="other">%d patches applied.</item>
+    </plurals>
+
+    <!-- Background battery exemption prompt -->
+    <string name="battery_opt_title">Keep running in the background?</string>
+    <string name="battery_opt_message">Allow the app to ignore battery optimization so long patch and build jobs aren\'t paused or stopped when the screen is off or the app is in the background.</string>
+    <string name="battery_opt_allow">Allow</string>
+    <string name="battery_opt_not_now">Not now</string>
+</resources>

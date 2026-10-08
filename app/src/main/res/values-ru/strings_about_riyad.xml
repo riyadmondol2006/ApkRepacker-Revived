@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="about_developer_label">Разработчик</string>
+    <string name="about_email_short">Почта</string>
+    <string name="about_group_contact">Контакты</string>
+    <string name="about_group_social">Ссылки и проекты</string>
+    <string name="about_project_repo">Этот проект (исходный код)</string>
+    <string name="about_original_repo">Оригинальный репозиторий</string>
+</resources>

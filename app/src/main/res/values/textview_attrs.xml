@@ -33,7 +33,8 @@
 
     <declare-styleable name="Editor">
         <attr name="textForeground" format="color" />
-        <attr name="textBackground" format="color" />
+        <!-- Defined by constraintlayout (format="reference"); redeclaring it with another format fails resource merging. -->
+        <attr name="textBackground" />
         <attr name="caret" format="color" />
         <attr name="selection" format="color" />
         <attr name="invisibles" format="color" />

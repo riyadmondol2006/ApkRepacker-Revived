@@ -1,20 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.appbar.AppBarLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Shared top app bar. Ids app_bar and toolbar are looked up by many screens. -->
+<com.google.android.material.appbar.AppBarLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/app_bar"
+    style="@style/Widget.Material3Expressive.AppBarLayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:theme="@style/AppTheme.AppBarOverlay"
-    android:stateListAnimator="@animator/appbar_elevation"
-    android:backgroundTint="?colorPrimary">
+    app:liftOnScroll="true">
 
-<!--    app:liftOnScroll="true"
-    app:liftOnScrollTargetViewId="@id/recycler_view_bottom_appbar"-->
-
-    <androidx.appcompat.widget.Toolbar
+    <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
+        style="@style/Widget.Material3Expressive.Toolbar"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        app:popupTheme="?attr/actionBarPopupTheme" />
+        android:layout_height="?attr/actionBarSize" />
 </com.google.android.material.appbar.AppBarLayout>

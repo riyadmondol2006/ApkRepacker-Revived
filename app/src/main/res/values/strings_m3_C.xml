@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="theme_selected">Selected</string>
+    <string name="about_group_team">Credits: original project</string>
+    <string name="project_notes_saved">Notes saved</string>
+    <string name="licenses_open_link">Open %s</string>
+    <string name="editor_theme_current">Current</string>
+    <string name="editor_theme_load_failed">Couldn\'t load editor themes</string>
+    <string name="key_saved_in_use">Key created and set as the signing key</string>
+    <string name="key_created">Key created</string>
+    <string name="key_create_failed">Couldn\'t create the key</string>
+
+    <string name="key_field_type">Key type</string>
+    <string name="key_field_path">Key file</string>
+    <string name="key_field_cert_path">Certificate file</string>
+    <string name="key_field_alias">Alias</string>
+    <string name="key_field_store_pass">Keystore password</string>
+    <string name="key_field_key_pass">Private key password</string>
+    <string name="key_field_size">Key size (bits)</string>
+    <string name="key_field_validity">Validity (years)</string>
+    <string name="key_field_common_name">Common name</string>
+    <string name="key_field_org_unit">Organization unit</string>
+    <string name="key_field_org_name">Organization name</string>
+    <string name="key_field_locality">Locality</string>
+    <string name="key_field_state">State</string>
+    <string name="key_field_country">Country</string>
+    <string name="key_action_create">Create</string>
+</resources>

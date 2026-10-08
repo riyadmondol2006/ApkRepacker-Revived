@@ -7,7 +7,7 @@
         android:id="@+id/imageView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="center"
+        android:contentDescription="@null"
         android:scaleType="centerInside"
         android:visibility="gone" />
 
@@ -15,7 +15,7 @@
         android:id="@+id/vectorView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="center"
+        android:contentDescription="@null"
         android:visibility="gone" />
 
     <TextView
@@ -23,20 +23,20 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:layout_marginStart="@dimen/space_6"
+        android:layout_marginEnd="@dimen/space_6"
         android:gravity="center"
+        android:maxLines="4"
         android:ellipsize="end"
-        android:maxLines="1"
-        android:textColor="@color/google_red"
-        android:textAppearance="@style/TextAppearance.AppCompat.Title"
+        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+        android:textColor="?attr/colorError"
         android:visibility="gone" />
 
-    <ProgressBar
+    <com.google.android.material.loadingindicator.LoadingIndicator
         android:id="@+id/progress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:indeterminate="true"
-        android:visibility="gone"
-        style="@style/Widget.AppCompat.ProgressBar" />
+        android:visibility="gone" />
 
 </FrameLayout>

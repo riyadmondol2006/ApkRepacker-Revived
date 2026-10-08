@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Bottom sheet window enter: rises from below the screen with a springy settle. -->
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shareInterpolator="false">
+    <translate
+        android:duration="500"
+        android:fromYDelta="100%"
+        android:toYDelta="0"
+        android:interpolator="@interpolator/revived_spring_overshoot" />
+    <alpha
+        android:duration="150"
+        android:fromAlpha="0"
+        android:toAlpha="1"
+        android:interpolator="@interpolator/revived_standard_effects" />
+</set>

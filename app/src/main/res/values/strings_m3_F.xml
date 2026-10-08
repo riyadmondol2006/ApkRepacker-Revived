@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="m3f_open_files">Open files</string>
+    <string name="m3f_project_files">Project files</string>
+    <string name="m3f_more_actions">More actions</string>
+    <string name="m3f_no_open_files">No files open</string>
+    <string name="m3f_close_tab">Close tab</string>
+    <string name="m3f_unsaved_changes">Unsaved changes</string>
+    <string name="m3f_prev_match">Previous match</string>
+    <string name="m3f_next_match">Next match</string>
+    <string name="m3f_close_find">Close find bar</string>
+    <string name="m3f_toggle_replace">Show replace</string>
+    <string name="m3f_replace_hint">Replace with</string>
+    <string name="m3f_find_hint">Find in file</string>
+    <string name="m3f_line_hint">Line number</string>
+    <string name="m3f_line_range">Line 1 to %d</string>
+    <string name="m3f_invalid_line">Enter a line number</string>
+    <string name="m3f_goto">Go</string>
+    <string name="m3f_saved">Saved</string>
+    <string name="m3f_saved_all">All files saved</string>
+    <string name="m3f_save_failed">Could not save: %s</string>
+    <string name="m3f_decompiling">Decompiling smali to Java</string>
+    <string name="m3f_smali_only">Works only with .smali files</string>
+    <string name="m3f_press_back_again">Press back again to exit</string>
+    <string name="m3f_class_package_hint">Package</string>
+    <string name="m3f_create">Create</string>
+    <string name="m3f_file_name_hint">File name</string>
+    <string name="m3f_folder_hint">Folder</string>
+    <string name="m3f_extension_hint">Extension</string>
+    <string name="m3f_choose_folder">Choose folder</string>
+    <string name="m3f_icon_edit">Change icon</string>
+    <string name="m3f_identity">Identity</string>
+    <string name="m3f_version">Version</string>
+    <string name="m3f_compatibility">Compatibility</string>
+    <string name="m3f_install_failed">Could not install</string>
+    <string name="m3f_filter_charsets">Filter encodings</string>
+    <string name="m3f_encoding_language">%1$s · %2$s</string>
+    <string name="m3f_file_type_icon">File type</string>
+    <string name="m3f_switch_storage">Switch storage</string>
+</resources>

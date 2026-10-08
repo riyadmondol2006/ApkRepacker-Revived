@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Image viewer -->
+    <string name="viewer_back">Back</string>
+    <string name="viewer_switch_background">Switch background</string>
+    <string name="viewer_load_failed">Couldn\'t load this image</string>
+    <!-- Project tree -->
+    <string name="tree_refresh">Refresh tree</string>
+    <string name="tree_info_path">Path</string>
+    <string name="tree_info_size">Size</string>
+    <string name="tree_info_modified">Modified</string>
+    <string name="tree_sheet_title">Add to this folder</string>
+    <string name="tree_folder_created">Folder created</string>
+    <string name="tree_file_created">File created</string>
+    <string name="tree_error_create_file">Can\'t create the file</string>
+    <string name="tree_error_exists">Already exists</string>
+    <string name="tree_items_added">Added %d item(s)</string>
+    <string name="tree_path_copied">Path copied</string>
+    <string name="tree_loading">Loading project files</string>
+</resources>

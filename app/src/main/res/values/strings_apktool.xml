@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strings for the apktool decompile/build options UI (DecodeOptions / BuildOptions). -->
+<resources>
+    <!-- Legacy listener item id for "decode nothing" (DecompileOptionsDialogFragment.ItemClickListener). -->
+    <item name="apktool_decompile_none" type="id" />
+
+    <!-- Decompile options sheet -->
+    <string name="apktool_decode_options_title">Decompile options</string>
+    <string name="apktool_decode_mode_label">What to decode</string>
+    <string name="apktool_decode_options_label">Options</string>
+    <string name="apktool_decode_mode_all">Resources and smali</string>
+    <string name="apktool_decode_mode_resources">Resources only (keep classes.dex)</string>
+    <string name="apktool_decode_mode_sources">Smali only (keep resources.arsc)</string>
+    <string name="apktool_decode_mode_none">Nothing, just unpack</string>
+
+    <string name="apktool_only_main_classes">Only main classes</string>
+    <string name="apktool_only_main_classes_summary">--only-main-classes: disassemble only the classes*.dex files in the APK root</string>
+    <string name="apktool_no_debug_info">No debug info</string>
+    <string name="apktool_no_debug_info_summary">--no-debug-info: skip .line, .local and .param directives</string>
+    <string name="apktool_no_assets">Skip assets</string>
+    <string name="apktool_no_assets_summary">--no-assets: don\'t extract the assets folder</string>
+    <string name="apktool_force_manifest">Decode manifest anyway</string>
+    <string name="apktool_force_manifest_summary">--force-manifest: decode AndroidManifest.xml even when resources are skipped</string>
+    <string name="apktool_keep_broken_res">Keep broken resources</string>
+    <string name="apktool_keep_broken_res_summary">--keep-broken-res: keep going when a resource can\'t be decoded</string>
+    <string name="apktool_analysis_mode">Analysis mode</string>
+    <string name="apktool_analysis_mode_summary">--match-original: output stays closer to the original APK, but may not rebuild</string>
+    <string name="apktool_merge_splits">Merge split APKs</string>
+    <string name="apktool_merge_splits_summary">For an app installed as split APKs: add the native libraries and the density/language resources of its config splits to the project</string>
+
+    <string name="apktool_remember_default">Remember as default</string>
+    <string name="apktool_decompile">Decompile</string>
+
+    <!-- Build options sheet -->
+    <string name="apktool_build_options_title">Build options</string>
+    <string name="apktool_build_debuggable">Debuggable</string>
+    <string name="apktool_build_debuggable_summary">--debuggable: set android:debuggable=\"true\" in the manifest</string>
+    <string name="apktool_build_net_sec_conf">Trust user certificates</string>
+    <string name="apktool_build_net_sec_conf_summary">--net-sec-conf: add a network security config that trusts user-installed CAs</string>
+    <string name="apktool_build_copy_original">Copy original manifest and META-INF</string>
+    <string name="apktool_build_copy_original_summary">--copy-original: keep the original AndroidManifest.xml and META-INF</string>
+    <string name="apktool_build_no_crunch">Don\'t crunch PNGs</string>
+    <string name="apktool_build_no_crunch_summary">--no-crunch: keep PNG files exactly as they are</string>
+    <string name="apktool_build_force">Force full rebuild</string>
+    <string name="apktool_build_force_summary">-f: ignore cached build outputs and rebuild everything</string>
+    <string name="apktool_build_sign">Sign the APK</string>
+    <string name="apktool_build_sign_summary">Sign the rebuilt APK with the configured key</string>
+    <string name="apktool_build_remove_split_requirement">Remove split requirement</string>
+    <string name="apktool_build_remove_split_requirement_summary">Drop isSplitRequired, requiredSplitTypes, splitTypes and the Play split meta-data from the manifest, so the APK installs without its splits</string>
+    <string name="apktool_build">Build</string>
+
+    <!-- Settings -->
+    <string name="apktool_settings_decompile">Decompile</string>
+    <string name="apktool_settings_build">Build</string>
+    <string name="apktool_pref_decode_mode">Default decode mode</string>
+    <string name="apktool_pref_ask_decode">Show options before decompiling</string>
+    <string name="apktool_pref_ask_decode_summary">Otherwise the defaults below are used right away</string>
+    <string name="apktool_pref_ask_build">Show options before building</string>
+    <string name="apktool_pref_ask_build_summary">Otherwise the defaults below are used right away</string>
+
+    <string name="apktool_storage_permission_denied">Without storage access the file manager can\'t browse shared storage. Your projects still work.</string>
+
+    <string-array name="apktool_decode_mode_names">
+        <item>@string/apktool_decode_mode_all</item>
+        <item>@string/apktool_decode_mode_resources</item>
+        <item>@string/apktool_decode_mode_sources</item>
+        <item>@string/apktool_decode_mode_none</item>
+    </string-array>
+
+    <!-- Must match the DecodeMode enum names. -->
+    <string-array name="apktool_decode_mode_values" translatable="false">
+        <item>ALL</item>
+        <item>RESOURCES_ONLY</item>
+        <item>SOURCES_ONLY</item>
+        <item>NONE</item>
+    </string-array>
+</resources>

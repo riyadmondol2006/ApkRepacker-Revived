@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.mrikso.apkrepacker.ui.themelist.ThemeView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.riyadm.apkrepacker.ui.themelist.ThemeView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/theme_view_theme_item"
+    style="@style/Widget.Revived.Card.ThemePreview"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    style="@style/ThemeView.Normal.Interactive" />
+    android:layout_margin="@dimen/space_2" />

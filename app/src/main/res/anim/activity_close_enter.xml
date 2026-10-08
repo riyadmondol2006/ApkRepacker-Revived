@@ -1,16 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Previous activity returning as the top one closes: fade-through, 0.92 -> 1 scale and a 30dp slide back in. -->
 <set xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shareInterpolator="false">
+    android:shareInterpolator="false"
+    android:fillEnabled="true"
+    android:fillBefore="true"
+    android:fillAfter="true">
+    <alpha
+        android:duration="210"
+        android:startOffset="90"
+        android:fromAlpha="0"
+        android:toAlpha="1"
+        android:interpolator="@interpolator/revived_standard_effects" />
     <scale
-        android:interpolator="@android:interpolator/fast_out_slow_in"
-        android:duration="400"
+        android:duration="450"
+        android:fromXScale="0.92"
+        android:toXScale="1"
+        android:fromYScale="0.92"
+        android:toYScale="1"
         android:pivotX="50%"
         android:pivotY="50%"
-        android:fillBefore="true"
-        android:fillAfter="true"
-        android:fromXScale="1.1"
-        android:toXScale="1.0"
-        android:fromYScale="1.1"
-        android:toYScale="1.0"
-        android:fillEnabled="true" />
+        android:interpolator="@interpolator/revived_emphasized" />
+    <translate
+        android:duration="450"
+        android:fromXDelta="-30dp"
+        android:toXDelta="0"
+        android:interpolator="@interpolator/revived_emphasized" />
 </set>

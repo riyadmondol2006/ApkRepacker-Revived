@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Inside of ThemeView: live preview on top, name (+ optional hint) below. -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="com.riyadm.apkrepacker.ui.themelist.ThemeView">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <FrameLayout
+            android:id="@+id/theme_preview_container"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/theme_preview_height" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="@dimen/space_3"
+            android:paddingTop="@dimen/space_3"
+            android:paddingEnd="@dimen/space_3"
+            android:paddingBottom="@dimen/space_3">
+
+            <ImageView
+                android:id="@+id/theme_mode_icon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:importantForAccessibility="no"
+                app:tint="?attr/colorOnSurfaceVariant"
+                tools:src="@drawable/ic_light_theme" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/space_2"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/theme_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textAppearance="@style/TextAppearance.Material3.LabelLarge.Emphasized"
+                    android:textColor="?attr/colorOnSurface"
+                    tools:text="Material You Light" />
+
+                <TextView
+                    android:id="@+id/theme_message"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:visibility="gone"
+                    tools:text="Tap to change"
+                    tools:visibility="visible" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/theme_badge"
+        android:layout_width="@dimen/theme_preview_badge"
+        android:layout_height="@dimen/theme_preview_badge"
+        android:layout_gravity="top|end"
+        android:layout_margin="@dimen/space_2"
+        android:background="@drawable/m3_preview_oval"
+        android:backgroundTint="?attr/colorPrimary"
+        android:contentDescription="@string/theme_selected"
+        android:padding="@dimen/space_1"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_check"
+        android:visibility="gone"
+        app:tint="?attr/colorOnPrimary" />
+</merge>

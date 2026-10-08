@@ -1,102 +1,215 @@
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
+import org.gradle.api.artifacts.transform.TransformParameters
+
+plugins {
+    alias(libs.plugins.android.application)
+}
 
 android {
-    compileSdk 34
-    buildToolsVersion rootProject.ext.buildToolsVersion
-    useLibrary  'org.apache.http.legacy'
+    namespace = 'com.riyadm.apkrepacker'
+    compileSdk = rootProject.ext.compileSdkVersion
+    useLibrary 'org.apache.http.legacy'
 
     defaultConfig {
-        applicationId "com.mrikso.apkrepacker"
-        minSdkVersion project.minSdkVersion
-        targetSdkVersion project.targetSdkVersion
-        versionCode 40
-        versionName "1.0.4 beta"
-        archivesBaseName = "ApkRepacker-v${versionName}(${versionCode})"
+        applicationId = "com.riyadm.apkrepacker"
+        minSdk = rootProject.ext.minSdkVersion
+        targetSdk = rootProject.ext.targetSdkVersion
+        versionCode = 40
+        versionName = "1.0.4 beta"
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Shown in decode/build logs and written to apktool.yml.
+        buildConfigField "String", "APKTOOL_VERSION", "\"${libs.versions.apktool.get()}\""
+    }
+
+    // Release signing comes from the environment only, so no key ever lives in the repository:
+    // the GitHub Actions release workflow sets these from repository secrets (docs/RELEASING.md).
+    // Without them (a normal local build) the release APK is simply left unsigned.
+    def releaseStoreFile = providers.environmentVariable("SIGNING_STORE_FILE").orNull
+    signingConfigs {
+        release {
+            if (releaseStoreFile) {
+                storeFile = file(releaseStoreFile)
+                storePassword = providers.environmentVariable("SIGNING_STORE_PASSWORD").orNull
+                keyAlias = providers.environmentVariable("SIGNING_KEY_ALIAS").orNull
+                keyPassword = providers.environmentVariable("SIGNING_KEY_PASSWORD").orNull
+            }
+        }
     }
 
     buildTypes {
         release {
-            minifyEnabled true
-            shrinkResources true
+            minifyEnabled = true
+            shrinkResources = true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (releaseStoreFile) {
+                signingConfig = signingConfigs.release
+            }
         }
     }
 
+    buildFeatures {
+        buildConfig = true
+        viewBinding = true
+    }
+
     compileOptions {
-        sourceCompatibility = 1.8
-        targetCompatibility = 1.8
+        // Backports java.nio.file & friends to API < 26 for jadx, smali and commons-io.
+        coreLibraryDesugaringEnabled = true
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = '1.8'
+    packaging {
+        resources {
+            excludes += ['META-INF/DEPENDENCIES', 'META-INF/LICENSE*', 'META-INF/NOTICE*',
+                         'META-INF/versions/9/module-info.class', 'module-info.class',
+                         // apktool-lib's desktop aapt2 binaries; the app ships its own (jniLibs/*/libaapt2.so).
+                         // Keep prebuilt/android-framework.jar: apktool extracts it as framework 1.apk.
+                         'prebuilt/linux/**', 'prebuilt/macosx/**', 'prebuilt/windows/**']
+        }
+        jniLibs {
+            // libaapt2.so is an executable, not a JNI library: it has to be extracted to
+            // nativeLibraryDir so apktool can run it.
+            useLegacyPackaging = true
+        }
     }
 
-    lintOptions {
-        checkReleaseBuilds false
+    lint {
+        checkReleaseBuilds = false
         // Or, if you prefer, you can continue to check for errors in release builds,
         // but continue the build even when errors are found:
-        abortOnError false
+        abortOnError = false
     }
-    namespace 'com.mrikso.apkrepacker'
+}
+
+base {
+    archivesName = "ApkRepackerRevived-v${android.defaultConfig.versionName}(${android.defaultConfig.versionCode})"
 }
 
 dependencies {
+    coreLibraryDesugaring libs.desugar.jdk.libs.nio
+
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation project(':apktool')
-    implementation project(':custom-fab')
+    // apktool 3 (decode/build). Android ships org.xmlpull.v1 itself.
+    implementation(libs.apktool.lib) {
+        exclude group: 'xmlpull', module: 'xmlpull'
+    }
     implementation project(':common')
     implementation project(':colorpicker')
     implementation project(':expandablerecyclerview')
     implementation project(':photoview')
     implementation project(':vectormaster')
     implementation project(':codeeditor')
-    implementation project(':md-dialog-core')
     //kotlin
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$rootProject.ext.kotlin_version"
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.1'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.1'
+    implementation libs.kotlinx.coroutines.core
+    implementation libs.kotlinx.coroutines.android
 
     //androidx
-    implementation 'androidx.preference:preference-ktx:1.2.1'
-    implementation 'androidx.fragment:fragment-ktx:1.7.1'
-    implementation 'androidx.appcompat:appcompat:1.7.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
+    implementation libs.androidx.preference.ktx
+    implementation libs.androidx.fragment.ktx
+    implementation libs.androidx.appcompat
+    implementation libs.androidx.constraintlayout
+    implementation libs.androidx.swiperefreshlayout
+    implementation libs.androidx.documentfile
 
     //mvvm
-    implementation 'androidx.core:core-ktx:1.13.1'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.1'
-    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
-    implementation 'androidx.lifecycle:lifecycle-common-java8:2.8.1'
-   // implementation 'androidx.navigation:navigation-fragment:2.3.0'
-  //  implementation 'androidx.navigation:navigation-ui:2.3.0'
+    implementation libs.androidx.core.ktx
+    implementation libs.androidx.lifecycle.viewmodel.ktx
+    implementation libs.androidx.lifecycle.extensions
 
     //material design
-    implementation 'com.google.android.material:material:1.12.0'
+    implementation libs.google.material
+    implementation libs.androidx.dynamicanimation
 
     //google utility lib
-    implementation 'com.google.guava:guava:30.1-android'
-    implementation 'com.google.code.gson:gson:2.8.6'
+    implementation libs.guava
+    implementation libs.gson
     //smali
-    implementation 'org.smali:baksmali:2.4.0'
-    implementation 'org.smali:smali:2.4.0'
+    implementation libs.smali
+    implementation libs.smali.baksmali
+    //jadx (smali -> java)
+    implementation libs.jadx.core
+    implementation libs.jadx.dex.input
+    implementation libs.jadx.smali.input
+    //apk signing
+    implementation libs.apksig
     //commons io
+    implementation libs.commons.io
 
-    implementation 'commons-io:commons-io:2.6'
-    implementation 'com.github.bumptech.glide:glide:4.11.0'
-    implementation 'com.github.ybq:Android-SpinKit:1.4.0'
-    implementation 'me.zhanghai.java.functional:android:1.0.0'
-    implementation 'me.zhanghai.android.fastscroll:library:1.1.4'
-    implementation 'me.zhanghai.android.systemuihelper:library:1.0.0'
-    implementation 'de.psdev.licensesdialog:licensesdialog:2.1.0'
-    implementation 'org.jetbrains:annotations:20.1.0'
-    implementation 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
+    implementation libs.glide
+    implementation libs.fastscroll
+    implementation libs.systemuihelper
+    implementation libs.licensesdialog
+    implementation libs.jetbrains.annotations
+    implementation libs.universal.image.loader
 
     // tests
-    testImplementation 'junit:junit:4.13'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    testImplementation libs.junit
+    androidTestImplementation libs.bundles.android.test
+    androidTestImplementation libs.androidx.test.runner
+    androidTestImplementation libs.androidx.test.rules
+}
+
+/*
+ * apktool-lib targets desktop JVMs. Two of its classes use APIs that Android lacks:
+ *  - ResNinePatchStreamDecoder draws 9-patch borders with java.awt/javax.imageio;
+ *  - brut.xml.XmlUtils sets JAXP features that Android's DocumentBuilderFactory rejects, which
+ *    silently disables --debuggable, --net-sec-conf and some manifest fixes.
+ * The app ships Android versions of both (src/main/java/brut/...), so the originals are stripped
+ * from the dependency jars here, together with the desktop aapt2 binaries.
+ */
+abstract class StripApktoolDesktopClasses implements TransformAction<TransformParameters.None> {
+    private static final Map<String, List<String>> STRIPPED = [
+        'apktool-lib-': ['brut/androlib/res/decoder/ResNinePatchStreamDecoder.class',
+                         'prebuilt/linux/', 'prebuilt/macosx/', 'prebuilt/windows/'],
+        'brut.j.xml-' : ['brut/xml/XmlUtils.class', 'brut/xml/XmlUtils$'],
+    ]
+
+    @InputArtifact
+    @PathSensitive(PathSensitivity.NAME_ONLY)
+    abstract Provider<FileSystemLocation> getInputArtifact()
+
+    @Override
+    void transform(TransformOutputs outputs) {
+        File input = inputArtifact.get().asFile
+        String prefix = STRIPPED.keySet().find { input.name.startsWith(it) }
+        if (prefix == null || !input.isFile()) {
+            outputs.file(inputArtifact)
+            return
+        }
+        List<String> stripped = STRIPPED[prefix]
+        File output = outputs.file("android-" + input.name)
+        new java.util.zip.ZipFile(input).withCloseable { zip ->
+            new java.util.zip.ZipOutputStream(new FileOutputStream(output)).withCloseable { out ->
+                zip.entries().each { java.util.zip.ZipEntry entry ->
+                    if (stripped.any { entry.name.startsWith(it) }) {
+                        return
+                    }
+                    out.putNextEntry(new java.util.zip.ZipEntry(entry.name))
+                    if (!entry.directory) {
+                        zip.getInputStream(entry).withCloseable { out << it }
+                    }
+                    out.closeEntry()
+                }
+            }
+        }
+    }
+}
+
+def apktoolStripped = Attribute.of('com.riyadm.apkrepacker.apktool-stripped', Boolean)
+dependencies {
+    attributesSchema {
+        attribute(apktoolStripped)
+    }
+    artifactTypes.maybeCreate('jar').attributes.attribute(apktoolStripped, false)
+    registerTransform(StripApktoolDesktopClasses) {
+        from.attribute(apktoolStripped, false).attribute(ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE, 'jar')
+        to.attribute(apktoolStripped, true).attribute(ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE, 'jar')
+    }
+}
+configurations.configureEach {
+    if (name.endsWith('CompileClasspath') || name.endsWith('RuntimeClasspath')) {
+        attributes.attribute(apktoolStripped, true)
+    }
 }

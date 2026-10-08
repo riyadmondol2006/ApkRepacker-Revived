@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- App shell styles (owner A): empty state, crash screen, loading. -->
+<resources>
+    <!-- Big tonal squircle behind illustrations -->
+    <style name="ShapeAppearance.Revived.Illustration" parent="ShapeAppearance.Material3.Corner.ExtraLarge">
+        <item name="cornerSize">@dimen/shape_corner_extra_extra_large</item>
+    </style>
+
+    <style name="Widget.Revived.IllustrationContainer" parent="Widget.Material3.CardView.Filled">
+        <item name="shapeAppearance">@style/ShapeAppearance.Revived.Illustration</item>
+        <item name="cardBackgroundColor">?attr/colorSecondaryContainer</item>
+        <item name="cardElevation">0dp</item>
+        <item name="contentPadding">@dimen/space_6</item>
+    </style>
+
+    <style name="Widget.Revived.IllustrationContainer.Error">
+        <item name="cardBackgroundColor">?attr/colorErrorContainer</item>
+    </style>
+
+    <style name="TextAppearance.Revived.Monospace" parent="TextAppearance.Material3.BodySmall">
+        <item name="android:fontFamily">monospace</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
+    </style>
+</resources>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="apktool_decode_options_title">Параметры декомпиляции</string>
+    <string name="apktool_decode_mode_label">Что декомпилировать</string>
+    <string name="apktool_decode_options_label">Параметры</string>
+    <string name="apktool_decode_mode_all">Ресурсы и smali</string>
+    <string name="apktool_decode_mode_resources">Только ресурсы (classes.dex без изменений)</string>
+    <string name="apktool_decode_mode_sources">Только smali (resources.arsc без изменений)</string>
+    <string name="apktool_decode_mode_none">Ничего, только распаковать</string>
+
+    <string name="apktool_only_main_classes">Только основные классы</string>
+    <string name="apktool_only_main_classes_summary">--only-main-classes: дизассемблировать только classes*.dex в корне APK</string>
+    <string name="apktool_no_debug_info">Без отладочной информации</string>
+    <string name="apktool_no_debug_info_summary">--no-debug-info: пропускать директивы .line, .local и .param</string>
+    <string name="apktool_no_assets">Пропустить assets</string>
+    <string name="apktool_no_assets_summary">--no-assets: не извлекать папку assets</string>
+    <string name="apktool_force_manifest">Всё равно декодировать манифест</string>
+    <string name="apktool_force_manifest_summary">--force-manifest: декодировать AndroidManifest.xml, даже если ресурсы пропускаются</string>
+    <string name="apktool_keep_broken_res">Сохранять повреждённые ресурсы</string>
+    <string name="apktool_keep_broken_res_summary">--keep-broken-res: продолжать, если ресурс не удаётся декодировать</string>
+    <string name="apktool_analysis_mode">Режим анализа</string>
+    <string name="apktool_analysis_mode_summary">--match-original: результат ближе к оригиналу, но может не собраться</string>
+    <string name="apktool_merge_splits">Объединить split APK</string>
+    <string name="apktool_merge_splits_summary">Для приложения, установленного из split APK: добавить в проект нативные библиотеки и ресурсы плотности/языка из его config-сплитов</string>
+
+    <string name="apktool_remember_default">Запомнить по умолчанию</string>
+    <string name="apktool_decompile">Декомпилировать</string>
+
+    <string name="apktool_build_options_title">Параметры сборки</string>
+    <string name="apktool_build_debuggable">Отладочная сборка</string>
+    <string name="apktool_build_debuggable_summary">--debuggable: установить android:debuggable=\"true\" в манифесте</string>
+    <string name="apktool_build_net_sec_conf">Доверять пользовательским сертификатам</string>
+    <string name="apktool_build_net_sec_conf_summary">--net-sec-conf: добавить конфигурацию сетевой безопасности, доверяющую пользовательским CA</string>
+    <string name="apktool_build_copy_original">Копировать оригинальные манифест и META-INF</string>
+    <string name="apktool_build_copy_original_summary">--copy-original: сохранить оригинальные AndroidManifest.xml и META-INF</string>
+    <string name="apktool_build_no_crunch">Не сжимать PNG</string>
+    <string name="apktool_build_no_crunch_summary">--no-crunch: оставить PNG-файлы как есть</string>
+    <string name="apktool_build_force">Полная пересборка</string>
+    <string name="apktool_build_force_summary">-f: игнорировать кэш сборки и пересобрать всё</string>
+    <string name="apktool_build_sign">Подписать APK</string>
+    <string name="apktool_build_sign_summary">Подписать собранный APK настроенным ключом</string>
+    <string name="apktool_build_remove_split_requirement">Убрать требование сплитов</string>
+    <string name="apktool_build_remove_split_requirement_summary">Удалить isSplitRequired, requiredSplitTypes, splitTypes и split-метаданные Play из манифеста, чтобы APK устанавливался без сплитов</string>
+    <string name="apktool_build">Собрать</string>
+
+    <string name="apktool_settings_decompile">Декомпиляция</string>
+    <string name="apktool_settings_build">Сборка</string>
+    <string name="apktool_pref_decode_mode">Режим декомпиляции по умолчанию</string>
+    <string name="apktool_pref_ask_decode">Показывать параметры перед декомпиляцией</string>
+    <string name="apktool_pref_ask_decode_summary">Иначе сразу используются значения ниже</string>
+    <string name="apktool_pref_ask_build">Показывать параметры перед сборкой</string>
+    <string name="apktool_pref_ask_build_summary">Иначе сразу используются значения ниже</string>
+
+    <string name="apktool_storage_permission_denied">Без доступа к хранилищу файловый менеджер не сможет открыть общую память. Проекты продолжат работать.</string>
+</resources>

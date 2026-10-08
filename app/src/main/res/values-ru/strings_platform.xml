@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="storage_access_title">Доступ ко всем файлам</string>
+    <string name="storage_access_message">В Apk Repacker Revived есть файловый менеджер для общего хранилища: он открывает APK из любой папки, копирует и редактирует файлы и сохраняет собранные APK. Android разрешает это только с разрешением \"Доступ ко всем файлам\".\n\nНа следующем экране включите \"Разрешить доступ к управлению всеми файлами\" для этого приложения и вернитесь назад.\n\nБез него проекты продолжат работать, но файловый менеджер и выбор файлов не смогут открыть общее хранилище.</string>
+    <string name="storage_access_denied_settings">Разрешение на доступ к хранилищу для этого приложения выключено. Его можно включить в настройках приложения.</string>
+    <string name="storage_access_denied_hint">Без доступа к хранилищу файловый менеджер не может открыть общее хранилище. Проекты продолжают работать.</string>
+    <string name="storage_access_grant">Предоставить доступ</string>
+    <string name="storage_access_open_settings">Открыть настройки</string>
+    <string name="storage_access_not_now">Не сейчас</string>
+    <string name="storage_access_settings_unavailable">Не удалось открыть настройки разрешений. Разрешите этому приложению \"Доступ ко всем файлам\" в системных настройках.</string>
+
+    <string name="install_unknown_sources_title">Разрешить установку приложений</string>
+    <string name="install_unknown_sources_message">Чтобы установить APK, разрешите Apk Repacker Revived устанавливать неизвестные приложения на следующем экране, затем вернитесь и снова нажмите \"Установить\".</string>
+
+    <string name="notification_channel_build">Сборка APK</string>
+    <string name="notification_build_timeout">Сборка остановлена: Android ограничивает время её работы в фоне.</string>
+    <string name="build_service_start_failed">Не удалось начать сборку, пока приложение в фоне. Откройте приложение и попробуйте снова.</string>
+    <string name="notification_copying">Копирование файлов…</string>
+
+    <string name="notification_channel_decompile">Декомпиляция</string>
+    <string name="decompile_notification_title">Декомпиляция</string>
+    <string name="decompile_notification_starting">Запуск…</string>
+    <string name="decompile_notification_running">Декомпиляция %1$s…</string>
+    <string name="decompile_notification_done">%1$s декомпилирован.</string>
+    <string name="decompile_notification_failed">Не удалось декомпилировать %1$s.</string>
+    <string name="decompile_done_title">Декомпиляция завершена</string>
+    <string name="decompile_failed_title">Ошибка декомпиляции</string>
+</resources>

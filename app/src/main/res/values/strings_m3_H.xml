@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="h_search_strings">Search strings</string>
+    <string name="h_search_colors">Search colors</string>
+    <string name="h_search_dimens">Search dimensions</string>
+    <string name="h_clear_search">Clear search</string>
+    <string name="h_no_results">Nothing matches your search</string>
+    <string name="h_empty_strings">No strings in this file yet</string>
+    <string name="h_empty_colors">No colors in this file yet</string>
+    <string name="h_empty_dimens">No dimensions in this file yet</string>
+
+    <string name="h_unsaved_title">Unsaved changes</string>
+    <string name="h_unsaved_message">You have unsaved changes in this language. Save them before switching?</string>
+    <string name="h_action_discard">Discard</string>
+    <string name="h_saved">Saved</string>
+    <string name="h_save_failed">Could not save the file</string>
+    <string name="h_loading_failed">Could not read the file</string>
+
+    <string name="h_section_strings">Strings</string>
+    <string name="h_section_language">Languages</string>
+    <string name="h_section_translate">Translate</string>
+
+    <string name="h_original_text">Original text</string>
+    <string name="h_translate_failed">Translation failed. Check your connection and try again.</string>
+    <string name="h_translating">Translating…</string>
+    <string name="h_translated_marker">Translated</string>
+    <string name="h_more_for_string">Options for this string</string>
+    <string name="h_progress_percent">%1$d%%</string>
+
+    <string name="h_color_hex">Hex value</string>
+    <string name="h_color_hex_hint">#RRGGBB or #AARRGGBB</string>
+    <string name="h_color_hex_invalid">Use #RRGGBB or #AARRGGBB</string>
+    <string name="h_color_pick">Pick a color</string>
+    <string name="h_color_preview">Color preview</string>
+    <string name="h_color_unresolved">Unresolved reference</string>
+    <string name="h_color_saved">Color saved</string>
+    <string name="h_color_deleted">Color deleted</string>
+    <string name="h_color_added">Color added</string>
+
+    <string name="h_dimen_edit_title">Edit dimension</string>
+    <string name="h_dimen_name">Name</string>
+    <string name="h_dimen_value">Value</string>
+    <string name="h_dimen_value_hint">For example: 16dp</string>
+    <string name="h_dimen_saved">Dimension saved</string>
+    <string name="h_dimen_invalid">Use a number with a unit (16dp, 14sp, 1px) or a reference (@dimen/name)</string>
+</resources>

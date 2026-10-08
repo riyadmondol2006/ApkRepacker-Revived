@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <com.google.android.material.bottomsheet.BottomSheetDragHandleView
+        android:id="@+id/apktool_sheet_handle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/apktool_sheet_title"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0"
+        app:layout_constraintVertical_chainStyle="packed" />
+
+    <TextView
+        android:id="@+id/apktool_sheet_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="@dimen/space_6"
+        android:paddingEnd="@dimen/space_6"
+        android:paddingBottom="@dimen/space_2"
+        android:text="@string/apktool_build_options_title"
+        android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall.Emphasized"
+        android:textColor="?attr/colorOnSurface"
+        app:layout_constraintBottom_toTopOf="@+id/apktool_sheet_scroll"
+        app:layout_constraintTop_toBottomOf="@+id/apktool_sheet_handle" />
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/apktool_sheet_scroll"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        app:layout_constrainedHeight="true"
+        app:layout_constraintBottom_toTopOf="@+id/apktool_sheet_actions"
+        app:layout_constraintHeight_default="wrap"
+        app:layout_constraintTop_toBottomOf="@+id/apktool_sheet_title">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="@dimen/screen_margin"
+            android:paddingEnd="@dimen/screen_margin"
+            android:paddingBottom="@dimen/space_4">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="@dimen/space_2"
+                android:paddingTop="@dimen/space_2"
+                android:paddingBottom="@dimen/space_2"
+                android:text="@string/m3d_group_build_output"
+                android:textAppearance="@style/TextAppearance.Revived.SectionHeader" />
+
+            <LinearLayout
+                android:id="@+id/apktool_group_output"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="@dimen/space_2"
+                android:paddingTop="@dimen/space_4"
+                android:paddingBottom="@dimen/space_2"
+                android:text="@string/m3d_group_build_manifest"
+                android:textAppearance="@style/TextAppearance.Revived.SectionHeader" />
+
+            <LinearLayout
+                android:id="@+id/apktool_group_manifest"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <LinearLayout
+        android:id="@+id/apktool_sheet_actions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/screen_margin"
+        android:paddingTop="@dimen/space_2"
+        android:paddingEnd="@dimen/screen_margin"
+        android:paddingBottom="@dimen/space_4"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/apktool_sheet_scroll">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/apktool_btn_cancel"
+            style="@style/Widget.Material3Expressive.Button.TonalButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/space_2"
+            android:layout_weight="1"
+            android:text="@string/cancel"
+            app:materialSizeOverlay="@style/SizeOverlay.Material3Expressive.Button.Medium" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/apktool_btn_confirm"
+            style="@style/Widget.Material3Expressive.Button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:text="@string/apktool_build"
+            app:icon="@drawable/ic_build"
+            app:materialSizeOverlay="@style/SizeOverlay.Material3Expressive.Button.Medium" />
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

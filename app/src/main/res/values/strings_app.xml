@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">Apk Repacker</string>
+    <string name="app_name" translatable="false">Apk Repacker Revived</string>
 
     <string name="about_licenses_html_style_light" translatable="false">
         body {
@@ -98,6 +98,7 @@
     <string name="pref_copy_original_files">Match original</string>
     <string name="pref_copy_original_files_summary">Keeps files as close to original as possible. Prevents rebuild.</string>
     <string name="pref_use_v2_signature">Use V2 signature</string>
+    <string name="pref_use_v2_signature_summary">On by default (also adds a v3 signature). Always used for apps targeting Android 11+, which require it to install.</string>
     <string name="action_create_folder">Add Folder</string>
     <string name="action_add_file">Add File</string>
     <string name="action_add_new_lang">Add new language</string>
@@ -258,7 +259,7 @@
     <string name="install_location_auto">Auto (OS Make Decision)</string>
     <string name="install_location_internal">Internal Only</string>
     <string name="install_location_external">Prefer External</string>
-    <string name="about_telegram_developer_mrikso">MrIkso - Developer</string>
+    <string name="about_telegram_developer_mrikso">MrIkso - Original developer</string>
     <string name="about_telegram_developer_phoenix">Phoenix.Ltd - Developer</string>
     <string name="about_telegram_sponsor_alex_modz">Alex.Strannik - lite modz</string>
     <string name="toast_error_sign_failed">Error while signing an apk!</string>
@@ -282,7 +283,7 @@
     <string name="class_name">Class name</string>
     <string name="editor_theme">Editor theme</string>
     <string name="selected_editor_theme">Selected %s. Restart app to apply theme.</string>
-    <string name="toast_apk_succes_edited">Apk successful builded!</string>
+    <string name="toast_apk_succes_edited">APK built successfully!</string>
     <string name="toast_apk_falied_edited">Apk falied edited!</string>
     <string name="toast_error_decompile_smali_to_java">Error on decompile smali to java!</string>
     <string name="show_decompile_option_dialog">Show dialog for choosing decompilation mode</string>
@@ -309,6 +310,8 @@
     <string name="dialog_select_theme">Select Theme</string>
 
     <string name="theme_rena">Rena</string>
+    <string name="theme_dynamic_light">Material You Light</string>
+    <string name="theme_dynamic_dark">Material You Dark</string>
     <string name="theme_rena_light">Rena Light</string>
     <string name="theme_mint">Mint</string>
 
@@ -381,7 +384,7 @@
     <string name="action_more">More options</string>
     <string name="value">Value</string>
     <string name="key">Key</string>
-    <string name="app_compile_elapsed_time">App buided in %s</string>
+    <string name="app_compile_elapsed_time">App built in %s</string>
     <string name="dialog_dictionary_name">Enter dictionary name</string>
     <string name="dialog_warring">Warring</string>
     <string name="dialog_warring_save_changes">Do you want to save the changes?</string>

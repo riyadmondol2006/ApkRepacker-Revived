@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Grouped list rows: outer corners of a group are big, the seams between rows are tight. -->
+    <dimen name="b_group_corner_outer">24dp</dimen>
+    <dimen name="b_group_corner_inner">6dp</dimen>
+    <dimen name="b_group_gap">2dp</dimen>
+    <!-- Large extended FAB (96dp) + its margins, so the last row can scroll clear of it -->
+    <dimen name="b_list_bottom_padding">136dp</dimen>
+    <dimen name="b_apps_list_bottom_padding">24dp</dimen>
+    <dimen name="b_icon_size">48dp</dimen>
+    <dimen name="b_badge_size">96dp</dimen>
+</resources>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Monospace log lines (decompile log, build errors). -->
+    <style name="TextAppearance.Revived.Log" parent="TextAppearance.Material3.BodySmall">
+        <item name="android:fontFamily">monospace</item>
+        <item name="android:textColor">?attr/colorOnSurfaceVariant</item>
+    </style>
+
+    <!-- Segmented decode-mode button: tonal toggle with tight padding so four fit a phone. -->
+    <style name="Widget.Revived.ModeButton" parent="Widget.Material3Expressive.Button.TonalButton">
+        <item name="android:minWidth">0dp</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:textAppearance">?attr/textAppearanceLabelLarge</item>
+        <item name="android:paddingStart">@dimen/space_1</item>
+        <item name="android:paddingEnd">@dimen/space_1</item>
+    </style>
+</resources>

@@ -9,30 +9,11 @@
     <attr format="color|reference" name="cpv_borderColor"/>
   </declare-styleable>
 
-  <declare-styleable name="ColorPickerView" parent="ColorPanelView">
+  <declare-styleable name="ColorPickerView">
     <attr format="boolean|reference" name="cpv_alphaChannelVisible"/>
     <attr format="string|reference" name="cpv_alphaChannelText"/>
     <attr format="color|reference" name="cpv_sliderColor"/>
     <attr name="cpv_borderColor"/>
-  </declare-styleable>
-
-  <declare-styleable name="ColorPreference" parent="ColorPickerDialog">
-    <attr format="boolean|reference" name="cpv_showAlphaSlider"/>
-    <attr format="enum" name="cpv_previewSize">
-      <enum name="regular" value="0"/>
-      <enum name="large" value="1"/>
-    </attr>
-    <attr name="cpv_colorShape"/>
-    <attr format="reference" name="cpv_dialogTitle"/>
-    <attr format="reference" name="cpv_colorPresets"/>
-    <attr format="enum" name="cpv_dialogType">
-      <enum name="custom" value="0"/>
-      <enum name="preset" value="1"/>
-    </attr>
-    <attr format="boolean|reference" name="cpv_showColorShades"/>
-    <attr format="boolean|reference" name="cpv_allowPresets"/>
-    <attr format="boolean|reference" name="cpv_allowCustom"/>
-    <attr format="boolean|reference" name="cpv_showDialog"/>
   </declare-styleable>
 
 </resources>

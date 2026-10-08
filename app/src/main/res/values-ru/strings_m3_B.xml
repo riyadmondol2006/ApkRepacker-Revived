@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="projects_title">Проекты</string>
+    <plurals name="projects_count_plural">
+        <item quantity="one">%d проект</item>
+        <item quantity="few">%d проекта</item>
+        <item quantity="many">%d проектов</item>
+        <item quantity="other">%d проекта</item>
+    </plurals>
+    <plurals name="apps_count_plural">
+        <item quantity="one">%d приложение</item>
+        <item quantity="few">%d приложения</item>
+        <item quantity="many">%d приложений</item>
+        <item quantity="other">%d приложения</item>
+    </plurals>
+    <string name="search_projects_hint">Поиск проектов</string>
+    <string name="search_apps_hint">Поиск установленных приложений</string>
+    <string name="delete_project_title">Удалить проект?</string>
+    <string name="delete_project_message">«%1$s» и все его файлы будут удалены без возможности восстановления.</string>
+    <string name="project_deleted">Проект удалён</string>
+    <string name="project_actions_toggle">Показать действия проекта</string>
+    <string name="project_open_hint">Нажмите, чтобы открыть, удерживайте для действий</string>
+    <string name="apps_empty">Приложения не найдены</string>
+    <string name="apk_options_title">Действия с APK</string>
+    <string name="app_actions_title">Действия с приложением</string>
+    <string name="build_success_summary">APK готов</string>
+</resources>

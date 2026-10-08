@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Files screens: shared -->
+    <string name="files_fab_open">Open actions</string>
+    <string name="files_fab_close">Close actions</string>
+    <string name="files_input_name_hint">Name</string>
+    <string name="files_error_name_empty">Enter a name</string>
+    <string name="files_error_name_invalid">A name can\'t contain a slash</string>
+    <string name="files_action_create">Create</string>
+    <string name="files_action_clear_selection">Clear selection</string>
+    <string name="files_action_more">More actions</string>
+    <string name="files_action_home">Project root</string>
+    <string name="files_action_paste_here">Paste here</string>
+    <string name="files_action_new_folder_here">New folder</string>
+    <string name="files_action_cancel_paste">Discard clipboard</string>
+    <string name="files_path_bar">Current location</string>
+    <string name="files_loading">Loading files</string>
+    <string name="files_rename_multiple_unsupported">Renaming several items at once isn\'t supported yet</string>
+    <string name="files_copied_to_clipboard">Copied</string>
+    <string name="files_item_selected">%1$s, selected</string>
+    <string name="files_empty_hint">Use the + button to add files or folders</string>
+    <string name="files_cant_open_file">No app can open this file</string>
+    <string name="files_fab_import_file">Import file</string>
+    <string name="files_fab_import_folder">Import folder</string>
+    <string name="files_subtitle_both">%1$s, %2$s</string>
+</resources>

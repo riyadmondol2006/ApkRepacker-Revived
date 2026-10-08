@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="projects_title">Projects</string>
+    <plurals name="projects_count_plural">
+        <item quantity="one">%d project</item>
+        <item quantity="other">%d projects</item>
+    </plurals>
+    <plurals name="apps_count_plural">
+        <item quantity="one">%d app</item>
+        <item quantity="other">%d apps</item>
+    </plurals>
+    <string name="search_projects_hint">Search projects</string>
+    <string name="search_apps_hint">Search installed apps</string>
+    <string name="delete_project_title">Delete project?</string>
+    <string name="delete_project_message">“%1$s” and all of its files will be permanently deleted.</string>
+    <string name="project_deleted">Project deleted</string>
+    <string name="project_actions_toggle">Show project actions</string>
+    <string name="project_open_hint">Tap to open, long press for actions</string>
+    <string name="apps_empty">No apps match your search</string>
+    <string name="apk_options_title">APK actions</string>
+    <string name="app_actions_title">App actions</string>
+    <string name="build_success_summary">Your APK is ready</string>
+</resources>

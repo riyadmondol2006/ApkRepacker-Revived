@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Project row / menu -->
+    <string name="menu_export_project">Export</string>
+    <string name="menu_import_zip">Import from ZIP</string>
+    <string name="menu_import_folder">Import from folder</string>
+    <string name="transfer_export_title">Export project</string>
+    <string name="transfer_export_as_zip">Save as ZIP file</string>
+    <string name="transfer_export_as_zip_desc">Fastest. One .zip you can share or back up</string>
+    <string name="transfer_export_to_folder">Save to a folder</string>
+    <string name="transfer_export_to_folder_desc">Slower for big projects: copies thousands of files one by one</string>
+
+    <!-- Progress + results -->
+    <string name="transfer_exporting">Exporting project…</string>
+    <string name="transfer_importing">Importing project…</string>
+    <string name="transfer_progress">%1$d of %2$d files</string>
+    <string name="transfer_progress_unknown">%1$d files</string>
+    <string name="transfer_done_title">Project transfer finished</string>
+    <string name="transfer_failed_title">Project transfer failed</string>
+    <string name="transfer_export_done">Saved %1$s</string>
+    <string name="transfer_export_folder_done">Saved to folder %1$s</string>
+    <plurals name="transfer_import_done">
+        <item quantity="one">%d project imported</item>
+        <item quantity="other">%d projects imported</item>
+    </plurals>
+    <string name="transfer_failed">Failed: %1$s</string>
+    <string name="transfer_error_open">Could not open the file.</string>
+    <string name="transfer_error_no_project">No project found. A project is a folder with apktool.json or apktool.yml.</string>
+    <string name="transfer_error_too_big">The archive expands to more than 8 GB, so it was not imported.</string>
+
+    <!-- All files access -->
+    <string name="transfer_access_title">Allow access to all files?</string>
+    <string name="transfer_access_message">With All files access the app can read and write the folder you pick directly, which is much faster for big projects. You can still continue without it.</string>
+    <string name="transfer_access_grant">Allow</string>
+    <string name="transfer_access_continue">Continue without</string>
+    <string name="pref_all_files_access">All files access</string>
+    <string name="pref_all_files_access_granted">Allowed. The file manager and project export/import can use any folder.</string>
+    <string name="pref_all_files_access_denied">Not allowed. Tap to allow access to all files.</string>
+
+    <!-- Split APK apps -->
+    <string name="apps_badge_split">Split</string>
+    <string name="split_warning_title">Split APK app</string>
+    <string name="split_warning_message">%1$s is installed as split APKs: a base APK plus separate configuration splits.\n\nThe base and its configuration splits (native libraries, screen density and language resources) are merged into one project, and the split requirement is removed when you rebuild, so the result installs as a single APK. Dynamic feature splits are not included, and the rebuilt app is signed with your key, so it can\'t be installed over the original.</string>
+    <string name="split_warning_continue">Decompile anyway</string>
+</resources>

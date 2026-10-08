@@ -1,57 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    style="@style/Material.CardView.BottomSheet"
-    app:strokeWidth="0dp">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/space_4">
+
+    <com.google.android.material.bottomsheet.BottomSheetDragHandleView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="@dimen/space_6"
+        android:paddingEnd="@dimen/space_6"
+        android:paddingBottom="@dimen/space_2"
+        android:text="@string/tree_sheet_title"
+        android:textAppearance="@style/TextAppearance.Material3.TitleLarge.Emphasized"
+        android:textColor="?attr/colorOnSurface" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingStart="@dimen/space_2"
+        android:paddingEnd="@dimen/space_2">
 
-        <View
-            android:layout_width="@dimen/checkbox_dimens"
-            android:layout_height="5dp"
-            android:layout_gravity="center"
-            android:layout_marginTop="12dp"
-            android:layout_marginBottom="4dp"
-            android:background="@drawable/bottom_sheet_dialog_indicator" />
-
-        <TextView
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/create_class_file"
-            android:drawableStart="@drawable/ic_rename"
+            style="@style/Widget.Revived.SheetAction"
             android:text="@string/action_create_class"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            style="@style/ActionItem" />
+            app:icon="@drawable/ic_java" />
 
-        <TextView
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/create_xml_file"
-            android:drawableStart="@drawable/ic_rename"
+            style="@style/Widget.Revived.SheetAction"
             android:text="@string/action_create_xml"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/create_class_file"
-            style="@style/ActionItem" />
+            app:icon="@drawable/ic_file_add" />
 
-        <TextView
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/add_new_folder"
-            android:drawableStart="@drawable/ic_create_new_folder_dark"
+            style="@style/Widget.Revived.SheetAction"
             android:text="@string/action_create_new_folder"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/create_xml_file"
-            style="@style/ActionItem" />
+            app:icon="@drawable/ic_create_new_folder" />
 
-        <TextView
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/select_file"
-            android:drawableStart="@drawable/ic_file_add_grey"
+            style="@style/Widget.Revived.SheetAction"
             android:text="@string/select_from_storage"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/add_new_folder"
-            style="@style/ActionItem" />
+            app:icon="@drawable/ic_file_add_grey" />
 
     </LinearLayout>
-</com.google.android.material.card.MaterialCardView>
+</LinearLayout>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="space_half_e">2dp</dimen>
+    <dimen name="e_tile_icon_size">56dp</dimen>
+    <dimen name="e_tile_min_height">136dp</dimen>
+</resources>

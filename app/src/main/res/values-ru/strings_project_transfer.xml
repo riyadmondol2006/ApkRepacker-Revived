@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="menu_export_project">Экспорт</string>
+    <string name="menu_import_zip">Импорт из ZIP</string>
+    <string name="menu_import_folder">Импорт из папки</string>
+    <string name="transfer_export_title">Экспорт проекта</string>
+    <string name="transfer_export_as_zip">Сохранить как ZIP-файл</string>
+    <string name="transfer_export_as_zip_desc">Быстрее всего. Один .zip для передачи или резервной копии</string>
+    <string name="transfer_export_to_folder">Сохранить в папку</string>
+    <string name="transfer_export_to_folder_desc">Медленнее для больших проектов: копирует тысячи файлов по одному</string>
+    <string name="transfer_exporting">Экспорт проекта…</string>
+    <string name="transfer_importing">Импорт проекта…</string>
+    <string name="transfer_progress">%1$d из %2$d файлов</string>
+    <string name="transfer_progress_unknown">Файлов: %1$d</string>
+    <string name="transfer_done_title">Перенос проекта завершён</string>
+    <string name="transfer_failed_title">Не удалось перенести проект</string>
+    <string name="transfer_export_done">Сохранено: %1$s</string>
+    <string name="transfer_export_folder_done">Сохранено в папку %1$s</string>
+    <plurals name="transfer_import_done">
+        <item quantity="one">Импортирован %d проект</item>
+        <item quantity="few">Импортировано %d проекта</item>
+        <item quantity="many">Импортировано %d проектов</item>
+        <item quantity="other">Импортировано %d проекта</item>
+    </plurals>
+    <string name="transfer_failed">Ошибка: %1$s</string>
+    <string name="transfer_error_open">Не удалось открыть файл.</string>
+    <string name="transfer_error_no_project">Проект не найден. Проект — это папка с apktool.json или apktool.yml.</string>
+    <string name="transfer_error_too_big">Архив распаковывается более чем в 8 ГБ, поэтому он не был импортирован.</string>
+    <string name="transfer_access_title">Разрешить доступ ко всем файлам?</string>
+    <string name="transfer_access_message">С доступом ко всем файлам приложение читает и записывает выбранную папку напрямую, это намного быстрее для больших проектов. Можно продолжить и без него.</string>
+    <string name="transfer_access_grant">Разрешить</string>
+    <string name="transfer_access_continue">Продолжить без доступа</string>
+    <string name="pref_all_files_access">Доступ ко всем файлам</string>
+    <string name="pref_all_files_access_granted">Разрешён. Файловый менеджер и экспорт/импорт проектов могут использовать любую папку.</string>
+    <string name="pref_all_files_access_denied">Не разрешён. Нажмите, чтобы разрешить доступ ко всем файлам.</string>
+
+    <string name="apps_badge_split">Split</string>
+    <string name="split_warning_title">Приложение из split APK</string>
+    <string name="split_warning_message">%1$s установлено как split APK: базовый APK и отдельные конфигурационные части.\n\nБазовый APK и его конфигурационные части (нативные библиотеки, ресурсы плотности экрана и языков) объединяются в один проект, а при сборке требование split снимается, поэтому результат устанавливается как один APK. Динамические feature-части не включаются, а пересобранное приложение подписывается вашим ключом, поэтому его нельзя установить поверх оригинала.</string>
+    <string name="split_warning_continue">Всё равно декомпилировать</string>
+</resources>

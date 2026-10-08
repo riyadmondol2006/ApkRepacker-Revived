@@ -1,26 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Closing activity: fades out fast while sliding 30dp away and shrinking. -->
 <set xmlns:android="http://schemas.android.com/apk/res/android"
     android:shareInterpolator="false"
-    android:zAdjustment="top">
+    android:zAdjustment="top"
+    android:fillEnabled="true"
+    android:fillBefore="true"
+    android:fillAfter="true">
     <alpha
-        android:interpolator="@android:interpolator/linear"
-        android:duration="50"
-        android:fillBefore="true"
-        android:fillAfter="true"
-        android:startOffset="33"
-        android:fromAlpha="1.0"
-        android:toAlpha="0.0"
-        android:fillEnabled="true" />
+        android:duration="90"
+        android:fromAlpha="1"
+        android:toAlpha="0"
+        android:interpolator="@interpolator/revived_emphasized_accelerate" />
     <scale
-        android:interpolator="@android:interpolator/fast_out_slow_in"
-        android:duration="400"
+        android:duration="200"
+        android:fromXScale="1"
+        android:toXScale="0.92"
+        android:fromYScale="1"
+        android:toYScale="0.92"
         android:pivotX="50%"
         android:pivotY="50%"
-        android:fillBefore="true"
-        android:fillAfter="true"
-        android:fromXScale="1.0"
-        android:toXScale="0.9"
-        android:fromYScale="1.0"
-        android:toYScale="0.9"
-        android:fillEnabled="true" />
+        android:interpolator="@interpolator/revived_emphasized_accelerate" />
+    <translate
+        android:duration="200"
+        android:fromXDelta="0"
+        android:toXDelta="30dp"
+        android:interpolator="@interpolator/revived_emphasized_accelerate" />
 </set>

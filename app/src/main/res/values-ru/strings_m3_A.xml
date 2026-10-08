@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="empty_screen_hint">Создайте проект или импортируйте APK, чтобы начать.</string>
+    <string name="empty_screen_action">Начать</string>
+    <string name="loading_short">Загрузка</string>
+
+    <string name="nav_rail_expand">Развернуть навигацию</string>
+    <string name="nav_rail_collapse">Свернуть навигацию</string>
+
+    <string name="crash_title">Что-то пошло не так</string>
+    <string name="crash_message">Apk Repacker столкнулся с непредвиденной ошибкой и был остановлен. Скопируйте или отправьте отчёт ниже, чтобы мы могли это исправить.</string>
+    <string name="crash_report_label">Отчёт об ошибке</string>
+    <string name="crash_action_share">Поделиться</string>
+    <string name="crash_action_restart">Перезапустить</string>
+    <string name="crash_share_chooser">Отправить отчёт об ошибке</string>
+</resources>

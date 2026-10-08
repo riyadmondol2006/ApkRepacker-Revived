@@ -1,58 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- A row of the file picker list. FileListAdapter paints the round type badge on iv_file_type. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    style="?android:attr/background"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:descendantFocusability="blocksDescendants"
-    android:focusable="false"
     android:gravity="center_vertical"
-    android:minHeight="?android:listPreferredItemHeight"
-    android:orientation="horizontal">
+    android:minHeight="@dimen/list_item_min_height"
+    android:orientation="horizontal"
+    android:paddingStart="@dimen/space_3"
+    android:paddingEnd="@dimen/space_1">
 
-    <androidx.appcompat.widget.AppCompatImageView
+    <ImageView
         android:id="@+id/iv_file_type"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginStart="@dimen/list_item_icon_margin"
+        android:layout_width="@dimen/space_10"
+        android:layout_height="@dimen/space_10"
         android:scaleType="center"
         tools:ignore="ContentDescription"
         tools:src="@drawable/ic_directory" />
 
     <LinearLayout
-        android:layout_marginStart="5dp"
-        style="?android:attr/background"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/space_4"
         android:layout_weight="1"
-        android:focusable="false"
         android:orientation="vertical">
 
         <TextView
             android:id="@+id/tv_file_name"
-            style="?android:attr/textAppearanceLarge"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ellipsize="end"
-            android:singleLine="true"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            tools:text="File Name"/>
+            android:maxLines="1"
+            android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+            android:textColor="?attr/colorOnSurface"
+            tools:text="File Name" />
 
         <TextView
             android:id="@+id/tv_file_info"
-            style="?android:attr/textViewStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="12sp"
-            tools:text="Date"/>
+            android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            tools:text="Date" />
     </LinearLayout>
 
-    <CheckBox
+    <com.google.android.material.checkbox.MaterialCheckBox
         android:id="@+id/cb_file_mark"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="center_vertical"
-        android:gravity="center"
-        android:padding="@dimen/checkbox_margin" />
+        android:layout_height="wrap_content" />
 </LinearLayout>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="theme_selected">Выбрано</string>
+    <string name="about_group_team">Оригинальный проект</string>
+    <string name="project_notes_saved">Заметки сохранены</string>
+    <string name="licenses_open_link">Открыть %s</string>
+    <string name="editor_theme_current">Текущая</string>
+    <string name="editor_theme_load_failed">Не удалось загрузить темы редактора</string>
+    <string name="key_saved_in_use">Ключ создан и выбран для подписи</string>
+    <string name="key_created">Ключ создан</string>
+    <string name="key_create_failed">Не удалось создать ключ</string>
+
+    <string name="key_field_type">Тип ключа</string>
+    <string name="key_field_path">Файл ключа</string>
+    <string name="key_field_cert_path">Файл сертификата</string>
+    <string name="key_field_alias">Псевдоним</string>
+    <string name="key_field_store_pass">Пароль хранилища</string>
+    <string name="key_field_key_pass">Пароль закрытого ключа</string>
+    <string name="key_field_size">Размер ключа (бит)</string>
+    <string name="key_field_validity">Срок действия (лет)</string>
+    <string name="key_field_common_name">Общее имя</string>
+    <string name="key_field_org_unit">Подразделение</string>
+    <string name="key_field_org_name">Организация</string>
+    <string name="key_field_locality">Город</string>
+    <string name="key_field_state">Регион</string>
+    <string name="key_field_country">Страна</string>
+    <string name="key_action_create">Создать</string>
+</resources>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="cpv_hex">Hex</string>
+  <string name="cpv_hue">Оттенок</string>
+  <string name="cpv_saturation">Насыщенность</string>
+  <string name="cpv_brightness">Яркость</string>
+  <string name="cpv_opacity">Непрозрачность</string>
+  <string name="cpv_old_color">Текущий цвет</string>
+  <string name="cpv_new_color">Новый цвет</string>
+  <string name="cpv_shades">Тональные оттенки</string>
+</resources>

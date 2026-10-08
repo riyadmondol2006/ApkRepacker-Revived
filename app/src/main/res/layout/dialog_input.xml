@@ -1,22 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Single-line input shown inside a Material dialog (go to line). -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:paddingStart="@dimen/space_6"
+    android:paddingEnd="@dimen/space_6"
+    android:paddingTop="@dimen/space_2">
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/hint"
+        style="@style/Widget.Revived.TextInput"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp">
+        android:layout_height="wrap_content">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/edit_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:singleLine="false"
-            tools:text="Hello" />
-
+            android:imeOptions="actionDone"
+            android:inputType="number"
+            android:maxLines="1"
+            tools:text="1" />
     </com.google.android.material.textfield.TextInputLayout>
-
-</LinearLayout>
+</FrameLayout>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="color_swatch_height">88dp</dimen>
+    <dimen name="color_card_min_width">168dp</dimen>
+    <dimen name="color_preview_height">120dp</dimen>
+    <dimen name="dimen_unit_badge">48dp</dimen>
+</resources>

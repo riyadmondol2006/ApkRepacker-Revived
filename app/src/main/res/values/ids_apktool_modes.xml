@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ids that identify the decode-mode presets in ItemClickListener.onModeItemClick. -->
+<resources>
+    <item name="decompile_all" type="id" />
+    <item name="decompile_all_res" type="id" />
+    <item name="decompile_all_dex" type="id" />
+</resources>

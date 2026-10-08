@@ -1,96 +1,181 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?android:windowBackground"
+    android:background="?attr/colorSurface"
     android:clickable="true"
-    tools:context=".fragment.DecompileFragment"
-    android:focusable="true">
-    <!--разметка когда разбирается apk-->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:orientation="vertical"
-        tools:ignore="UselessParent">
+    android:focusable="true"
+    tools:context=".fragment.DecompileFragment">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <ProgressBar
-                style="?android:attr/progressBarStyleLarge"
-                android:id="@+id/progressBar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/normal_padding"/>
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/image_error"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:visibility="gone"
-                app:srcCompat="@drawable/ic_error" />
-
-            <TextView
-                android:id="@+id/progress_tip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="20dp"
-                android:text="@string/decode_run_title"
-                android:textStyle="bold"
-                android:textAppearance="?android:attr/textAppearanceLarge" />
-
-            <ListView
-                android:id="@+id/log"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="4dp" />
-        </LinearLayout>
+    <!-- Status: becomes a large tonal result card (primary container / error container) when the run ends. -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/decompile_status_card"
+        style="@style/Widget.Revived.Card.Filled"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/screen_margin"
+        android:layout_marginTop="@dimen/screen_margin"
+        android:layout_marginEnd="@dimen/screen_margin"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_max="@dimen/content_max_width"
+        app:shapeAppearance="@style/ShapeAppearance.Revived.Card.Large">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:orientation="horizontal"
-            android:animateLayoutChanges="true"
-            android:paddingLeft="@dimen/normal_padding"
-            android:paddingRight="@dimen/normal_padding"
-            android:paddingBottom="@dimen/checkbox_margin">
+            android:orientation="vertical"
+            android:padding="@dimen/space_6">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_copy"
-                style="@style/MD2Button"
-                android:layout_width="0dp"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/normal_padding"
-                android:layout_weight="1"
-                android:text="@string/action_copy_log"
-                android:visibility="gone" />
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_open_project"
-                style="@style/MD2Button"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/normal_padding"
-                android:layout_weight="1"
-                android:text="@string/action_open_project"
-                android:visibility="gone"/>
+                <FrameLayout
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:layout_marginEnd="@dimen/space_4">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_close"
-                style="@style/MD2Button"
-                android:layout_width="0dp"
+                    <com.google.android.material.loadingindicator.LoadingIndicator
+                        android:id="@+id/decompile_loading"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+
+                    <ImageView
+                        android:id="@+id/decompile_result_icon"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_gravity="center"
+                        android:importantForAccessibility="no"
+                        android:visibility="gone" />
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/progress_tip"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/decode_run_title"
+                        android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall.Emphasized"
+                        android:textColor="?attr/colorOnSurface" />
+
+                    <TextView
+                        android:id="@+id/decompile_subtitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_1"
+                        android:ellipsize="middle"
+                        android:maxLines="2"
+                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:textColor="?attr/colorOnSurfaceVariant" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <com.google.android.material.progressindicator.LinearProgressIndicator
+                android:id="@+id/decompile_progress"
+                style="@style/Widget.Material3Expressive.LinearProgressIndicator.Wavy"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="0.9"
-                android:text="@string/close" />
+                android:layout_marginTop="@dimen/space_5"
+                android:indeterminate="true" />
         </LinearLayout>
-    </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
-</FrameLayout>
+    <TextView
+        android:id="@+id/decompile_log_label"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/screen_margin"
+        android:layout_marginTop="@dimen/space_4"
+        android:layout_marginEnd="@dimen/screen_margin"
+        android:paddingStart="@dimen/space_2"
+        android:text="@string/m3d_decompile_log_title"
+        android:textAppearance="@style/TextAppearance.Revived.SectionHeader"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/decompile_status_card"
+        app:layout_constraintWidth_max="@dimen/content_max_width" />
+
+    <!-- Live log: monospace lines on a surface container card. -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/decompile_log_card"
+        style="@style/Widget.Revived.Card.Filled"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="@dimen/screen_margin"
+        android:layout_marginTop="@dimen/space_2"
+        android:layout_marginEnd="@dimen/screen_margin"
+        android:layout_marginBottom="@dimen/space_4"
+        app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
+        app:layout_constraintBottom_toTopOf="@+id/decompile_actions"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/decompile_log_label"
+        app:layout_constraintWidth_max="@dimen/content_max_width">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/log"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:padding="@dimen/space_3"
+            tools:listitem="@layout/item_apktool_log_line" />
+    </com.google.android.material.card.MaterialCardView>
+
+    <LinearLayout
+        android:id="@+id/decompile_actions"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/screen_margin"
+        android:layout_marginEnd="@dimen/screen_margin"
+        android:layout_marginBottom="@dimen/screen_margin"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintWidth_max="@dimen/content_max_width">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_close"
+            style="@style/Widget.Material3Expressive.Button.TonalButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/close"
+            app:materialSizeOverlay="@style/SizeOverlay.Material3Expressive.Button.Medium" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_copy"
+            style="@style/Widget.Material3Expressive.Button.TonalButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/space_2"
+            android:layout_weight="1"
+            android:text="@string/action_copy_log"
+            android:visibility="gone"
+            app:icon="@drawable/ic_copy"
+            app:materialSizeOverlay="@style/SizeOverlay.Material3Expressive.Button.Medium" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_open_project"
+            style="@style/Widget.Material3Expressive.Button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/space_2"
+            android:layout_weight="1.4"
+            android:text="@string/action_open_project"
+            android:visibility="gone"
+            app:icon="@drawable/ic_m3_folder_open"
+            app:materialSizeOverlay="@style/SizeOverlay.Material3Expressive.Button.Medium" />
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

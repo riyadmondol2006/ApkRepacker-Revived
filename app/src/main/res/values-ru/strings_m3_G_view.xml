@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="viewer_back">Назад</string>
+    <string name="viewer_switch_background">Сменить фон</string>
+    <string name="viewer_load_failed">Не удалось загрузить изображение</string>
+    <string name="tree_refresh">Обновить дерево</string>
+    <string name="tree_info_path">Путь</string>
+    <string name="tree_info_size">Размер</string>
+    <string name="tree_info_modified">Изменён</string>
+    <string name="tree_sheet_title">Добавить в эту папку</string>
+    <string name="tree_folder_created">Папка создана</string>
+    <string name="tree_file_created">Файл создан</string>
+    <string name="tree_error_create_file">Не удалось создать файл</string>
+    <string name="tree_error_exists">Уже существует</string>
+    <string name="tree_items_added">Добавлено элементов: %d</string>
+    <string name="tree_path_copied">Путь скопирован</string>
+    <string name="tree_loading">Загрузка файлов проекта</string>
+</resources>

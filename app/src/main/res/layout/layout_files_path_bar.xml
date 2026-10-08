@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container_path"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingStart="@dimen/space_2"
+    android:paddingEnd="0dp"
+    android:paddingTop="@dimen/space_1"
+    android:paddingBottom="@dimen/space_1">
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/home_folder_app"
+        style="@style/Widget.Material3Expressive.Button.IconButton.Tonal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/space_1"
+        android:contentDescription="@string/files_action_home"
+        app:icon="@drawable/ic_folder_home" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/pathScrollView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:contentDescription="@string/files_path_bar"
+        android:orientation="horizontal"
+        android:paddingEnd="@dimen/screen_margin"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:listitem="@layout/path_button_layout" />
+
+</LinearLayout>

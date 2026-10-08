@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Apk Repacker Revived themed (monochrome) launcher icon -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M29.28,67.15A28,28 0 0,1 62.65,27.37L63.89,23.57 L70.73,35.42 L59.56,36.88 L60.8,33.08A22,22 0 0,0 34.58,64.33A3,3 0 0,1 29.28,67.15 Z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M78.72,40.85A28,28 0 0,1 45.35,80.63L44.11,84.43 L37.27,72.58 L48.44,71.12 L47.2,74.92A22,22 0 0,0 73.42,43.67A3,3 0 0,1 78.72,40.85 Z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M54,38.92 L66.26,46 L54,53.08 L41.74,46 Z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M40.94,47.39 L53.2,54.46 L53.2,68.61 L40.94,61.54 Z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M54.8,54.46 L67.06,47.39 L67.06,61.54 L54.8,68.61 Z" />
+</vector>

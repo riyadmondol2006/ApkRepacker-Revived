@@ -1,38 +1,39 @@
-apply plugin: 'com.android.library'
+plugins {
+    alias(libs.plugins.android.library)
+}
 
 android {
-    compileSdk 34
-    buildToolsVersion rootProject.ext.buildToolsVersion
+    namespace = 'com.thoughtbot.expandablerecyclerview'
+    compileSdk = rootProject.ext.compileSdkVersion
 
     defaultConfig {
-        minSdkVersion project.minSdkVersion
-        targetSdkVersion project.targetSdkVersion
-        multiDexEnabled true
+        minSdk = rootProject.ext.minSdkVersion
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled = false
         }
     }
-
-    lintOptions {
-        abortOnError false
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+    lint {
+        abortOnError = false
     }
     testOptions {
         unitTests {
             includeAndroidResources = true
         }
     }
-    namespace 'com.thoughtbot.expandablerecyclerview'
 }
 
 dependencies {
     //android
-    implementation 'androidx.appcompat:appcompat:1.7.0'
-    implementation 'androidx.recyclerview:recyclerview:1.3.2'
+    implementation libs.androidx.appcompat
+    implementation libs.androidx.recyclerview
 
     //tests
-    testImplementation 'junit:junit:4.13'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    testImplementation libs.junit
+    androidTestImplementation libs.bundles.android.test
 }

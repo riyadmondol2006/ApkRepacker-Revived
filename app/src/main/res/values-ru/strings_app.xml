@@ -58,6 +58,7 @@
     <string name="pref_copy_original_files">Соответствовать оригиналу</string>
     <string name="pref_copy_original_files_summary">Сохраняет файлы как можно ближе к оригиналу. Предотвращает пересборку.</string>
     <string name="pref_use_v2_signature">Использовать подпись V2</string>
+    <string name="pref_use_v2_signature_summary">Включено по умолчанию (также добавляет подпись v3). Всегда используется для приложений под Android 11+, иначе они не установятся.</string>
     <string name="action_create_folder">Добавить папку</string>
     <string name="action_add_file">Добавить файл</string>
     <string name="action_add_new_lang">Добавить новый язык</string>

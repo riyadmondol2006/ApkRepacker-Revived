@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- M3 Expressive tokens shared by every screen. Layouts use these instead of literals. -->
+<resources>
+    <!-- Shape scale (corner radii) -->
+    <dimen name="shape_corner_none">0dp</dimen>
+    <dimen name="shape_corner_extra_small">4dp</dimen>
+    <dimen name="shape_corner_small">8dp</dimen>
+    <dimen name="shape_corner_medium">12dp</dimen>
+    <dimen name="shape_corner_large">16dp</dimen>
+    <dimen name="shape_corner_large_increased">20dp</dimen>
+    <dimen name="shape_corner_extra_large">28dp</dimen>
+    <dimen name="shape_corner_extra_large_increased">32dp</dimen>
+    <dimen name="shape_corner_extra_extra_large">48dp</dimen>
+
+    <!-- Spacing (4dp grid) -->
+    <dimen name="space_1">4dp</dimen>
+    <dimen name="space_2">8dp</dimen>
+    <dimen name="space_3">12dp</dimen>
+    <dimen name="space_4">16dp</dimen>
+    <dimen name="space_5">20dp</dimen>
+    <dimen name="space_6">24dp</dimen>
+    <dimen name="space_8">32dp</dimen>
+    <dimen name="space_10">40dp</dimen>
+    <dimen name="space_12">48dp</dimen>
+
+    <!-- Layout -->
+    <dimen name="screen_margin">16dp</dimen>
+    <dimen name="list_item_min_height">72dp</dimen>
+    <dimen name="list_item_leading_size">48dp</dimen>
+    <dimen name="touch_target">48dp</dimen>
+    <dimen name="content_max_width">640dp</dimen>
+    <dimen name="fab_clearance">96dp</dimen>
+</resources>

@@ -1,46 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    style="@style/Material.CardView.BottomSheet"
-    app:strokeWidth="0dp">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/space_4">
 
-    <LinearLayout
+    <com.google.android.material.bottomsheet.BottomSheetDragHandleView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:paddingStart="@dimen/space_6"
+        android:paddingEnd="@dimen/space_6"
+        android:paddingBottom="@dimen/space_2"
+        android:text="@string/title_file_options"
+        android:textAppearance="@style/TextAppearance.Material3.TitleLarge.Emphasized"
+        android:textColor="?attr/colorOnSurface" />
 
-        <View
-            android:layout_width="@dimen/checkbox_dimens"
-            android:layout_height="5dp"
-            android:layout_gravity="center"
-            android:layout_marginTop="12dp"
-            android:layout_marginBottom="4dp"
-            android:background="@drawable/bottom_sheet_dialog_indicator" />
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/open_with"
+        style="@style/Widget.Revived.SheetAction"
+        android:paddingStart="@dimen/space_6"
+        android:text="@string/action_open_with"
+        app:icon="@drawable/ic_open_with" />
 
-        <TextView
-            android:id="@+id/open_with"
-            style="@style/ActionItem"
-            android:drawableStart="@drawable/ic_open_with"
-            android:text="@string/action_open_with" />
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/open_in_editor"
+        style="@style/Widget.Revived.SheetAction"
+        android:paddingStart="@dimen/space_6"
+        android:text="@string/action_open_in_editor"
+        app:icon="@drawable/ic_rename" />
 
-        <TextView
-            android:id="@+id/open_in_editor"
-            style="@style/ActionItem"
-            android:drawableStart="@drawable/ic_rename"
-            android:text="@string/action_open_in_editor" />
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/copy_path"
+        style="@style/Widget.Revived.SheetAction"
+        android:paddingStart="@dimen/space_6"
+        android:text="@string/action_copy_path"
+        app:icon="@drawable/ic_copy" />
 
-        <TextView
-            android:id="@+id/copy_path"
-            style="@style/ActionItem"
-            android:drawableStart="@drawable/ic_copy"
-            android:text="@string/action_copy_path" />
-
-        <TextView
-            android:id="@+id/replace_in_file"
-            style="@style/ActionItem"
-            android:drawableStart="@drawable/ic_find_replace"
-            android:text="@string/action_replace_panel"
-            android:visibility="gone" />
-
-    </LinearLayout>
-</com.google.android.material.card.MaterialCardView>
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/replace_in_file"
+        style="@style/Widget.Revived.SheetAction"
+        android:paddingStart="@dimen/space_6"
+        android:text="@string/action_replace_panel"
+        android:visibility="gone"
+        app:icon="@drawable/ic_find_replace" />
+</LinearLayout>

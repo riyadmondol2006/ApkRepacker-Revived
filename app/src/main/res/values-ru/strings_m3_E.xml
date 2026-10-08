@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="m3e_close_project">Закрыть проект</string>
+    <string name="m3e_build">Собрать</string>
+    <string name="m3e_find_empty_title">Поиск по проекту</string>
+    <string name="m3e_find_empty_body">Ищите текст внутри файлов или файлы по имени. Результаты появятся здесь.</string>
+    <string name="m3e_pick_folder">Выбрать папку</string>
+    <string name="m3e_folder">Папка</string>
+    <string name="m3e_extension_hint">Расширение</string>
+    <string name="m3e_extension_remove">Удалить расширение</string>
+    <string name="m3e_expand_collapse">Развернуть или свернуть</string>
+    <string name="m3e_replaced">Заменено</string>
+    <string name="m3e_in_development">Проверка обновлений скоро появится</string>
+    <string name="m3e_tools_updates_hint">Найти новую версию</string>
+    <string name="m3e_tools_settings_hint">Оформление, редактор и сборка</string>
+    <string name="m3e_tools_about_hint">Версия, авторы и ссылки</string>
+    <string name="m3e_batch_variables">Вставить переменную</string>
+    <string name="m3e_replace_failed">Не удалось заменить в %1$s</string>
+    <string name="m3e_open_file_options">Ещё</string>
+    <string name="m3e_search_hint">Поиск в проекте</string>
+    <string name="m3e_replace_all_in_files">Заменить во всех файлах</string>
+    <string name="m3e_cut">Вырезать</string>
+    <string name="m3e_clear">Очистить</string>
+</resources>

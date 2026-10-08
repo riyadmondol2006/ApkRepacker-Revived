@@ -1,194 +1,113 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    style="@style/Material.CardView.BottomSheet"
-    app:strokeWidth="0dp">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/space_4">
 
-        <androidx.appcompat.widget.AppCompatTextView
+        <com.google.android.material.bottomsheet.BottomSheetDragHandleView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
             android:id="@+id/title_text_view"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_gravity="center_vertical"
-            android:gravity="center_vertical"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/space_6"
+            android:paddingEnd="@dimen/space_6"
+            android:paddingBottom="@dimen/space_3"
             android:text="@string/replace_in_file_title"
-            android:textAppearance="?attr/textAppearanceSubtitle1"
-            android:textColor="?attr/colorOnSurface"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            android:textAppearance="@style/TextAppearance.Material3.TitleLarge.Emphasized"
+            android:textColor="?attr/colorOnSurface" />
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="?dividerColor" />
-
-        <com.google.android.material.card.MaterialCardView
-            style="@style/Material.CardView"
-            android:layout_height="@dimen/checkbox_dimens">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:animateLayoutChanges="true"
-                android:orientation="horizontal">
-
-                <androidx.appcompat.widget.AppCompatImageView
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginStart="4dp"
-                    android:padding="6dp"
-                    android:tint="?android:textColorSecondary"
-                    app:srcCompat="@drawable/ic_search" />
-
-                <androidx.appcompat.widget.AppCompatEditText
-                    android:id="@+id/search_text"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="4dp"
-                    android:layout_weight="1"
-                    android:background="@android:color/transparent"
-                    android:ems="10"
-                    android:hint="@string/search_request"
-                    android:inputType="text"
-                    android:padding="4dp"
-                    android:singleLine="true"
-                    android:textColorHint="?android:textColorSecondary"
-                    android:textSize="16sp" />
-
-                <androidx.appcompat.widget.AppCompatImageButton
-                    android:id="@+id/button_clear"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:layout_gravity="center_vertical"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:tint="?android:textColorSecondary"
-                    android:visibility="gone"
-                    app:srcCompat="@drawable/ic_clear" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.card.MaterialCardView
-            style="@style/Material.CardView"
-            android:layout_height="@dimen/checkbox_dimens">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:animateLayoutChanges="true"
-                android:orientation="horizontal">
-
-                <androidx.appcompat.widget.AppCompatImageView
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginStart="4dp"
-                    android:padding="6dp"
-                    android:tint="?android:textColorSecondary"
-                    app:srcCompat="@drawable/ic_find_replace" />
-
-                <androidx.appcompat.widget.AppCompatEditText
-                    android:id="@+id/replace_text"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="4dp"
-                    android:layout_weight="1"
-                    android:background="@android:color/transparent"
-                    android:ems="10"
-                    android:hint="@string/replace_request"
-                    android:inputType="text"
-                    android:padding="4dp"
-                    android:singleLine="true"
-                    android:textColorHint="?android:textColorSecondary"
-                    android:textSize="16sp" />
-
-                <androidx.appcompat.widget.AppCompatImageButton
-                    android:id="@+id/button_clear_replace"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:layout_gravity="center_vertical"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:tint="?android:textColorSecondary"
-                    android:visibility="gone"
-                    app:srcCompat="@drawable/ic_clear" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.card.MaterialCardView style="@style/Material.CardView">
-
-            <LinearLayout
-                android:id="@+id/search_options_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/normal_padding"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/caption_string_search_options"
-                    android:textColor="?colorAccent"
-                    android:textSize="@dimen/text_size_14"
-                    android:textStyle="bold" />
-
-                <CheckBox
-                    android:id="@+id/regular_exp_cb"
-                    android:layout_width="match_parent"
-                    android:layout_height="28dp"
-                    android:layout_marginTop="@dimen/checkbox_margin"
-                    android:text="@string/regex" />
-
-                <CheckBox
-                    android:id="@+id/ignore_case_cb"
-                    android:layout_width="match_parent"
-                    android:layout_height="28dp"
-                    android:text="@string/label_ignore_case" />
-
-                <CheckBox
-                    android:id="@+id/whole_words_only_cb"
-                    android:layout_width="match_parent"
-                    android:layout_height="28dp"
-                    android:text="@string/whole_words_only" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-      <!--  <com.google.android.material.card.MaterialCardView
-            style="@style/Material.CardView">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/normal_padding"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/caption_string_replace_options"
-                    android:textColor="?colorAccent"
-                    android:textSize="@dimen/text_size_14"
-                    android:textStyle="bold" />
-
-                <CheckBox
-                    android:id="@+id/apply_to_all_files_cb"
-                    android:layout_width="match_parent"
-                    android:layout_height="28dp"
-                    android:layout_marginTop="@dimen/checkbox_margin"
-                    android:text="@string/apply_to_all_files" />
-
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>-->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/button_bottom_sheet_dialog_base_ok"
-            style="@style/MD2Button"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/search_text_layout"
+            style="@style/Widget.Revived.E.TextInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/card_title_margin"
+            android:layout_marginStart="@dimen/space_6"
+            android:layout_marginEnd="@dimen/space_6"
+            android:hint="@string/search_request"
+            app:endIconMode="clear_text"
+            app:startIconDrawable="@drawable/ic_search">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/search_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:maxLines="1" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Revived.E.TextInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/space_6"
+            android:layout_marginTop="@dimen/space_3"
+            android:layout_marginEnd="@dimen/space_6"
+            android:hint="@string/replace_request"
+            app:endIconMode="clear_text"
+            app:startIconDrawable="@drawable/ic_find_replace">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/replace_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:maxLines="1" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/space_6"
+            android:layout_marginTop="@dimen/space_4"
+            android:text="@string/caption_string_search_options"
+            android:textAppearance="@style/TextAppearance.Revived.SectionHeader" />
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/search_options_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/space_6"
+            android:layout_marginTop="@dimen/space_2"
+            android:layout_marginEnd="@dimen/space_6">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/regular_exp_cb"
+                style="@style/Widget.Revived.E.FilterChip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/regex" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/ignore_case_cb"
+                style="@style/Widget.Revived.E.FilterChip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/case_sensitive" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/whole_words_only_cb"
+                style="@style/Widget.Revived.E.FilterChip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/whole_words_only" />
+        </com.google.android.material.chip.ChipGroup>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_bottom_sheet_dialog_base_ok"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/space_6"
+            android:layout_marginTop="@dimen/space_6"
+            android:layout_marginEnd="@dimen/space_6"
             android:text="@string/ok" />
     </LinearLayout>
-</com.google.android.material.card.MaterialCardView>
+</androidx.core.widget.NestedScrollView>

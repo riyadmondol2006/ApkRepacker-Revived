@@ -1,70 +1,119 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:fab="http://schemas.android.com/apk/res-auto"
-    tools:context="fragment.StringsFragment">
+    tools:context=".fragment.StringsFragment">
 
-    <LinearLayout
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:liftOnScroll="true">
+
+        <com.google.android.material.search.SearchBar
+            android:id="@+id/search_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/screen_margin"
+            android:layout_marginTop="@dimen/space_2"
+            android:layout_marginEnd="@dimen/screen_margin"
+            android:hint="@string/h_search_strings"
+            app:layout_scrollFlags="scroll|enterAlways|snap" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/lang_layout"
+            style="?attr/textInputFilledExposedDropdownMenuStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/screen_margin"
+            android:layout_marginTop="@dimen/space_2"
+            android:layout_marginEnd="@dimen/screen_margin"
+            android:layout_marginBottom="@dimen/space_2"
+            android:hint="@string/language"
+            app:layout_scrollFlags="scroll|enterAlways">
+
+            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                android:id="@+id/lang_dropdown"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none"
+                android:labelFor="@id/lang_layout"
+                android:singleLine="true" />
+        </com.google.android.material.textfield.TextInputLayout>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/string_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingTop="@dimen/space_2"
+        android:paddingBottom="@dimen/fab_clearance"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        tools:listitem="@layout/item_string_value" />
+
+    <com.google.android.material.loadingindicator.LoadingIndicator
+        android:id="@+id/loading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        tools:visibility="gone" />
+
+    <TextView
+        android:id="@+id/empty_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:padding="@dimen/space_6"
+        android:text="@string/h_empty_strings"
+        android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/fab_cluster"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="@dimen/screen_margin"
+        android:gravity="end"
         android:orientation="vertical">
 
-        <include
-            layout="@layout/search_view"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/checkbox_dimens"
-            android:layout_margin="@dimen/checkbox_margin" />
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_more_options"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/space_3"
+            android:contentDescription="@string/action_more"
+            android:src="@drawable/ic_more"
+            app:backgroundTint="?attr/colorSecondaryContainer"
+            app:tint="?attr/colorOnSecondaryContainer" />
+
+        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+            android:id="@+id/fab_save_language"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/save"
+            app:icon="@drawable/ic_save" />
+    </LinearLayout>
+
+    <com.google.android.material.search.SearchView
+        android:id="@+id/search_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:hint="@string/h_search_strings"
+        app:layout_anchor="@id/search_bar">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/string_list"
+            android:id="@+id/search_results"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
-            android:paddingBottom="@dimen/list_padding"
+            android:paddingTop="@dimen/space_2"
+            android:paddingBottom="@dimen/space_6"
             tools:listitem="@layout/item_string_value" />
-
-    </LinearLayout>
-
-    <com.github.clans.fab.FloatingActionMenu
-        android:id="@+id/fab"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="end|bottom"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:paddingBottom="10dp"
-        fab:menu_animationDelayPerItem="0"
-        fab:menu_colorRipple="?colorSelected"
-        fab:menu_colorNormal="?colorAccent"
-        fab:menu_colorPressed="?colorAccent"
-        fab:menu_icon="@drawable/ic_add_white"
-        fab:menu_labels_ellipsize="end"
-        fab:menu_labels_maxLines="2">
-
-        <com.github.clans.fab.FloatingActionButton
-            android:id="@+id/fab_save_language"
-            style="@style/MenuButtonsSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_save"
-            fab:fab_label="@string/save" />
-
-        <com.github.clans.fab.FloatingActionButton
-            android:id="@+id/fab_select_language"
-            style="@style/MenuButtonsSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_web"
-            fab:fab_label="@string/action_select_lang" />
-
-        <com.github.clans.fab.FloatingActionButton
-            android:id="@+id/fab_more_options"
-            style="@style/MenuButtonsSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_add_white"
-            fab:fab_label="@string/action_more" />
-    </com.github.clans.fab.FloatingActionMenu>
-
-</FrameLayout>
+    </com.google.android.material.search.SearchView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

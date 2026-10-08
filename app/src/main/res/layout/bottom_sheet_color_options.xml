@@ -1,107 +1,127 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    style="@style/Material.CardView.BottomSheet"
-    app:strokeWidth="0dp">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingStart="@dimen/space_6"
+        android:paddingEnd="@dimen/space_6"
+        android:paddingBottom="@dimen/space_6">
 
-        <LinearLayout
+        <com.google.android.material.bottomsheet.BottomSheetDragHandleView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/tv_dialog_title"
-                android:layout_width="0dp"
-                android:layout_height="56dp"
-                android:layout_weight="1"
-                android:layout_gravity="center_vertical"
-                android:gravity="center_vertical"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                tools:text="Add new color"
-                android:textStyle="bold"
-                android:textSize="18sp"
-                android:textAppearance="?attr/textAppearanceSubtitle1"
-                android:textColor="?attr/colorOnSurface" />
-
-            <androidx.appcompat.widget.AppCompatImageButton
-                android:id="@+id/delete_color"
-                android:visibility="gone"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/card_title_margin"
-                android:layout_marginEnd="@dimen/card_title_margin"
-                android:layout_gravity="center_vertical"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:tint="@color/red_primary_dark"
-                app:srcCompat="@drawable/ic_delete" />
-
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="?dividerColor" />
+            android:layout_height="wrap_content" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            android:layout_marginTop="@dimen/card_title_margin"
-            android:layout_marginStart="@dimen/card_title_margin"
-            android:layout_marginEnd="@dimen/card_title_margin"
-            android:layout_marginBottom="0dp"
-            android:focusableInTouchMode="true"
             android:orientation="horizontal">
 
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/TextInputLayout"
-                android:theme="@style/TextInputLayout.OutlinedBox"
+            <TextView
+                android:id="@+id/tv_dialog_title"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="@string/color_name">
+                android:text="@string/action_add_new_color"
+                android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
+                android:textColor="?attr/colorOnSurface" />
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/color_name"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="text">
-
-                    <requestFocus />
-                </com.google.android.material.textfield.TextInputEditText>
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <androidx.appcompat.widget.AppCompatImageButton
-                android:id="@+id/select_color"
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/delete_color"
+                style="@style/Widget.Material3Expressive.Button.IconButton.Tonal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:layout_marginStart="@dimen/card_title_margin"
-                android:layout_gravity="center_vertical"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:tint="?android:textColorSecondary"
-                app:srcCompat="@drawable/ic_palette" />
-
+                android:contentDescription="@string/delete"
+                android:visibility="gone"
+                app:backgroundTint="?attr/colorErrorContainer"
+                app:icon="@drawable/ic_delete"
+                app:iconTint="?attr/colorOnErrorContainer"
+                tools:visibility="visible" />
         </LinearLayout>
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/done"
-            style="@style/MD2Button"
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/color_preview_height"
+            android:layout_marginTop="@dimen/space_4"
+            app:cardCornerRadius="@dimen/shape_corner_extra_large"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp">
+
+            <View
+                android:id="@+id/color_preview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/h_color_preview" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/color_name_layout"
+            style="@style/Widget.Revived.TextInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/card_title_margin"
-            android:text="@string/abc_action_mode_done"
-            tools:ignore="PrivateResource" />
+            android:layout_marginTop="@dimen/space_4"
+            android:hint="@string/color_name"
+            app:helperText="@string/color_name_exapmle">
 
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/color_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionNext"
+                android:inputType="textNoSuggestions"
+                android:singleLine="true" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/color_hex_layout"
+            style="@style/Widget.Revived.TextInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_3"
+            android:hint="@string/h_color_hex"
+            app:placeholderText="@string/h_color_hex_hint">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/color_hex"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:digits="#0123456789ABCDEFabcdef"
+                android:imeOptions="actionDone"
+                android:inputType="textNoSuggestions|textCapCharacters"
+                android:maxLength="9"
+                android:singleLine="true" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_6"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/select_color"
+                style="@style/Widget.Material3Expressive.Button.TonalButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/space_2"
+                android:layout_weight="1"
+                android:text="@string/h_color_pick"
+                app:icon="@drawable/ic_palette" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/done"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/space_2"
+                android:layout_weight="1"
+                android:text="@string/save"
+                app:icon="@drawable/ic_check" />
+        </LinearLayout>
     </LinearLayout>
-
-</com.google.android.material.card.MaterialCardView>
+</androidx.core.widget.NestedScrollView>

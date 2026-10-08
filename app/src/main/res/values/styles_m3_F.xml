@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- One key of the symbol toolbar: a compact monospace text button. -->
+    <style name="Widget.Revived.Editor.SymbolKey" parent="Widget.Material3Expressive.Button.TextButton">
+        <item name="android:minWidth">@dimen/m3f_symbol_key_min_width</item>
+        <item name="android:minHeight">@dimen/touch_target</item>
+        <item name="android:paddingStart">@dimen/space_2</item>
+        <item name="android:paddingEnd">@dimen/space_2</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:fontFamily">monospace</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
+        <item name="android:textAppearance">@style/TextAppearance.Material3.TitleMedium</item>
+    </style>
+
+    <!-- Section label inside forms and dialogs. -->
+    <style name="TextAppearance.Revived.Editor.FormSection" parent="TextAppearance.Material3.LabelLarge.Emphasized">
+        <item name="android:textColor">?attr/colorPrimary</item>
+    </style>
+</resources>

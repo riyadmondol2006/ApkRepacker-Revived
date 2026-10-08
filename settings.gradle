@@ -1,8 +1,28 @@
-rootProject.name='Apk Repacker'
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode = RepositoriesMode.FAIL_ON_PROJECT_REPOS
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            url = "https://jitpack.io"
+            content {
+                includeGroup "com.github.ybq"
+                includeGroup "com.github.iBotPeaches.smali"
+            }
+        }
+    }
+}
+
+rootProject.name = 'Apk Repacker Revived'
 include ':app'
-include ':md-dialog-core'
-include ':apktool'
-include ':custom-fab'
 include ':common'
 include ':colorpicker'
 include ':expandablerecyclerview'
