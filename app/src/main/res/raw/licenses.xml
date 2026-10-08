@@ -37,6 +37,13 @@
     </notice>
 
     <notice>
+        <name>ARSCLib</name>
+        <url>https://github.com/REAndroid/ARSCLib</url>
+        <copyright>Copyright (C) 2022 github.com/REAndroid</copyright>
+        <license>Apache Software License 2.0</license>
+    </notice>
+
+    <notice>
         <name>Apktool</name>
         <url>https://github.com/iBotPeaches/Apktool</url>
         <copyright>Copyright (c) 2019 Ryszard Wiśniewski, Copyright (C) 2019 Connor Tumbleson. All rights reserved.</copyright>

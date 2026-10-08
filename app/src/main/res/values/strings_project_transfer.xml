@@ -41,7 +41,4 @@
 
     <!-- Split APK apps -->
     <string name="apps_badge_split">Split</string>
-    <string name="split_warning_title">Split APK app</string>
-    <string name="split_warning_message">%1$s is installed as split APKs: a base APK plus separate configuration splits.\n\nThe base and its configuration splits (native libraries, screen density and language resources) are merged into one project, and the split requirement is removed when you rebuild, so the result installs as a single APK. Dynamic feature splits are not included, and the rebuilt app is signed with your key, so it can\'t be installed over the original.</string>
-    <string name="split_warning_continue">Decompile anyway</string>
 </resources>

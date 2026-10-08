@@ -1,6 +1,7 @@
 package com.riyadm.apkrepacker.ui.filemanager.holder
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.view.isVisible
@@ -28,6 +29,8 @@ open class FileListViewHolder private constructor(private val binding: ListItemF
 
     init {
         binding.fileRow.pressSpring(0.98f)
+        // The tile is a touch shortcut for the row's long-press; keep it out of TalkBack as an unlabeled button.
+        binding.listItemImage.importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
     }
 
     open fun bind(filePath: File, position: Int, listener: OnItemClickListener, selected: Boolean, projectMode: Boolean) {

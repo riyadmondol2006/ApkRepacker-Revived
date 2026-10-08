@@ -273,8 +273,12 @@ class ProjectsFragment : Fragment(), ProjectViewHolder.OnItemClickListener {
             }
         }
         adapter?.setData(visible)
-        binding.collapsingToolbar.subtitle =
-            resources.getQuantityString(R.plurals.projects_count_plural, visible.size, visible.size)
+        val subtitle = resources.getQuantityString(R.plurals.projects_count_plural, visible.size, visible.size)
+        if (binding.collapsingToolbar.subtitle?.toString() != subtitle) {
+            binding.collapsingToolbar.subtitle = subtitle
+            // setSubtitle doesn't remeasure; the bar must grow to make room for the line.
+            binding.collapsingToolbar.requestLayout()
+        }
 
         val hasItems = visible.isNotEmpty()
         binding.projectList.visibility = if (hasItems) View.VISIBLE else View.INVISIBLE

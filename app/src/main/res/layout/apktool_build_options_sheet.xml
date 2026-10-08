@@ -106,6 +106,7 @@
             android:layout_weight="2"
             android:text="@string/apktool_build"
             app:icon="@drawable/ic_build"
+            app:iconGravity="textStart"
             app:materialSizeOverlay="@style/SizeOverlay.Material3Expressive.Button.Medium" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

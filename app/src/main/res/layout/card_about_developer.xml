@@ -68,7 +68,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/about_telegram_short"
-                app:icon="@drawable/ic_telegram" />
+                app:icon="@drawable/ic_telegram"
+                app:iconGravity="textStart" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_dev_email"
@@ -77,7 +78,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/about_email_short"
-                app:icon="@drawable/ic_email" />
+                app:icon="@drawable/ic_email"
+                app:iconGravity="textStart" />
         </com.google.android.material.button.MaterialButtonGroup>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

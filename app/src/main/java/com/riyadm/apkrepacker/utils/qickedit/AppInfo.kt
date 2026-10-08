@@ -3,12 +3,15 @@ package com.riyadm.apkrepacker.utils.qickedit
 import android.content.Context
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import android.content.res.Resources
 import android.graphics.drawable.Drawable
+import android.util.TypedValue
 import java.io.File
 
 class AppInfo {
     private var icon: Drawable? = null
     private var iconValue: String? = null
+    private var iconFiles: Map<String, String> = emptyMap()
     private var label: CharSequence? = null
     private var pname: String? = null
     private var version: String? = null
@@ -46,6 +49,7 @@ class AppInfo {
                 val resources = pManager!!.getResourcesForApplication(appInfo)
                 this.icon = appInfo.loadIcon(pManager!!)
                 this.iconValue = resources.getResourceName(appInfo.icon)
+                this.iconFiles = resolveIconFiles(resources, appInfo.icon)
                 this.label = appInfo.loadLabel(pManager!!)
                 this.pname = pInfo!!.packageName
                 this.version = pInfo!!.versionName
@@ -69,6 +73,34 @@ class AppInfo {
 
     fun iconValue(): String? {
         return iconValue
+    }
+
+    /** APK entry path -> [IconGenerate.mDens] density of every bitmap the icon resolves to. */
+    fun iconFiles(): Map<String, String> {
+        return iconFiles
+    }
+
+    /**
+     * Asks the resource table which file serves the icon at each density, so obfuscated entry
+     * names (res/a1.png) are found too. XML results (an adaptive icon) are skipped.
+     */
+    private fun resolveIconFiles(resources: Resources, id: Int): Map<String, String> {
+        val dpis = intArrayOf(120, 160, 240, 320, 480, 640)
+        val files = HashMap<String, String>()
+        val value = TypedValue()
+        for (dpi in dpis) {
+            try {
+                resources.getValueForDensity(id, dpi, value, true)
+            } catch (e: Resources.NotFoundException) {
+                continue
+            }
+            val path = value.string?.toString() ?: continue
+            if (!path.startsWith("res/") || path.endsWith(".xml")) continue
+            // The file's own density, which may differ from the one asked for; none/any -> largest.
+            val index = dpis.indexOfFirst { value.density in 1..it }
+            files[path] = IconGenerate.mDens[if (index >= 0) index else dpis.lastIndex]
+        }
+        return files
     }
 
     fun label(): String {

@@ -15,7 +15,8 @@
 
 Apk Repacker Revived is an APK editor that runs on the device itself. Pick an installed app or an
 APK file, decompile it with **apktool 3**, change its code or resources, rebuild it with a bundled
-`aapt2`, sign it and install it. No computer needed.
+`aapt2`, sign it and install it. Apps that come as split APKs can be merged into one ordinary APK
+first (**AntiSplit**). No computer needed.
 
 It is a modernised continuation of [ApkRepacker](https://github.com/MrIkso/ApkRepacker) by MrIkso:
 a new engine, a new toolchain, a reworked patcher and a full Material 3 Expressive interface.
@@ -45,12 +46,26 @@ works without it, only slower for folder export and import (see [Permissions](#p
   the original manifest and `META-INF`, no PNG crunch, force.
 - Sign with v1, v2, v3 and v4 signatures, using the built-in key or your own keystore.
 
-### Split APK apps
+### Split APK apps and AntiSplit
 - Apps installed as split APKs (a base APK plus configuration splits) are marked **Split** in the
-  Installed Apps list, and you get a warning before decompiling one.
-- The base and its configuration splits (native libraries, density and language resources) are merged
-  into a single project, and the split requirement is removed on rebuild so the result installs on
-  its own. Dynamic feature splits are not included.
+  Installed Apps list.
+- **AntiSplit & save APK** merges the base and every split into one ordinary APK and saves it
+  wherever you choose: **signed** (ready to install, with your signing key from Settings) or
+  **unsigned** (to sign later with your own key).
+- Split-APK archives (`.apks`, `.xapk`, `.apkm`, or a `.zip` of APKs) opened in **My Files** get the
+  same actions: convert & save, convert then decompile or simple edit, or use just the base APK.
+- **Decompile** and **Simple edit** on a split app ask first: *AntiSplit* (merge everything, then
+  use the merged APK) or *Base APK only*.
+- The merge is binary, done with [ARSCLib](https://github.com/REAndroid/ARSCLib): nothing is
+  decompiled, so it is fast and lossless (a 300 MB app merges in about 10 s). The app then:
+  - finds the base APK itself, so service-only apps without a launcher work too;
+  - refuses mismatched files, such as splits of another app or version;
+  - removes every split requirement from the manifest;
+  - keeps native libraries uncompressed and 16 KB page-aligned when the app needs that.
+- Merges run in the background with notifications, and are cached per app version, so decompiling
+  the same app again is instant.
+- Apps protected by Google Play's anti-tamper check (PairIP) get a warning: a re-signed copy usually
+  refuses to run. Encrypted `.apkm` files can't be opened by any tool.
 
 ### Patcher
 - Apply one or more `.zip` patches to the open project. Each patch is a small script
@@ -182,7 +197,9 @@ pinning and integrity check bypass, and mobile forensics are the main areas of w
 
 ## Credits
 
-Based on the original [ApkRepacker](https://github.com/MrIkso/ApkRepacker) by MrIkso. Open source
+Based on the original [ApkRepacker](https://github.com/MrIkso/ApkRepacker) by MrIkso. Split APKs
+are merged with [ARSCLib](https://github.com/REAndroid/ARSCLib) by REAndroid; the idea of an on-device
+merger comes from [AntiSplit-M](https://github.com/AbdurazaaqMohammed/AntiSplit-M). Open source
 libraries are listed under **About → Licenses** in the app.
 
 ## Responsible use

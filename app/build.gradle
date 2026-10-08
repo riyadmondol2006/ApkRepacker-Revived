@@ -13,8 +13,8 @@ android {
         applicationId = "com.riyadm.apkrepacker"
         minSdk = rootProject.ext.minSdkVersion
         targetSdk = rootProject.ext.targetSdkVersion
-        versionCode = 41
-        versionName = "1.0.4"
+        versionCode = 42
+        versionName = "1.0.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -87,10 +87,21 @@ base {
     archivesName = "ApkRepackerRevived-v${android.defaultConfig.versionName}(${android.defaultConfig.versionCode})"
 }
 
+// ARSCLib (AntiSplit) without its desktop-only parts: the Android framework tables and its own
+// copies of android.* / org.xmlpull.* classes, which the device already provides. See libs/arsclib.
+def arscLibJar = tasks.register('arscLibJar', Jar) {
+    from(zipTree(file('libs/arsclib/ARSCLib-1.4.0.jar'))) {
+        exclude 'frameworks/**', 'android/**', 'org/xmlpull/**', 'META-INF/*.SF', 'META-INF/*.RSA', 'META-INF/*.DSA'
+    }
+    archiveFileName = 'arsclib-android.jar'
+    destinationDirectory = layout.buildDirectory.dir('arsclib')
+}
+
 dependencies {
     coreLibraryDesugaring libs.desugar.jdk.libs.nio
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation files(arscLibJar)
     // apktool 3 (decode/build). Android ships org.xmlpull.v1 itself.
     implementation(libs.apktool.lib) {
         exclude group: 'xmlpull', module: 'xmlpull'

@@ -16,6 +16,7 @@ object QickEditParams {
     private var inDex = false
     private var bitmap: Bitmap? = null
     private var iconName: String? = null
+    private var iconFiles: Map<String, String> = emptyMap()
 
     @JvmStatic
     fun setOldName(old: String?) {
@@ -132,6 +133,16 @@ object QickEditParams {
     @JvmStatic
     fun setBitmap(bit: Bitmap?) {
         bitmap = bit
+    }
+
+    @JvmStatic
+    fun getIconFiles(): Map<String, String> {
+        return iconFiles
+    }
+
+    @JvmStatic
+    fun setIconFiles(files: Map<String, String>) {
+        iconFiles = files
     }
 
     @JvmStatic

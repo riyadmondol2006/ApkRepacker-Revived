@@ -19,7 +19,7 @@
         android:contentDescription="@string/m3f_icon_edit"
         android:focusable="true"
         android:scaleType="centerCrop"
-        app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.ExtraLarge"
+        app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
         app:srcCompat="@mipmap/ic_launcher" />
 
     <com.google.android.material.button.MaterialButton

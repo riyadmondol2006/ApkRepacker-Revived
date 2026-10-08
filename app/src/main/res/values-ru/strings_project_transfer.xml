@@ -37,7 +37,4 @@
     <string name="pref_all_files_access_denied">Не разрешён. Нажмите, чтобы разрешить доступ ко всем файлам.</string>
 
     <string name="apps_badge_split">Split</string>
-    <string name="split_warning_title">Приложение из split APK</string>
-    <string name="split_warning_message">%1$s установлено как split APK: базовый APK и отдельные конфигурационные части.\n\nБазовый APK и его конфигурационные части (нативные библиотеки, ресурсы плотности экрана и языков) объединяются в один проект, а при сборке требование split снимается, поэтому результат устанавливается как один APK. Динамические feature-части не включаются, а пересобранное приложение подписывается вашим ключом, поэтому его нельзя установить поверх оригинала.</string>
-    <string name="split_warning_continue">Всё равно декомпилировать</string>
 </resources>

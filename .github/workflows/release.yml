@@ -127,9 +127,10 @@ jobs:
             exit 1
           fi
           SAFE_VERSION=${VERSION_NAME// /-}
-          TAG="v${SAFE_VERSION}-build.${GITHUB_RUN_NUMBER}"
+          # One release per version: pushing again without a new versionName replaces it.
+          TAG="v${SAFE_VERSION}"
           APK_SRC=$(ls app/build/outputs/apk/release/*.apk | head -n 1)
-          APK="ApkRepackerRevived-v${SAFE_VERSION}-build${GITHUB_RUN_NUMBER}.apk"
+          APK="ApkRepackerRevived-v${SAFE_VERSION}.apk"
           cp "$APK_SRC" "$APK"
           echo "version_name=$VERSION_NAME" >> "$GITHUB_OUTPUT"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
@@ -150,8 +151,10 @@ jobs:
       - name: Write the release notes
         env:
           APK: ${{ steps.meta.outputs.apk }}
+          TAG: ${{ steps.meta.outputs.tag }}
         run: |
-          PREVIOUS=$(git describe --tags --abbrev=0 2>/dev/null || true)
+          # Changes since the previous version (not since an earlier build of this same version).
+          PREVIOUS=$(git describe --tags --abbrev=0 --exclude "$TAG" 2>/dev/null || true)
           {
             echo "Automatic build of \`main\` at \`${GITHUB_SHA::7}\`."
             echo
@@ -173,10 +176,10 @@ jobs:
           VERSION_NAME: ${{ steps.meta.outputs.version_name }}
           CHANNEL: ${{ steps.meta.outputs.channel }}
         run: |
-          # Re-running a run reuses its tag: replace what is there instead of failing.
+          # The same version again (a re-run, or a push without a new versionName): replace it.
           gh release delete "$TAG" --cleanup-tag --yes > /dev/null 2>&1 || true
           gh release create "$TAG" "$APK" \
-            --title "Apk Repacker Revived $VERSION_NAME (build $GITHUB_RUN_NUMBER)" \
+            --title "Apk Repacker Revived $VERSION_NAME" \
             --notes-file release-notes.md \
             --target "$GITHUB_SHA" \
             "$CHANNEL"

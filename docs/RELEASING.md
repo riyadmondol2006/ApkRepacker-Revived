@@ -82,10 +82,11 @@ Open the **Actions** tab. The *Build and release* run takes roughly 5 to 10 minu
 (faster after, Gradle is cached). When it finishes, the **Releases** page has a new release
 containing:
 
-* `ApkRepackerRevived-v<version>-build<N>.apk`: the signed APK
-* notes with the commit, the APK's SHA-256 and the commits since the last release
+* `ApkRepackerRevived-v<version>.apk`: the signed APK
+* notes with the commit, the APK's SHA-256 and the commits since the previous version
 
-Releases are named `v<versionName>-build.<run number>` (for example `v1.0.4-build.17`). A release is marked *pre-release* only while `versionName` contains
+Releases are named after the version only: `v<versionName>` (for example `v1.0.5`). Pushing again without
+changing `versionName` replaces that version's release. A release is marked *pre-release* only while `versionName` contains
 `beta`, `alpha` or `rc`; a plain number such as `1.0.4` is published as a stable release.
 
 You can also start a build by hand: **Actions** → *Build and release* → **Run workflow**.
@@ -95,7 +96,8 @@ You can also start a build by hand: **Actions** → *Build and release* → **Ru
 ## Changing the version
 
 Edit `versionName` and `versionCode` in [`app/build.gradle`](../app/build.gradle). Raise
-`versionCode` for every version you want users to be able to update to.
+`versionCode` for every version you want users to be able to update to. A new `versionName` makes a
+new release; the same one updates the existing release.
 
 ## Troubleshooting
 

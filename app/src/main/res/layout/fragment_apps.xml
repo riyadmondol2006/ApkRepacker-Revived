@@ -14,11 +14,14 @@
         app:liftOnScroll="true"
         app:liftOnScrollTargetViewId="@id/app_packages">
 
+        <!-- Fixed (not wrap_content) height: with wrap_content the Expressive style's scrim trigger
+             is taller than the bar, so the scrim showed and the title faded while fully expanded.
+             The title and subtitle still get the extra room they need. -->
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:id="@+id/collapsing_toolbar"
             style="@style/Widget.Material3Expressive.CollapsingToolbar.Large"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="?attr/collapsingToolbarLayoutLargeSize"
             app:layout_scrollFlags="scroll|exitUntilCollapsed|snap">
 
             <com.google.android.material.appbar.MaterialToolbar

@@ -58,6 +58,14 @@
             android:text="@string/simple_edit_app"
             app:icon="@drawable/ic_rename" />
 
+        <!-- Only for apps installed as split APKs. -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/antisplit_save"
+            style="@style/Widget.Revived.SheetAction"
+            android:text="@string/antisplit_save_action"
+            android:visibility="gone"
+            app:icon="@drawable/ic_m3_merge" />
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/goto_settings_app"
             style="@style/Widget.Revived.SheetAction"

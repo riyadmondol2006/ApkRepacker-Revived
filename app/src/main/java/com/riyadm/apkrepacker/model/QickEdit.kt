@@ -39,12 +39,11 @@ class QickEdit {
                 val parts = icon.split("/").filter { it.isNotEmpty() }
                 type = parts[0]
                 name = parts[1]
-                val tmp = File.createTempFile("temp", null)
                 DLog.i("Generate new icon")
-                IconGenerate.generate(tmp.parent, bitmap, name)
+                IconGenerate.generate(to.parent, bitmap, name)
             }
             DLog.i("repack apk")
-            repackApk(from, to, type, name)
+            repackApk(from, to, type, name, QickEditParams.getIconFiles())
         } catch (e: IOException) {
             e.printStackTrace()
         } finally {
@@ -79,7 +78,7 @@ class QickEdit {
     }
 
     @Throws(IOException::class)
-    private fun repackApk(srcApk: File, targetApk: File, type: String?, name: String?) {
+    private fun repackApk(srcApk: File, targetApk: File, type: String?, name: String?, iconFiles: Map<String, String>) {
         val dir = targetApk.parentFile
         ZipInputStream(FileInputStream(srcApk)).use { zin ->
             ZipOutputStream(FileOutputStream(targetApk)).use { zout ->
@@ -88,9 +87,9 @@ class QickEdit {
                     val entry = zin.nextEntry ?: break
                     val entryName = entry.name
                     when {
-                        // replaced launcher icon
-                        type != null && name != null && entryName.startsWith("res/$type") && entryName.startsWith("$name.png") -> {
-                            val density = IconGenerate.mDens.lastOrNull { entryName.startsWith("res/$type-$it") } ?: "xxxhdpi"
+                        // replaced launcher icon: every density's bitmap gets the generated PNG of that density
+                        type != null && name != null && isIconBitmap(entryName, type, name, iconFiles) -> {
+                            val density = iconFiles[entryName] ?: densityOf(entryName)
                             val icon = File(dir!!.absolutePath + File.separator + density + File.separator + name + ".png")
                             writeDeflated(zout, entryName, icon)
                         }
@@ -105,6 +104,27 @@ class QickEdit {
                 }
             }
         }
+    }
+
+    /**
+     * The icon's bitmaps: the files the resource table resolved ([iconFiles], which covers obfuscated
+     * names) plus any res/<type>[-qualifiers]/<name>.png|webp|jpg. PNG bytes under a .webp/.jpg name
+     * still decode, since Android sniffs the format. An adaptive icon (mipmap-anydpi-v26/<name>.xml)
+     * is left alone: it is a binary XML of foreground/background layers that a bitmap cannot replace,
+     * so on Android 8+ such an app keeps its old icon and only older releases show the new one.
+     */
+    private fun isIconBitmap(entryName: String, type: String, name: String, iconFiles: Map<String, String>): Boolean {
+        if (entryName in iconFiles) return true
+        val dirName = entryName.substringBeforeLast('/', "")
+        if (dirName != "res/$type" && !dirName.startsWith("res/$type-")) return false
+        val fileName = entryName.substringAfterLast('/')
+        return fileName.substringBeforeLast('.') == name && fileName.substringAfterLast('.') in iconExtensions
+    }
+
+    /** The density qualifier of res/<type>-...-<density>-.../ (no density: the largest). */
+    private fun densityOf(entryName: String): String {
+        val qualifiers = entryName.substringBeforeLast('/').split('-')
+        return IconGenerate.mDens.firstOrNull { it in qualifiers } ?: IconGenerate.mDens.last()
     }
 
     private fun writeDeflated(zout: ZipOutputStream, entryName: String, source: File) {
@@ -123,7 +143,9 @@ class QickEdit {
         val outEntry = ZipEntry(entryName)
         val size = entry.size
         val crc = entry.crc
-        if (isIgnore(entryName) && crc >= 0 && size >= 0) {
+        // What the source stores uncompressed stays so: Android 11+ refuses an app whose
+        // resources.arsc is compressed, and stored native libraries are loaded straight from the APK.
+        if ((entry.method == ZipEntry.STORED || isIgnore(entryName)) && crc >= 0 && size >= 0) {
             outEntry.method = ZipEntry.STORED
             outEntry.size = size
             outEntry.crc = crc
@@ -145,5 +167,6 @@ class QickEdit {
 
     private companion object {
         const val MANIFEST = "AndroidManifest.xml"
+        val iconExtensions = setOf("png", "webp", "jpg")
     }
 }

@@ -33,6 +33,8 @@ import java.util.zip.ZipInputStream
 object FileUtil {
     private const val TAG = "FileUtil"
 
+    /** Extensions [parseNameApk] splits off; anything else after a dot is part of the name. */
+    private val APK_LIKE_EXTENSIONS = setOf("apk", "apks", "xapk", "apkm", "zip", "jar")
 
     @JvmStatic
     fun isRoot(root: File?, current: File?): Boolean {
@@ -129,12 +131,20 @@ object FileUtil {
         var filename = "out"
         var extension = "apk"
 
-        val i = name!!.lastIndexOf('.')
-        if (i > 0 && name != null) {
-            filename = name.substring(0, i) + suff
-            extension = name.substring(i + 1)
+        if (!name.isNullOrEmpty()) {
+            // Only a real file extension is split off and gets the suffix (x.apk -> x_signed.apk).
+            // A name such as an app label ("WhatsApp", "Mr. Robot"), which project builds use,
+            // keeps all of its text and just gets ".apk", as before.
+            val i = name.lastIndexOf('.')
+            val ext = if (i > 0) name.substring(i + 1) else ""
+            if (ext.lowercase() in APK_LIKE_EXTENSIONS) {
+                filename = name.substring(0, i) + suff.orEmpty()
+                extension = ext
+            } else {
+                filename = name
+            }
         }
-        return arrayOf(name, extension)
+        return arrayOf(filename, extension)
     }
 
 

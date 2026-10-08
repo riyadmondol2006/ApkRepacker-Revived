@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- AntiSplit: merge an app installed as split APKs (or a split-APK archive) into one APK -->
+    <string name="antisplit_title">AntiSplit</string>
+    <string name="antisplit_running">Merging split APKs…</string>
+    <string name="antisplit_merging">Merging split APKs…</string>
+    <string name="antisplit_unpacking">Unpacking the archive…</string>
+    <string name="antisplit_signing">Signing…</string>
+    <string name="antisplit_writing">Saving…</string>
+    <string name="antisplit_prepared">Ready: %1$s</string>
+    <string name="antisplit_saved">Saved %1$s</string>
+    <string name="antisplit_saved_unsigned">Saved %1$s (unsigned)</string>
+    <string name="antisplit_sign_title">Save as one APK</string>
+    <string name="antisplit_sign_message">The splits will be merged into a single APK. How should it be saved?</string>
+    <string name="antisplit_sign_yes">Signed</string>
+    <string name="antisplit_sign_yes_desc">Ready to install. Uses the signing key set in Settings.</string>
+    <string name="antisplit_sign_no">Unsigned</string>
+    <string name="antisplit_sign_no_desc">To sign later with your own key. Android can\'t install it until it\'s signed.</string>
+    <string name="antisplit_sign_recommended">Recommended</string>
+    <string name="antisplit_sign_continue">Choose where to save</string>
+    <string name="antisplit_failed">AntiSplit failed: %1$s</string>
+    <string name="antisplit_time_limit">stopped by Android\'s time limit for background work</string>
+    <string name="antisplit_sign_failed">Signing the merged APK failed, see the log.</string>
+    <string name="antisplit_done_title">AntiSplit finished</string>
+    <string name="antisplit_failed_title">AntiSplit failed</string>
+    <string name="antisplit_started">Merging in the background. You\'ll get a notification when it\'s saved.</string>
+    <string name="antisplit_run_in_background">Run in background</string>
+
+    <string name="antisplit_save_action">AntiSplit &amp; save APK</string>
+    <string name="antisplit_choice_title">%1$s is a split app</string>
+    <string name="antisplit_choice_merge">AntiSplit (recommended)</string>
+    <string name="antisplit_choice_merge_desc">Merge the base and all splits into one APK first</string>
+    <string name="antisplit_choice_base">Base APK only</string>
+    <string name="antisplit_choice_base_desc">Use base.apk alone: no native libraries, screen-density or language splits</string>
+
+    <!-- Split-APK archive files (.apks, .xapk, .apkm) in My Files -->
+    <string name="antisplit_archive_title">%1$s (split APK archive)</string>
+    <string name="antisplit_archive_save">Convert to one APK &amp; save</string>
+    <string name="antisplit_archive_decompile">Convert, then decompile</string>
+    <string name="antisplit_archive_edit">Convert, then simple edit</string>
+    <string name="antisplit_archive_base_decompile">Decompile base.apk only</string>
+    <string name="antisplit_archive_base_edit">Simple edit base.apk only</string>
+</resources>

@@ -2,8 +2,11 @@ package com.riyadm.apkrepacker.fragment
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.drawable.AdaptiveIconDrawable
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.text.Editable
@@ -73,7 +76,7 @@ class SimpleEditorFragment : Fragment(), ProgressDialogFragment.ProgressDialogFr
             newIcon = null
 
             with(views.form) {
-                appIconEdit.setImageDrawable(apk[0] as Drawable?)
+                appIconEdit.setImageDrawable(previewIcon(apk[0] as Drawable?))
                 appName.setText(info.label())
                 appPackage.setText(info.pname())
                 appVersionName.setText(info.version())
@@ -149,6 +152,25 @@ class SimpleEditorFragment : Fragment(), ProgressDialogFragment.ProgressDialogFr
         binding?.form?.appIconEdit?.setImageDrawable(BitmapDrawable(resources, bitmap))
     }
 
+    /**
+     * An adaptive icon draws itself through the system's mask shape, which never lines up with the
+     * circular frame. Its two layers are flattened unmasked instead (each is 1.5x the visible area,
+     * centred) so the frame alone does the clipping.
+     */
+    private fun previewIcon(icon: Drawable?): Drawable? {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || icon !is AdaptiveIconDrawable) return icon
+        val size = binding?.form?.appIconEdit?.layoutParams?.width?.takeIf { it > 0 } ?: return icon
+        val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        val inset = size / 4
+        for (layer in listOf(icon.background, icon.foreground)) {
+            layer ?: continue
+            layer.setBounds(-inset, -inset, size + inset, size + inset)
+            layer.draw(canvas)
+        }
+        return BitmapDrawable(resources, bitmap)
+    }
+
     private fun buildApp() {
         val views = binding?.form ?: return
         val info = appInfo ?: return
@@ -168,6 +190,7 @@ class SimpleEditorFragment : Fragment(), ProgressDialogFragment.ProgressDialogFr
         QickEditParams.setInRes(views.inResourcesCb.isChecked)
         QickEditParams.setInDex(views.inDexCb.isChecked)
         QickEditParams.setIconName(iconPath)
+        QickEditParams.setIconFiles(info.iconFiles())
         QickEditParams.setBitmap(newIcon)
         val context = requireContext()
         SignUtil.loadKey(context) { signTool -> SimpleEditTask(context, this, signTool).execute(selected) }

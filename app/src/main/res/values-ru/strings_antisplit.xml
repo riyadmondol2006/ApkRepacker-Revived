@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="antisplit_title">AntiSplit</string>
+    <string name="antisplit_running">Объединение split APK…</string>
+    <string name="antisplit_merging">Объединение split APK…</string>
+    <string name="antisplit_unpacking">Распаковка архива…</string>
+    <string name="antisplit_signing">Подпись…</string>
+    <string name="antisplit_writing">Сохранение…</string>
+    <string name="antisplit_prepared">Готово: %1$s</string>
+    <string name="antisplit_saved">Сохранено: %1$s</string>
+    <string name="antisplit_saved_unsigned">Сохранено без подписи: %1$s</string>
+    <string name="antisplit_sign_title">Сохранить как один APK</string>
+    <string name="antisplit_sign_message">Сплиты будут объединены в один APK. Как его сохранить?</string>
+    <string name="antisplit_sign_yes">С подписью</string>
+    <string name="antisplit_sign_yes_desc">Готов к установке. Используется ключ подписи из настроек.</string>
+    <string name="antisplit_sign_no">Без подписи</string>
+    <string name="antisplit_sign_no_desc">Чтобы подписать позже своим ключом. Android не установит его без подписи.</string>
+    <string name="antisplit_sign_recommended">Рекомендуется</string>
+    <string name="antisplit_sign_continue">Выбрать, куда сохранить</string>
+    <string name="antisplit_failed">Ошибка AntiSplit: %1$s</string>
+    <string name="antisplit_time_limit">остановлено ограничением Android на фоновую работу</string>
+    <string name="antisplit_sign_failed">Не удалось подписать объединённый APK, см. журнал.</string>
+    <string name="antisplit_done_title">AntiSplit завершён</string>
+    <string name="antisplit_failed_title">Ошибка AntiSplit</string>
+    <string name="antisplit_started">Объединение идёт в фоне. Уведомление придёт после сохранения.</string>
+    <string name="antisplit_run_in_background">Продолжить в фоне</string>
+    <string name="antisplit_save_action">AntiSplit и сохранить APK</string>
+    <string name="antisplit_choice_title">%1$s — split-приложение</string>
+    <string name="antisplit_choice_merge">AntiSplit (рекомендуется)</string>
+    <string name="antisplit_choice_merge_desc">Сначала объединить базовый APK и все части в один APK</string>
+    <string name="antisplit_choice_base">Только base.apk</string>
+    <string name="antisplit_choice_base_desc">Только base.apk: без нативных библиотек, частей плотности экрана и языков</string>
+    <string name="antisplit_archive_title">%1$s (архив split APK)</string>
+    <string name="antisplit_archive_save">Преобразовать в один APK и сохранить</string>
+    <string name="antisplit_archive_decompile">Преобразовать и декомпилировать</string>
+    <string name="antisplit_archive_edit">Преобразовать и быстро изменить</string>
+    <string name="antisplit_archive_base_decompile">Декомпилировать только base.apk</string>
+    <string name="antisplit_archive_base_edit">Быстро изменить только base.apk</string>
+</resources>
