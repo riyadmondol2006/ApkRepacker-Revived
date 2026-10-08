@@ -46,14 +46,17 @@ class FullLogDialogFragment : BottomSheetDialogFragment() {
             showLog(args.getString(ARG_LOG))
             return
         }
+        // Resolve the path on the main thread: requireContext() throws once the sheet is dismissed.
+        val decodingPath = PreferenceHelper.getInstance(requireContext()).decodingPath
         viewLifecycleOwner.lifecycleScope.launch {
-            showLog(readCompileLog())
+            val text = readCompileLog(decodingPath)
+            if (isAdded) showLog(text)
         }
     }
 
-    private suspend fun readCompileLog(): String? = withContext(Dispatchers.IO) {
+    private suspend fun readCompileLog(decodingPath: String): String? = withContext(Dispatchers.IO) {
         try {
-            File(PreferenceHelper.getInstance(requireContext()).decodingPath, "compile_log.txt").readText()
+            File(decodingPath, "compile_log.txt").readText()
         } catch (e: IOException) {
             e.printStackTrace()
             null

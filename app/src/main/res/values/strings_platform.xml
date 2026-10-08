@@ -31,4 +31,7 @@
     <string name="decompile_notification_failed">Decompiling %1$s failed.</string>
     <string name="decompile_done_title">Decompile finished</string>
     <string name="decompile_failed_title">Decompile failed</string>
+    <string name="build_interrupted">The build was interrupted (the app was restarted) or has already ended. Open the build again to rebuild.</string>
+    <string name="build_sign_key_load_failed">Could not load the signing key.</string>
+    <string name="build_sign_key_password_required">The signing key \'%1$s\' has no saved password, so it can\'t be opened during a background build. Save its password in the signing settings and build again.</string>
 </resources>

@@ -669,12 +669,23 @@ object FileUtil {
         }
     }
 
+    private const val MAX_DECODE_ICON_SIZE = 1024
+
     @JvmStatic
     fun decodeBase64(input: String?): Bitmap? {
+        // Throwable: a hostile icon (tiny PNG declaring huge dimensions) must not OOM the app.
         return try {
             val decodedBytes = Base64.decode(input, 0)
-            BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
-        } catch (e: Exception) {
+            val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size, bounds)
+            if (bounds.outWidth <= 0 || bounds.outHeight <= 0 ||
+                bounds.outWidth > MAX_DECODE_ICON_SIZE || bounds.outHeight > MAX_DECODE_ICON_SIZE
+            ) {
+                null
+            } else {
+                BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+            }
+        } catch (e: Throwable) {
             null
         }
     }

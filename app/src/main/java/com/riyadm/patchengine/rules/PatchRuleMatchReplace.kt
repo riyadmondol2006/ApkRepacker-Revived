@@ -368,7 +368,7 @@ class PatchRuleMatchReplace : PatchRule() {
 
             // One walk of the project for all rules: they share the same target.
             val tWalk = System.nanoTime()
-            val files = ArrayList<String>()
+            val files = LinkedHashSet<String>()
             val finder = rules[0].pathFinder!!
             var next = finder.getNextPath()
             while (next != null) {
@@ -397,15 +397,16 @@ class PatchRuleMatchReplace : PatchRule() {
                                 if (p == null) continue
                                 val matcher = p.pattern.matcher(text)
                                 var count = 0
-                                val out = StringBuilder(text.length + 64)
+                                var out: StringBuilder? = null
                                 var last = 0
                                 while (matcher.find()) {
                                     count++
+                                    if (out == null) out = StringBuilder(text.length + 64)
                                     out.append(text, last, matcher.start())
                                     out.append(expand(p.replace, matcher))
                                     last = matcher.end()
                                 }
-                                if (count > 0) {
+                                if (count > 0 && out != null) {
                                     out.append(text, last, text.length)
                                     text = out.toString()
                                     replaced[i].add(file to count)
@@ -414,7 +415,9 @@ class PatchRuleMatchReplace : PatchRule() {
                                 }
                             }
                             if (text !== original) {
-                                java.io.FileOutputStream(path).use { it.write(text.toByteArray(Charset.defaultCharset())) }
+                                // Encode first: an OutOfMemoryError here must not leave a truncated file.
+                                val bytes = text.toByteArray(Charset.defaultCharset())
+                                java.io.FileOutputStream(path).use { it.write(bytes) }
                             }
                         } catch (e: IOException) {
                             errors.add(-1 to file)

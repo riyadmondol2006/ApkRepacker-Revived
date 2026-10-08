@@ -5,6 +5,7 @@ import com.riyadm.patchengine.LinedReader
 import com.riyadm.patchengine.PatchRule
 import com.riyadm.patchengine.ProjectHelper
 import com.riyadm.patchengine.interfaces.IPatchContext
+import com.riyadm.apkrepacker.utils.SafeZip
 import org.apache.commons.io.FileUtils
 import java.io.File
 import java.io.IOException
@@ -56,7 +57,12 @@ class PatchRuleRemoveFiles : PatchRule() {
         val rootPath = projectHelper.getProjectPath()
         //ResListAdapter resAdapter = activity.getResListAdapter();
         for (i in this.targetList.indices) {
-            val filePath = rootPath + "/" + this.targetList[i]
+            val resolved = SafeZip.resolve(File(rootPath ?: ""), this.targetList[i])
+            if (resolved == null) {
+                iPatchContext.error(R.string.general_error, "Unsafe TARGET skipped: " + this.targetList[i])
+                continue
+            }
+            val filePath = resolved.path
             val pos = filePath.lastIndexOf('/')
             // String dirPath = filePath.substring(0, pos);
             //  String fileName = filePath.substring(pos + 1);

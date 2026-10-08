@@ -29,6 +29,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.io.File
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.logging.Level
 
 class BuildService : Service(), IBuilderCallback, ApktoolLogListener {
@@ -46,11 +47,22 @@ class BuildService : Service(), IBuilderCallback, ApktoolLogListener {
     private var mProjectDir: String? = ""
     private var wakeLock: JobWakeLock? = null
 
+    /** Builds that took the wake lock and have not reported a result yet (each start pairs one acquire with one release). */
+    private val running = AtomicInteger(0)
+
+    /** Id of the newest start command, so stopSelf(id) never kills a build started meanwhile. */
+    @Volatile
+    private var latestStartId = 0
+
+    /** Set by [onTimeout]: the late result of the (unstoppable) task is ignored so it can't contradict the timeout message. */
+    @Volatile
+    private var timedOut = false
+
     private val mCompileLogMutable = StringBuilder()
     var compileLog: String? = ""
 
-    private val mStepMutable = MutableLiveData<String>()
-    val stepInfo: LiveData<String> = mStepMutable
+    private val mStepMutable = MutableLiveData<String?>()
+    val stepInfo: LiveData<String?> = mStepMutable
 
     private val mTimeMutable = MutableLiveData<Long>(0)
     val time: LiveData<Long> = mTimeMutable
@@ -69,39 +81,64 @@ class BuildService : Service(), IBuilderCallback, ApktoolLogListener {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         job.start()
+        latestStartId = startId
         mProjectDir = intent?.getStringExtra("projectDir")
+        // A bound client may outlive the previous build: don't replay its result for this one.
+        resetResults()
         // Started with startForegroundService(): go foreground right away, every time.
         addNotification(getString(R.string.title_build_apk), startForeground = true)
         val projectDir = mProjectDir
         if (projectDir.isNullOrEmpty()) {
-            taskFailed("No project to build")
+            // Nothing was acquired by this start: don't touch the wake lock of a build that may be running.
+            reportFailure("No project to build", ownsBuild = false)
             return START_NOT_STICKY
         }
         synchronized(mCompileLogMutable) { mCompileLogMutable.setLength(0) }
         compileLog = ""
         wakeLock?.acquire()
+        running.incrementAndGet()
         uiScope.launch {
-            val options = ApktoolOptionsStore.loadBuildOptions(baseContext)
-            val build = Runnable {
+            try {
+                val options = ApktoolOptionsStore.loadBuildOptions(baseContext)
                 if (options.sign) {
                     var started = false
-                    SignUtil.loadKey(baseContext) { signTool: SignUtil? ->
-                        started = true
-                        BuildTask(baseContext, signTool, this@BuildService, this@BuildService, options).execute(
-                            File(projectDir)
-                        )
-                    }
-                    // The default key loads synchronously; a custom one may still be asking for its password.
-                    if (!started && !PreferenceHelper.getInstance(baseContext).isCustomSign) {
-                        taskFailed("Could not load the signing key")
+                    var failed = false
+                    // No dialogs here: this runs on a worker thread of a Service. A key that can't be
+                    // opened without asking for a password is reported as a failed build.
+                    SignUtil.loadKey(
+                        baseContext,
+                        SignUtil.LoadKeyCallback { signTool: SignUtil? ->
+                            started = true
+                            BuildTask(baseContext, signTool, this@BuildService, this@BuildService, options).execute(
+                                File(projectDir)
+                            )
+                        },
+                        SignUtil.LoadKeyFailure { message ->
+                            failed = true
+                            taskFailed(message)
+                        },
+                    )
+                    if (!started && !failed) {
+                        taskFailed(getString(R.string.build_sign_key_load_failed))
                     }
                 } else {
                     BuildTask(baseContext, null, this@BuildService, this@BuildService, options).execute(File(projectDir))
                 }
+            } catch (t: Throwable) {
+                // Nothing may escape this coroutine: it would take the whole app down.
+                DLog.e("BuildService", t)
+                taskFailed(t.message ?: t.toString())
             }
-            build.run()
         }
         return START_NOT_STICKY
+    }
+
+    /** Back to the "nothing happened yet" values every observer ignores (see CompileFragment.observe). */
+    private fun resetResults() {
+        mStepMutable.value = null
+        mTimeMutable.value = 0
+        mFaliedMutable.value = null
+        mSuccessMutable.value = null
     }
 
     private var mInForeground = false
@@ -154,7 +191,6 @@ class BuildService : Service(), IBuilderCallback, ApktoolLogListener {
     }
 
     private fun leaveForeground() {
-        wakeLock?.release()
         if (mInForeground) {
             ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
             mInForeground = false
@@ -166,16 +202,24 @@ class BuildService : Service(), IBuilderCallback, ApktoolLogListener {
      * this the service must stop right away or the app is ANR'd.
      */
     override fun onTimeout(startId: Int, fgsType: Int) {
+        // The task itself can't be interrupted (it runs on GlobalScope); mark it so its late
+        // result and step updates are ignored.
+        timedOut = true
         job.cancel()
         mFaliedMutable.postValue(getString(R.string.notification_build_timeout))
         mSuccessMutable.postValue(null)
+        releaseAllWakeLocks()
         leaveForeground()
         stopSelf()
     }
 
+    private fun releaseAllWakeLocks() {
+        repeat(running.getAndSet(0)) { wakeLock?.release() }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
-        wakeLock?.release()
+        releaseAllWakeLocks()
         job.cancel()
     }
 
@@ -210,6 +254,7 @@ class BuildService : Service(), IBuilderCallback, ApktoolLogListener {
     }
 
     override fun setTaskStepInfo(taskStepInfo: TaskStepInfo?) {
+        if (timedOut) return
         val desc = String.format(
             getString(R.string.step),
             taskStepInfo?.stepIndex?.let { Integer.valueOf(it) },
@@ -222,20 +267,37 @@ class BuildService : Service(), IBuilderCallback, ApktoolLogListener {
     }
 
     override fun taskSucceed(file: File?) {
+        if (timedOut) return
         saveCompileLog()
         mSuccessMutable.postValue(file)
-        leaveForeground()
+        endBuild(ownsBuild = true)
         showCompletion(true, getString(R.string.notification_build_done_title), file?.name ?: getString(R.string.build_successful))
     }
 
     /** Called once per failed build with the error (aapt2's error lines included). */
-    override fun taskFailed(str: String?) {
+    override fun taskFailed(str: String?) = reportFailure(str, ownsBuild = true)
+
+    private fun reportFailure(str: String?, ownsBuild: Boolean) {
+        if (timedOut) return
         compileLog = str
         saveCompileLog()
-        mFaliedMutable.postValue(str)
+        mFaliedMutable.postValue(str ?: getString(R.string.error_build_failed))
         mSuccessMutable.postValue(null)
-        leaveForeground()
+        endBuild(ownsBuild)
         showCompletion(false, getString(R.string.notification_build_failed_title), str ?: getString(R.string.error_build_failed))
+    }
+
+    /**
+     * Releases the wake lock this build took (only if it took one), and once no build is left
+     * leaves the foreground and stops the service. A bound client still reads the final values;
+     * the service dies when it unbinds. stopSelf(id) leaves a start that arrived meanwhile alone.
+     */
+    private fun endBuild(ownsBuild: Boolean) {
+        if (ownsBuild && running.get() > 0 && running.decrementAndGet() >= 0) wakeLock?.release()
+        if (running.get() <= 0) {
+            leaveForeground()
+            stopSelf(latestStartId)
+        }
     }
 
     /** One-shot "finished" notification so the user is told the result when the app is backgrounded. */

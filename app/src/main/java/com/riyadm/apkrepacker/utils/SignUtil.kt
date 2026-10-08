@@ -170,6 +170,11 @@ class SignUtil private constructor() {
         fun call(signTool: SignUtil?)
     }
 
+    /** Reports why a key could not be loaded when no dialog may be shown (background callers). */
+    fun interface LoadKeyFailure {
+        fun call(message: String)
+    }
+
     companion object {
         private var preferenceHelper: PreferenceHelper? = null
         private var appContext: Context? = null
@@ -206,7 +211,15 @@ class SignUtil private constructor() {
         }
 
         @JvmStatic
-        fun loadKey(context: Context, callback: LoadKeyCallback) {
+        fun loadKey(context: Context, callback: LoadKeyCallback) = loadKey(context, callback, null)
+
+        /**
+         * Like [loadKey] with an Activity, but with [onFailure] set nothing is ever shown: a custom
+         * key that needs a password prompt or fails to load is reported through [onFailure]
+         * instead. Safe to call from any thread and from a Service context.
+         */
+        @JvmStatic
+        fun loadKey(context: Context, callback: LoadKeyCallback, onFailure: LoadKeyFailure?) {
             val helper = PreferenceHelper.getInstance(context)
             preferenceHelper = helper
             appContext = context.applicationContext
@@ -222,9 +235,9 @@ class SignUtil private constructor() {
                     custom = if (type == 3)
                         loadKey(callback, keyPath!!, certOrAlias!!)
                     else
-                        loadKey(context, callback, keyPath!!, type, certOrAlias!!, storePass!!, keyPass!!)
+                        loadKey(context, callback, keyPath!!, type, certOrAlias!!, storePass!!, keyPass!!, onFailure)
                 } catch (e: Exception) {
-                    error(context, keyPath)
+                    error(context, keyPath, onFailure)
                 }
             }
             if (!custom) {
@@ -252,8 +265,12 @@ class SignUtil private constructor() {
             }
         }
 
-        private fun error(context: Context, keyPath: String?) {
+        private fun error(context: Context, keyPath: String?, onFailure: LoadKeyFailure? = null) {
             val message = context.resources.getString(R.string.load_signature_file_fail, keyPath)
+            if (onFailure != null) {
+                onFailure.call(message)
+                return
+            }
             AlertDialog.Builder(context)
                 .setTitle(R.string.error)
                 .setMessage(message)
@@ -264,13 +281,17 @@ class SignUtil private constructor() {
         @Throws(Exception::class)
         private fun loadKey(
             context: Context, callback: LoadKeyCallback, keyPath: String, type: Int, alias: String,
-            storePassText: String, keyPassText: String,
+            storePassText: String, keyPassText: String, onFailure: LoadKeyFailure? = null,
         ): Boolean {
             if (!exists(keyPath)) return false
             val keyType = types[type]
             val ks = KeyStore.getInstance(keyType)
             if (storePassText.isEmpty()) {
-                showPasswd(context, callback, ks, keyPath, alias)
+                if (onFailure != null) {
+                    onFailure.call(context.getString(R.string.build_sign_key_password_required, keyPath))
+                } else {
+                    showPasswd(context, callback, ks, keyPath, alias)
+                }
             } else {
                 val storePass = storePassText.toCharArray()
                 val keyPass = if (keyPassText.isEmpty()) storePass else keyPassText.toCharArray()

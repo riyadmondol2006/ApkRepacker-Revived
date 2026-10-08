@@ -36,6 +36,7 @@ import com.riyadm.apkrepacker.ui.preferences.PreferenceHelper
 import com.riyadm.apkrepacker.ui.projectlist.ProjectItem
 import com.riyadm.apkrepacker.ui.projectlist.ProjectViewAdapter
 import com.riyadm.apkrepacker.ui.projectlist.ProjectViewHolder
+import com.riyadm.apkrepacker.utils.ClickGuard
 import com.riyadm.apkrepacker.utils.FragmentUtils
 import com.riyadm.apkrepacker.utils.NotificationHelper
 import com.riyadm.apkrepacker.utils.PermissionsUtils
@@ -70,7 +71,20 @@ class ProjectsFragment : Fragment(), ProjectViewHolder.OnItemClickListener {
     private var afterStorageAccess: (() -> Unit)? = null
 
     /** The project an export dialog is currently choosing a destination for. */
-    private var pendingExport: ProjectItem? = null
+    private var pendingExportPath: String? = null
+
+    private val clickGuard = ClickGuard()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // The system picker can outlive our process; keep the chosen project so the export still proceeds.
+        pendingExportPath = savedInstanceState?.getString(STATE_PENDING_EXPORT)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString(STATE_PENDING_EXPORT, pendingExportPath)
+    }
 
     private val exportZipLauncher =
         registerForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri ->
@@ -209,6 +223,7 @@ class ProjectsFragment : Fragment(), ProjectViewHolder.OnItemClickListener {
     private fun setupFab(binding: FragmentProjectsBinding) {
         val fab = binding.fabAddApp
         fab.setOnClickListener {
+            if (!clickGuard.allow()) return@setOnClickListener
             parentFragmentManager
                 .beginTransaction()
                 .addToBackStack(null)
@@ -287,6 +302,7 @@ class ProjectsFragment : Fragment(), ProjectViewHolder.OnItemClickListener {
     }
 
     override fun onProjectClick(item: ProjectItem, position: Int) {
+        if (!clickGuard.allow()) return
         val intent = Intent(requireContext(), AppEditorActivity::class.java)
             .putExtra("apkFileIcon", item.appIcon)
             .putExtra("apkFileName", item.appName)
@@ -348,7 +364,7 @@ class ProjectsFragment : Fragment(), ProjectViewHolder.OnItemClickListener {
             .setTitle(getString(R.string.transfer_export_title))
             .setItems(options) { _, which ->
                 askNotificationsOnce()
-                pendingExport = item
+                pendingExportPath = item.appProjectPath
                 if (which == 0) {
                     exportZipLauncher.launch(ProjectTransfer.safeName(item.appName ?: "project") + ".zip")
                 } else {
@@ -360,10 +376,10 @@ class ProjectsFragment : Fragment(), ProjectViewHolder.OnItemClickListener {
     }
 
     private fun startExport(action: String, uri: Uri?) {
-        val project = pendingExport
-        pendingExport = null
-        if (uri == null || project == null) return
-        ProjectTransferService.start(requireContext().applicationContext, action, uri, project.appProjectPath)
+        val projectPath = pendingExportPath
+        pendingExportPath = null
+        if (uri == null || projectPath == null) return
+        ProjectTransferService.start(requireContext().applicationContext, action, uri, projectPath)
     }
 
     private fun startImport(action: String, uri: Uri?) {
@@ -421,6 +437,7 @@ class ProjectsFragment : Fragment(), ProjectViewHolder.OnItemClickListener {
 
     companion object {
         const val TAG = "ProjectsFragment"
+        private const val STATE_PENDING_EXPORT = "pending_export_path"
         private const val KEY_ASKED_STORAGE_ACCESS = "asked_storage_access_on_start"
         private const val SCROLL_SLOP = 6
         private val ZIP_MIME_TYPES = arrayOf("application/zip", "application/x-zip-compressed", "application/octet-stream")

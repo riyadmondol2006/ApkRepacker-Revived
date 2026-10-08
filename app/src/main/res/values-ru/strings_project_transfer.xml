@@ -25,6 +25,8 @@
     <string name="transfer_failed">Ошибка: %1$s</string>
     <string name="transfer_error_open">Не удалось открыть файл.</string>
     <string name="transfer_error_no_project">Проект не найден. Проект — это папка с apktool.json или apktool.yml.</string>
+    <string name="transfer_error_destination_in_project">Выберите другую папку: она совпадает с папкой проекта или находится внутри неё.</string>
+    <string name="transfer_error_empty_project">В проекте нет файлов для экспорта.</string>
     <string name="transfer_error_too_big">Архив распаковывается более чем в 8 ГБ, поэтому он не был импортирован.</string>
     <string name="transfer_access_title">Разрешить доступ ко всем файлам?</string>
     <string name="transfer_access_message">С доступом ко всем файлам приложение читает и записывает выбранную папку напрямую, это намного быстрее для больших проектов. Можно продолжить и без него.</string>

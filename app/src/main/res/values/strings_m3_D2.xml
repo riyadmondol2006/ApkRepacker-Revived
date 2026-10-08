@@ -30,6 +30,10 @@
         <item quantity="one">%d rule</item>
         <item quantity="other">%d rules</item>
     </plurals>
+    <plurals name="patcher_done_with_errors_summary">
+        <item quantity="one">Patching finished with %d error. See the log.</item>
+        <item quantity="other">Patching finished with %d errors. See the log.</item>
+    </plurals>
     <plurals name="patcher_done_summary">
         <item quantity="one">%d patch applied.</item>
         <item quantity="other">%d patches applied.</item>

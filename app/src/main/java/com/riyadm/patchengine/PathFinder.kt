@@ -73,6 +73,7 @@ class PathFinder(ctx: IPatchContext, pathStr: String, line: Int) {
     fun getNextPath(): String? {
         DLog.d(TAG, "Starting getNextPatch")
         val list = this.filters ?: return null
+        if (list.isEmpty()) return null
         var nextEntry = list[0].getNextEntry()
         if (list.size > 1) {
             while (nextEntry != null) {

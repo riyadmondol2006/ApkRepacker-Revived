@@ -19,14 +19,8 @@ object RandomHelper {
             mRandom = Random(System.currentTimeMillis())
         }
         val sb = StringBuilder()
-        // NOTE: kept verbatim from the Java original, which increments `values` instead of `i`
-        // (`for (int i = 0; i < values; values++)`).
-        var count = values
-        val i = 0
-        while (i < count) {
-            sb.append(LETTERS[mRandom!!.nextInt(26)])
-            count++
-        }
+        val rnd = mRandom!!
+        repeat(values) { sb.append(LETTERS[rnd.nextInt(26)]) }
         return sb.toString()
     }
 }

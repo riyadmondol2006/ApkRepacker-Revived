@@ -26,6 +26,8 @@
     <string name="transfer_failed">Failed: %1$s</string>
     <string name="transfer_error_open">Could not open the file.</string>
     <string name="transfer_error_no_project">No project found. A project is a folder with apktool.json or apktool.yml.</string>
+    <string name="transfer_error_destination_in_project">Choose a different folder: the destination is the project folder itself or inside it.</string>
+    <string name="transfer_error_empty_project">The project has no files to export.</string>
     <string name="transfer_error_too_big">The archive expands to more than 8 GB, so it was not imported.</string>
 
     <!-- All files access -->

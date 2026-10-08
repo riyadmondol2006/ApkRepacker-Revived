@@ -12,6 +12,7 @@ import com.riyadm.apkrepacker.activity.MainActivity
 import com.riyadm.apkrepacker.ui.filemanager.misc.ThumbnailHelper.imageDecoder
 import com.riyadm.apkrepacker.ui.filemanager.utils.CopyHelper
 import com.riyadm.apkrepacker.utils.ExceptionHandler
+import com.riyadm.apkrepacker.utils.JksSupport
 import com.riyadm.apkrepacker.utils.NotificationHelper
 import dalvik.system.ZipPathValidator
 
@@ -39,6 +40,7 @@ class App : Application() {
         copyHelper = CopyHelper()
         NotificationHelper.createChannels(this)
         ExceptionHandler.get(this).start()
+        JksSupport.install()
         UIUtils.install(this)
         // Snackbars on the main screen sit above the bottom navigation bar.
         UIUtils.anchorResolver = { activity -> (activity as? MainActivity)?.snackbarAnchor }

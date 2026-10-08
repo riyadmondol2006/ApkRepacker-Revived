@@ -94,7 +94,9 @@ class PatcherFragment : Fragment(), OnBackPressedListener {
         // A patch run started earlier (e.g. before a rotation) is still in the service: reconnect.
         if (patchingStarted || savedInstanceState?.getBoolean(STATE_RUNNING) == true) {
             patchingStarted = true
-            bindService()
+            // Still bound (only the view was recreated): bindService() would return early and
+            // the new view would never observe, so observe straight away.
+            service?.let { observe(ui, it) } ?: bindService()
         }
     }
 
@@ -119,7 +121,11 @@ class PatcherFragment : Fragment(), OnBackPressedListener {
         binding?.patchEmpty?.isVisible = patchAdapter.itemCount == 0
     }
 
+    /** True from the tap on Apply until the run is started (or the smali question is cancelled). */
+    private var applyPending = false
+
     private fun onApplyClicked() {
+        if (patchingStarted || applyPending) return
         if (patchAdapter.itemCount == 0) {
             binding?.let { Snackbar.make(it.startPatch, R.string.patcher_no_patches, Snackbar.LENGTH_SHORT).show() }
             return
@@ -132,6 +138,7 @@ class PatcherFragment : Fragment(), OnBackPressedListener {
         }
         BatteryOptimizationHelper.maybeAsk(requireActivity())
 
+        applyPending = true
         val paths = patchAdapter.patchData.mapNotNull { it.mPath }
         val project = projectDir
         viewLifecycleOwner.lifecycleScope.launch {
@@ -143,11 +150,15 @@ class PatcherFragment : Fragment(), OnBackPressedListener {
 
     /** The patch edits code but the project has no smali: let the user decide. */
     private fun askDecodeThenPatch(paths: List<String>) {
-        if (!isAdded) return
+        if (!isAdded) {
+            applyPending = false
+            return
+        }
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.patcher_smali_dialog_title)
             .setMessage(R.string.patcher_smali_dialog_message)
-            .setNegativeButton(R.string.cancel_button_label, null)
+            .setOnCancelListener { applyPending = false }
+            .setNegativeButton(R.string.cancel_button_label) { _, _ -> applyPending = false }
             .setNeutralButton(R.string.patcher_continue_anyway) { _, _ -> startPatching(paths, decodeSmali = false) }
             .setPositiveButton(R.string.patcher_decompile_and_apply) { _, _ -> startPatching(paths, decodeSmali = true) }
             .show()
@@ -156,6 +167,7 @@ class PatcherFragment : Fragment(), OnBackPressedListener {
     private fun startPatching(paths: List<String>, decodeSmali: Boolean) {
         if (paths.isEmpty()) return
         patchingStarted = true
+        applyPending = false
         binding?.startPatch?.isEnabled = false
         if (!bound) bindService()
         val intent = Intent(appContext, PatchService::class.java)

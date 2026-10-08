@@ -42,6 +42,7 @@ import com.riyadm.apkrepacker.ui.filemanager.storage.operation.argument.CopyArgu
 import com.riyadm.apkrepacker.ui.filemanager.storage.operation.argument.MoveArguments
 import com.riyadm.apkrepacker.ui.filemanager.storage.operation.ui.OperationStatusDisplayerInjector
 import com.riyadm.apkrepacker.ui.filemanager.utils.FileUtils
+import java.lang.ref.WeakReference
 import java.io.File
 import java.io.IOException
 import java.util.concurrent.Executors
@@ -123,7 +124,7 @@ class CopyService : Service() {
         }
 
         if (spaceLeft > 0) {
-            mFilesFragment?.let { fragment ->
+            mFilesFragment?.get()?.let { fragment ->
                 mMainHandler.post { fragment.refresh(this, destination) }
             }
         }
@@ -133,7 +134,7 @@ class CopyService : Service() {
         try {
             FileOperationRunnerInjector.operationRunner(this).run(
                 CopyOperation(this, OperationStatusDisplayerInjector.operationStatusDisplayer(this)),
-                CopyArguments.copyArgs(files, to, mFilesFragment)
+                CopyArguments.copyArgs(files, to, mFilesFragment?.get())
             )
         } catch (e: IOException) {
             DLog.e("CopyService", e)
@@ -144,7 +145,7 @@ class CopyService : Service() {
         try {
             FileOperationRunnerInjector.operationRunner(this).run(
                 MoveOperation(this, OperationStatusDisplayerInjector.operationStatusDisplayer(this)),
-                MoveArguments.moveArgs(files, to, mFilesFragment)
+                MoveArguments.moveArgs(files, to, mFilesFragment?.get())
             )
         } catch (e: IOException) {
             DLog.e("CopyService", e)
@@ -156,11 +157,13 @@ class CopyService : Service() {
         private const val ACTION_COPY = "com.riyadm.apkrepacker.action.COPY"
         private const val ACTION_MOVE = "com.riyadm.apkrepacker.action.MOVE"
         private const val EXTRA_FILES = "com.riyadm.apkrepacker.action.FILES"
-        private var mFilesFragment: BaseFilesFragment? = null
+        /** Weak: a static strong reference would keep a closed screen's Activity alive. */
+        @Volatile
+        private var mFilesFragment: WeakReference<BaseFilesFragment>? = null
 
         @JvmStatic
         fun setFilesFragment(filesFragment: BaseFilesFragment?) {
-            mFilesFragment = filesFragment
+            mFilesFragment = filesFragment?.let { WeakReference(it) }
         }
 
         private fun spaceRemainingAfterCopy(of: List<FileHolder>, on: File): Long {

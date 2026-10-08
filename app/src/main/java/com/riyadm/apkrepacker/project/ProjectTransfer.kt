@@ -12,9 +12,13 @@ import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicReference
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
@@ -46,22 +50,39 @@ object ProjectTransfer {
     /** How deep below the picked folder / ZIP root to look for projects. */
     private const val MAX_SEARCH_DEPTH = 3
 
+    /** An apktool.json bigger than this is treated as broken and replaced by minimal metadata. */
+    private const val MAX_META_BYTES = 512L * 1024
+
+    /** Import stages older than this are leftovers of a killed or timed-out import. */
+    private const val STALE_STAGE_MS = 30L * 60 * 1000
+
+    private const val STAGE_PREFIX = "tmp_import_"
+
+    /** Stages of imports running in this process; the sweeper must not touch them. */
+    private val activeStages: MutableSet<String> = ConcurrentHashMap.newKeySet()
+
     // region export
 
     /** Writes [project] as a ZIP to [out] (closed afterwards). Files sit at the ZIP's root. */
     @Throws(IOException::class)
     fun exportZip(project: File, out: OutputStream, progress: Progress?) {
-        val total = countFiles(project, topLevel = true)
+        val total = countFiles(project, topLevel = true, depth = 0)
+        if (total == 0) {
+            runCatching { out.close() }
+            throw TransferException(R.string.transfer_error_empty_project)
+        }
         var done = 0
         ZipOutputStream(BufferedOutputStream(out, 64 * 1024)).use { zip ->
-            fun add(dir: File, prefix: String, topLevel: Boolean) {
+            fun add(dir: File, prefix: String, topLevel: Boolean, depth: Int) {
+                if (depth > MAX_TREE_DEPTH) return
                 for (child in dir.listFiles().orEmpty().sortedBy { it.name }) {
+                    if (isSymlink(child)) continue
                     if (topLevel && child.name in EXPORT_SKIP_TOP_LEVEL && child.isDirectory) continue
                     val entryName = prefix + child.name
                     if (child.isDirectory) {
                         zip.putNextEntry(ZipEntry("$entryName/").apply { time = child.lastModified() })
                         zip.closeEntry()
-                        add(child, "$entryName/", topLevel = false)
+                        add(child, "$entryName/", topLevel = false, depth = depth + 1)
                     } else {
                         zip.putNextEntry(ZipEntry(entryName).apply { time = child.lastModified() })
                         child.inputStream().use { it.copyTo(zip, 64 * 1024) }
@@ -70,14 +91,33 @@ object ProjectTransfer {
                     }
                 }
             }
-            add(project, "", topLevel = true)
+            add(project, "", topLevel = true, depth = 0)
         }
     }
 
-    /** Copies [project] into a new folder (named like the project) inside [destination]. */
+    /**
+     * Copies [project] into a new folder (named like the project, made unique with " (2)"... if
+     * taken, so an earlier export is never merged into or overwritten) inside [destination].
+     */
     @Throws(IOException::class)
-    internal fun exportFolder(project: File, destination: Sink, progress: Progress?) {
-        copyTree(Node.FileNode(project), destination.dir(safeName(project.name)), EXPORT_SKIP_TOP_LEVEL, progress)
+    internal fun exportFolder(project: File, destination: Sink, progress: Progress?): String {
+        if (countFiles(project, topLevel = true, depth = 0) == 0) {
+            throw TransferException(R.string.transfer_error_empty_project)
+        }
+        if (destination is Sink.FileSink) {
+            // Writing straight into (or under) the project would truncate its own files before
+            // they are read, or keep re-listing the fresh copy.
+            val projectPath = project.canonicalFile.path
+            val destPath = destination.dir.canonicalFile.path
+            if (destPath == projectPath || destPath.startsWith(projectPath + File.separator)) {
+                throw TransferException(R.string.transfer_error_destination_in_project)
+            }
+        }
+        // The new folder is always a fresh one, so even when the project sits inside the
+        // destination it can never be the folder written to.
+        val target = destination.newDir(safeName(project.name))
+        copyTree(Node.FileNode(project), target, EXPORT_SKIP_TOP_LEVEL, progress)
+        return target.folderName
     }
 
     /**
@@ -89,13 +129,14 @@ object ProjectTransfer {
     @Throws(IOException::class)
     private fun copyTree(from: Node, into: Sink, skipTopLevel: Set<String>, progress: Progress?) {
         val jobs = ArrayList<Pair<Node, Sink>>()
-        fun walk(dir: Node, sink: Sink, topLevel: Boolean) {
+        fun walk(dir: Node, sink: Sink, topLevel: Boolean, depth: Int) {
+            if (depth > MAX_TREE_DEPTH) return
             for (child in dir.list()) {
                 if (topLevel && child.isDirectory && child.name in skipTopLevel) continue
-                if (child.isDirectory) walk(child, sink.dir(child.name), topLevel = false) else jobs += child to sink
+                if (child.isDirectory) walk(child, sink.dir(child.name), topLevel = false, depth = depth + 1) else jobs += child to sink
             }
         }
-        walk(from, into, topLevel = true)
+        walk(from, into, topLevel = true, depth = 0)
         if (jobs.isEmpty()) return
         // Creating a file holds its folder's lock for the whole round trip, and a project keeps
         // thousands of files in a few big folders. In folder order the threads would all queue on
@@ -104,10 +145,20 @@ object ProjectTransfer {
 
         val pool = Executors.newFixedThreadPool(WorkerThreads.count())
         val done = AtomicInteger(0)
+        // Set by the first failing task: the queued ones then skip their work instead of
+        // trying thousands more files after, say, a disk-full error.
+        val failed = AtomicBoolean(false)
+        val firstError = AtomicReference<Throwable?>(null)
         try {
             val futures = jobs.map { (node, sink) ->
                 pool.submit(Runnable {
-                    sink.file(node.name).use { out -> node.open().use { it.copyTo(out, 64 * 1024) } }
+                    if (failed.get()) return@Runnable
+                    try {
+                        sink.file(node.name).use { out -> node.open().use { it.copyTo(out, 64 * 1024) } }
+                    } catch (t: Throwable) {
+                        if (failed.compareAndSet(false, true)) firstError.set(t)
+                        throw t
+                    }
                     progress?.onProgress(done.incrementAndGet(), jobs.size, node.name)
                 })
             }
@@ -115,19 +166,30 @@ object ProjectTransfer {
                 try {
                     future.get()
                 } catch (e: ExecutionException) {
-                    throw (e.cause as? IOException) ?: IOException(e.cause)
+                    failed.set(true)
+                    val cause = firstError.get() ?: e.cause
+                    throw (cause as? IOException) ?: IOException(cause)
                 }
             }
         } finally {
+            failed.set(true)
             pool.shutdownNow()
+            // Wait for the workers so the caller's cleanup never races with a file still being written.
+            try {
+                pool.awaitTermination(30, TimeUnit.SECONDS)
+            } catch (e: InterruptedException) {
+                Thread.currentThread().interrupt()
+            }
         }
     }
 
-    private fun countFiles(dir: File, topLevel: Boolean): Int {
+    private fun countFiles(dir: File, topLevel: Boolean, depth: Int): Int {
+        if (depth > MAX_TREE_DEPTH) return 0
         var count = 0
         for (child in dir.listFiles().orEmpty()) {
+            if (isSymlink(child)) continue
             if (topLevel && child.name in EXPORT_SKIP_TOP_LEVEL && child.isDirectory) continue
-            count += if (child.isDirectory) countFiles(child, topLevel = false) else 1
+            count += if (child.isDirectory) countFiles(child, topLevel = false, depth = depth + 1) else 1
         }
         return count
     }
@@ -177,7 +239,7 @@ object ProjectTransfer {
                 moveInto(dir, projectsDir, name)
             }
         } finally {
-            stage.deleteRecursively()
+            discardStage(stage)
         }
     }
 
@@ -196,7 +258,7 @@ object ProjectTransfer {
                 copyTree(node, Sink.FileSink(stage), emptySet(), progress)
                 imported += moveInto(stage, projectsDir, safeName(node.name.ifEmpty { "project" }))
             } finally {
-                stage.deleteRecursively()
+                discardStage(stage)
             }
         }
         return imported
@@ -230,9 +292,38 @@ object ProjectTransfer {
     private fun newStage(projectsDir: File): File {
         // Beside (not inside) the projects folder: the project list scans that one, and a rename
         // between the two stays on one file system.
+        sweepStaleStages(projectsDir)
         val parent = projectsDir.parentFile ?: projectsDir
-        return File(parent, "tmp_import_${System.nanoTime()}").also {
+        return File(parent, "$STAGE_PREFIX${System.nanoTime()}").also {
             if (!it.mkdirs()) throw IOException("Cannot create $it")
+            activeStages += it.name
+        }
+    }
+
+    private fun discardStage(stage: File) {
+        try {
+            stage.deleteRecursively()
+        } finally {
+            activeStages -= stage.name
+        }
+    }
+
+    /**
+     * Deletes `tmp_import_*` folders next to [projectsDir] that are older than 30 minutes: what a
+     * killed or timed-out import left behind. Stages of imports running now are kept.
+     */
+    @JvmStatic
+    fun sweepStaleStages(projectsDir: File) {
+        try {
+            val parent = projectsDir.parentFile ?: return
+            val now = System.currentTimeMillis()
+            for (dir in parent.listFiles().orEmpty()) {
+                if (!dir.name.startsWith(STAGE_PREFIX) || dir.name in activeStages) continue
+                if (isSymlink(dir) || !dir.isDirectory) continue
+                if (now - dir.lastModified() > STALE_STAGE_MS) dir.deleteRecursively()
+            }
+        } catch (e: Exception) {
+            android.util.Log.w("ProjectTransfer", "Could not sweep stale import stages", e)
         }
     }
 
@@ -261,7 +352,11 @@ object ProjectTransfer {
      */
     private fun ensureMeta(project: File) {
         val meta = ProjectMeta.file(project)
-        if (meta.exists()) return
+        // A hostile or damaged apktool.json (huge, or not JSON) would break the project list.
+        if (meta.exists()) {
+            if (meta.isFile && meta.length() <= MAX_META_BYTES && ProjectMeta.readFile(meta) != null) return
+            runCatching { meta.delete() }
+        }
         val info = runCatching { ApkInfo.load(project) }.getOrNull()
         val manifest = File(project, "AndroidManifest.xml").takeIf { it.isFile }?.let { file ->
             runCatching { file.readText().take(4096) }.getOrNull()
@@ -277,7 +372,7 @@ object ProjectTransfer {
         val versionName = info?.versionInfo?.versionName ?: yamlValue("versionName")
         val json = JSONObject().apply {
             put("apkFileIcon", JSONObject.NULL)
-            put("apkFileName", project.name)
+            put("apkFileName", safeName(project.name))
             put("apkFilePackageName", packageName ?: JSONObject.NULL)
             put("apkFilePatch", JSONObject.NULL)
             put("VersionInfo", JSONObject().apply {

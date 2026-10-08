@@ -30,6 +30,9 @@ import com.riyadm.apkrepacker.ui.motion.springTo
  */
 class DecompileOptionsDialogFragment : BottomSheetDialogFragment() {
 
+    /** Set on the first accepted tap: the sheet stays tappable while it animates out. */
+    private var handled = false
+
     private class Rows(
         val onlyMainClasses: OptionRow,
         val noDebugInfo: OptionRow,
@@ -82,7 +85,9 @@ class DecompileOptionsDialogFragment : BottomSheetDialogFragment() {
 
         b.apktoolBtnCancel.setOnClickListener { dismiss() }
         b.apktoolBtnConfirm.setOnClickListener {
+            if (handled) return@setOnClickListener
             val options = currentOptions() ?: return@setOnClickListener
+            handled = true
             if (b.apktoolRememberDefault.isChecked) {
                 ApktoolOptionsStore.saveDecodeOptions(requireContext(), options)
             }

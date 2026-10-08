@@ -39,6 +39,10 @@ class DecompileViewModel(application: Application) : AndroidViewModel(applicatio
 
     private var started = false
 
+    /** True once this ViewModel attached to a run (survives rotation, not process death). */
+    val isStarted: Boolean
+        get() = started
+
     /** The whole log as text, one line per entry. */
     val logText: String
         get() = lines.joinToString(separator = "\n", postfix = "\n")

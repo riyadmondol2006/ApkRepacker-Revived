@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData
 import com.google.gson.Gson
 import com.riyadm.apkrepacker.apktool.ProjectMeta
 import com.riyadm.apkrepacker.ui.preferences.PreferenceHelper
+import com.riyadm.apkrepacker.project.ProjectTransfer
 import com.riyadm.apkrepacker.ui.projectlist.ProjectItem
 import com.riyadm.apkrepacker.utils.common.DLog
 import kotlinx.coroutines.CoroutineScope
@@ -40,6 +41,7 @@ class ProjectLoader(context: Context) : LiveData<List<ProjectItem>>() {
             val root = preferenceHelper.projectsDir
             File(preferenceHelper.decodingPath, ".nomedia").createNewFile()
             if (!root.exists() && !root.mkdirs()) return items
+            ProjectTransfer.sweepStaleStages(root)
 
             // Projects decompiled by older versions live in /sdcard/ApkRepacker/projects; keep
             // listing them (when readable) so they don't disappear after the move to Android/data.
@@ -51,7 +53,12 @@ class ProjectLoader(context: Context) : LiveData<List<ProjectItem>>() {
 
             for (projectsRoot in roots) {
                 for (dir in projectsRoot.listFiles().orEmpty()) {
-                    readProject(dir)?.let(items::add)
+                    try {
+                        readProject(dir)?.let(items::add)
+                    } catch (t: Throwable) {
+                        // One broken project (even an OutOfMemoryError) must not hide the rest.
+                        DLog.e(TAG, "Skipping ${dir.absolutePath}", t)
+                    }
                 }
             }
         } catch (io: IOException) {
@@ -69,9 +76,18 @@ class ProjectLoader(context: Context) : LiveData<List<ProjectItem>>() {
             return null
         }
         return try {
-            val project = gson.fromJson(dataFile.readText(Charsets.UTF_8), ProjectItemJson::class.java) ?: return null
+            val minimal = dataFile.length() > MAX_META_BYTES
+            val project = (if (minimal) null else gson.fromJson(dataFile.readText(Charsets.UTF_8), ProjectItemJson::class.java))
+            if (project == null) {
+                if (!minimal) return null
+                // An oversized apktool.json is not read at all: list the project by its folder name.
+                DLog.w(TAG, "Ignoring oversized ${dataFile.absolutePath}")
+                return ProjectItem(null, dir.name, null, dir.absolutePath, null, null, null)
+            }
+            // A huge icon would overflow the Binder limit when the project is opened.
+            val icon = project.apkFileIcon?.takeIf { it.length <= MAX_ICON_CHARS }
             ProjectItem(
-                project.apkFileIcon,
+                icon,
                 project.apkFileName ?: dir.name,
                 project.apkFilePackageName,
                 dir.absolutePath,
@@ -79,7 +95,7 @@ class ProjectLoader(context: Context) : LiveData<List<ProjectItem>>() {
                 project.versionInfo?.versionName,
                 project.versionInfo?.versionCode,
             )
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             DLog.e(TAG, e)
             null
         }
@@ -87,6 +103,8 @@ class ProjectLoader(context: Context) : LiveData<List<ProjectItem>>() {
 
     companion object {
         private const val TAG = "ProjectLoader"
+        private const val MAX_META_BYTES = 512L * 1024
+        private const val MAX_ICON_CHARS = 150_000
         private var sInstance: ProjectLoader? = null
 
         @JvmStatic

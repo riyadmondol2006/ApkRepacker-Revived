@@ -7,12 +7,12 @@ import com.riyadm.patchengine.ProjectHelper
 import com.riyadm.patchengine.interfaces.IPatchContext
 import com.riyadm.patchengine.utils.IOUtil
 import com.riyadm.patchengine.utils.RandomHelper
+import com.riyadm.apkrepacker.utils.SafeZip
 import org.apache.commons.io.IOUtils
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
-import java.io.OutputStream
 import java.util.zip.ZipFile
 
 class PatchRuleAddFiles : PatchRule() {
@@ -60,19 +60,23 @@ class PatchRuleAddFiles : PatchRule() {
             return null
         }
         try {
-            val input = patchZip.getInputStream(entry)
-            if (!isExtract) {
-                val path = projectHelper.getProjectPath() + File.separator + targetFile
-                logger.info("Copying files from " + patchZip.name + " to " + path, false)
-                addFile(path, input)
-            } else {
-                val path = projectHelper.getAppDataPath() + RandomHelper.getRandomString(6)
-                val fos2: OutputStream = FileOutputStream(path)
-                IOUtil.copy(input, fos2)
-                fos2.close()
-                input.close()
-                logger.info("Copying files from " + patchZip.name + " to " + path, false)
-                addFilesInZip(projectHelper, path, null, logger)
+            patchZip.getInputStream(entry).use { input ->
+                if (!isExtract) {
+                    val projectDir = File(projectHelper.getProjectPath() ?: "")
+                    val resolved = SafeZip.resolve(projectDir, targetFile ?: "")
+                    if (resolved == null) {
+                        logger.error(R.string.general_error, "Unsafe TARGET skipped: $targetFile")
+                        return null
+                    }
+                    val path = resolved.path
+                    logger.info("Copying files from " + patchZip.name + " to " + path, false)
+                    addFile(path, input)
+                } else {
+                    val path = projectHelper.getAppDataPath() + RandomHelper.getRandomString(6)
+                    FileOutputStream(path).use { fos -> IOUtil.copy(input, fos) }
+                    logger.info("Copying files from " + patchZip.name + " to " + path, false)
+                    addFilesInZip(projectHelper, path, null, logger)
+                }
             }
         } catch (e: Exception) {
             logger.error(R.string.general_error, e.message)
@@ -90,7 +94,7 @@ class PatchRuleAddFiles : PatchRule() {
         if (!newDir.exists()) {
             newDir.mkdirs()
         }
-        IOUtils.copy(filePath, FileOutputStream(targetPath))
+        FileOutputStream(targetPath).use { IOUtils.copy(filePath, it) }
     }
 
     override fun isSmaliNeeded(): Boolean {

@@ -44,6 +44,8 @@ import com.riyadm.apkrepacker.utils.TimeUtils
 import com.riyadm.apkrepacker.utils.common.DLog
 import com.riyadm.apkrepacker.viewmodel.CompileFragmentViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -64,6 +66,7 @@ class CompileFragment : Fragment(), ErrorAdapter.OnItemInteractionListener {
     private var projectDir: String? = null
     private var service: BuildService? = null
     private var bound = false
+    private var reconnectJob: Job? = null
     private var finished = false
     private var builtApk: File? = null
     private var builtPackage: String? = null
@@ -123,7 +126,10 @@ class CompileFragment : Fragment(), ErrorAdapter.OnItemInteractionListener {
             viewModel.buildStarted || savedInstanceState?.getBoolean(STATE_SERVICE_RUNNING) == true -> {
                 // Rebuilt view of a running/finished build: just reconnect, never start a second build.
                 viewModel.buildStarted = true
-                service?.let { observe(b, it) } ?: bindService()
+                service?.let { observe(b, it) } ?: run {
+                    bindService()
+                    watchReconnect(b)
+                }
             }
             childFragmentManager.findFragmentByTag(BuildOptionsDialogFragment.TAG) != null -> Unit
             ApktoolUiPrefs.askBuildOptions(requireContext()) ->
@@ -140,6 +146,8 @@ class CompileFragment : Fragment(), ErrorAdapter.OnItemInteractionListener {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        reconnectJob?.cancel()
+        reconnectJob = null
         binding?.let {
             it.compileSteps.adapter = null
             it.errorList.adapter = null
@@ -165,6 +173,30 @@ class CompileFragment : Fragment(), ErrorAdapter.OnItemInteractionListener {
             stopBuildService()
             FragmentUtils.remove(this)
         }
+    }
+
+    /**
+     * Only reconnecting (no build is started here): if no service connects, e.g. after process
+     * death, the build is gone. Say so instead of spinning forever; never start a new build.
+     */
+    private fun watchReconnect(b: FragmentCompileBinding) {
+        reconnectJob?.cancel()
+        reconnectJob = viewLifecycleOwner.lifecycleScope.launch {
+            if (!bound) {
+                reconnectLost(b)
+                return@launch
+            }
+            delay(RECONNECT_TIMEOUT_MS)
+            if (service == null) reconnectLost(b)
+        }
+    }
+
+    private fun reconnectLost(b: FragmentCompileBinding) {
+        if (finished) return
+        unbindService()
+        val message = getString(R.string.build_interrupted)
+        errorAdapter.updateMessage(message)
+        showFailure(b, message)
     }
 
     private fun startBuild() {
@@ -217,6 +249,7 @@ class CompileFragment : Fragment(), ErrorAdapter.OnItemInteractionListener {
         override fun onServiceConnected(className: ComponentName, binder: IBinder) {
             val connected = (binder as BuildService.LocalBinder).getService()
             service = connected
+            reconnectJob?.cancel()
             binding?.let { observe(it, connected) }
         }
 
@@ -233,7 +266,9 @@ class CompileFragment : Fragment(), ErrorAdapter.OnItemInteractionListener {
             b.messageBuildFileTime.text = getString(R.string.app_compile_elapsed_time, TimeUtils().formatStopWatchTime(elapsed))
         }
         svc.success.observe(owner) { apk ->
-            if (apk != null) showSuccess(b, apk) else showFailure(b, errorAdapter.errorLines.firstOrNull())
+            // null with no error = the service was reset for a new build, not a result.
+            if (apk != null) showSuccess(b, apk)
+            else if (!svc.falied.value.isNullOrEmpty()) showFailure(b, errorAdapter.errorLines.firstOrNull())
         }
     }
 
@@ -350,6 +385,7 @@ class CompileFragment : Fragment(), ErrorAdapter.OnItemInteractionListener {
     companion object {
         private const val ARG_PROJECT = "project"
         private const val STATE_SERVICE_RUNNING = "serviceRunning"
+        private const val RECONNECT_TIMEOUT_MS = 4000L
 
         @JvmStatic
         fun newInstance(param1: String?): CompileFragment = CompileFragment().apply {

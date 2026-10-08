@@ -12,7 +12,7 @@ open class Translator(target: String?) {
 
     private val browser: WebBrowser
     private val START_URL = "https://translate.google.com/"
-    private val translateUrl = "http://translate.google.com/translate_a/single?client=gtx&dt=t&dj=1&ie=UTF-8&sl=auto&tl="
+    private val translateUrl = "https://translate.google.com/translate_a/single?client=gtx&dt=t&dj=1&ie=UTF-8&sl=auto&tl="
     private val USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36"
 
     // This is a temporary var

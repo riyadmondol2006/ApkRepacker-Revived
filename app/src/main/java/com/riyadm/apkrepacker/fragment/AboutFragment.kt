@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
@@ -21,6 +22,7 @@ import com.riyadm.apkrepacker.fragment.dialogs.LicensesDialogFragment
 import com.riyadm.apkrepacker.ui.motion.pressSpring
 import com.riyadm.apkrepacker.ui.motion.springIn
 import com.riyadm.apkrepacker.ui.preferences.showBackIfOverlay
+import com.riyadm.apkrepacker.utils.AppLogo
 import com.riyadm.apkrepacker.utils.AppUtils
 import com.riyadm.apkrepacker.utils.Constant
 
@@ -91,7 +93,16 @@ class AboutFragment : Fragment() {
 
     private fun bindHeader(header: CardAboutHeaderBinding) {
         val context = requireContext()
-        header.tvAboutAppIcon.setImageDrawable(context.packageManager.getApplicationIcon(context.applicationInfo))
+        // The logo fills the whole rounded square (this header is shared with the project page, whose
+        // icons keep the tinted backing, so it is adjusted here rather than in the layout).
+        with(header.tvAboutAppIcon) {
+            background = null
+            scaleType = ImageView.ScaleType.FIT_XY
+            setImageDrawable(
+                AppLogo.drawable(context, resources.getDimensionPixelSize(R.dimen.about_icon_size))
+                    ?: context.packageManager.getApplicationIcon(context.applicationInfo),
+            )
+        }
         header.tvAboutVersion.text = AppUtils.getVersionName(context)
         header.root.springIn(fromScale = 0.92f)
     }

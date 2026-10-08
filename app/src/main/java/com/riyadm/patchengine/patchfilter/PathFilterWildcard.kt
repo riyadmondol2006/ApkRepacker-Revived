@@ -19,7 +19,9 @@ class PathFilterWildcard(context: IPatchContext, pathStr: String) : PathFilter()
     private val wildPathStr: String = pathStr
 
     init {
-        this.regex = Pattern.compile("^" + pathStr.replace("*", ".*") + "\$")
+        this.regex = Pattern.compile(
+            "^" + pathStr.split("*").joinToString(".*") { if (it.isEmpty()) "" else Pattern.quote(it) } + "\$"
+        )
         this.decodedRootPath = context.getDecodeRootPath()
     }
 

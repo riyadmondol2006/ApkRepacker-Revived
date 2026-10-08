@@ -96,7 +96,13 @@ class BuildTask @JvmOverloads constructor(
             ApktoolEngine.build(mContext, projectDir, tmp, options, engineLog)
 
             val meta = ProjectMeta.read(projectDir)
-            val apkFileName = ProjectMeta.getString(meta, "apkFileName") ?: projectDir.name
+            // apktool.json may come from an imported project: reduce the name to a plain file name
+            // so "../../x" can't point the output (or its deletion) outside the output folder.
+            val apkFileName = ProjectMeta.getString(meta, "apkFileName")
+                ?.replace('\\', '/')?.let { File(it).name }
+                ?.replace(Regex("[/\\u0000]"), "_")?.trim()
+                ?.takeIf { it.isNotEmpty() && it != "." && it != ".." }
+                ?: projectDir.name
             val outApk = FileUtil.genNameApk(
                 mContext, projectDir.absolutePath, apkFileName,
                 if (options.sign) "_signed" else "_unsigned", 0

@@ -186,8 +186,7 @@ abstract class PatchRule {
         var input: InputStream? = null
         try {
             input = zfile.getInputStream(entry)
-            val out = FileOutputStream(path)
-            IOUtils.copy(input, out)
+            FileOutputStream(path).use { out -> IOUtils.copy(input, out) }
         } catch (e2: Exception) {
             logger.error(R.string.general_error, e2.message)
         } finally {
@@ -281,6 +280,8 @@ abstract class PatchRule {
                     }
                     Log.d(TAG, "real value null")
                     position = rawStr.indexOf("\${", endPos)
+                } else {
+                    break
                 }
             }
             if (!replaces.isEmpty()) {

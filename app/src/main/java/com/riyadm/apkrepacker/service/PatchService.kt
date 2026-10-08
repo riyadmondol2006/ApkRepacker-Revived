@@ -38,6 +38,7 @@ import kotlinx.coroutines.launch
 import org.apache.commons.io.FileUtils
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.logging.Level
 import java.util.zip.ZipFile
 
@@ -76,6 +77,13 @@ class PatchService : Service(), IPatchContext, IRulesInfo {
     private lateinit var projectHelper: ProjectHelper
     private var wakeLock: JobWakeLock? = null
 
+    /** The patch being applied right now (GOTO / MATCH_GOTO validate their target against its rule names). */
+    @Volatile
+    private var currentExecutor: PatchExecutor? = null
+
+    /** Number of error() lines logged during this run. */
+    private val errorCount = AtomicInteger(0)
+
     private val mLog = MutableLiveData<String>()
     val logLiveData: LiveData<String> get() = mLog
 
@@ -107,6 +115,10 @@ class PatchService : Service(), IPatchContext, IRulesInfo {
 
         addNotification(getString(R.string.title_patcher), startForeground = true)
 
+        // One run at a time: a second start (double tap, or a tap after rotating mid-run) would reset the
+        // log and project state under the run that is still patching the same project.
+        if (!running.compareAndSet(false, true)) return START_NOT_STICKY
+
         if (projectDir.isNullOrEmpty() || patchPaths.isEmpty()) {
             finish(success = false, summary = getString(R.string.patcher_nothing_to_do))
             return START_NOT_STICKY
@@ -120,6 +132,7 @@ class PatchService : Service(), IPatchContext, IRulesInfo {
         mPatchSize.postValue(patchPaths.size)
         mPatchCount.postValue(0)
         mDone.postValue(false)
+        errorCount.set(0)
 
         wakeLock?.acquire()
         uiScope.launch {
@@ -131,10 +144,21 @@ class PatchService : Service(), IPatchContext, IRulesInfo {
                     val name = File(path).name
                     appendInfo(getString(R.string.patcher_applying_patch, name), bold = true)
                     addNotification(getString(R.string.patcher_applying_n_of_m, index + 1, patchPaths.size), step = index, stepTotal = patchPaths.size)
-                    PatchExecutor(projectHelper, path, this@PatchService, this@PatchService).applyPatch()
+                    val executor = PatchExecutor(projectHelper, path, this@PatchService, this@PatchService)
+                    currentExecutor = executor
+                    try {
+                        executor.applyPatch()
+                    } finally {
+                        currentExecutor = null
+                    }
                     mPatchCount.postValue(index + 1)
                 }
-                finish(success = true, summary = resources.getQuantityString(R.plurals.patcher_done_summary, patchPaths.size, patchPaths.size))
+                val errors = errorCount.get()
+                if (errors > 0) {
+                    finish(success = false, summary = resources.getQuantityString(R.plurals.patcher_done_with_errors_summary, errors, errors))
+                } else {
+                    finish(success = true, summary = resources.getQuantityString(R.plurals.patcher_done_summary, patchPaths.size, patchPaths.size))
+                }
             } catch (e: Throwable) {
                 DLog.e("PatchService", e)
                 appendText(getString(R.string.general_error, e.message) + "\n")
@@ -192,7 +216,10 @@ class PatchService : Service(), IPatchContext, IRulesInfo {
         }
     }
 
+    private val running = AtomicBoolean(false)
+
     private fun finish(success: Boolean, summary: String) {
+        running.set(false)
         appendInfo(summary, bold = true)
         mainHandler.post { flushLog() }
         wakeLock?.release()
@@ -264,6 +291,8 @@ class PatchService : Service(), IPatchContext, IRulesInfo {
     override fun onTimeout(startId: Int, fgsType: Int) {
         job.cancel()
         appendInfo(getString(R.string.notification_build_timeout), bold = true)
+        mainHandler.post { flushLog() }
+        wakeLock?.release()
         leaveForeground()
         mDone.postValue(true)
         stopSelf()
@@ -288,14 +317,17 @@ class PatchService : Service(), IPatchContext, IRulesInfo {
 
     override fun getActivities(): List<String>? = runCatching { parseManifest().activities.mapNotNull { it.name } }.getOrNull()
 
-    override fun getApplicationManifest(): String? = runCatching { parseManifest().`package` }.getOrNull()
+    /** The `<application android:name>` class (what `[APPLICATION]` targets need), or null when the app has no custom one. */
+    override fun getApplicationManifest(): String? = runCatching {
+        parseManifest().keepClasses.firstOrNull { it.type == "application" }?.name
+    }.getOrNull()
 
     override fun getDecodeRootPath(): String? = projectHelper.getProjectPath()
 
     override fun getLauncherActivities(): List<String>? =
         runCatching { listOfNotNull(parseManifest().launcherActivity?.name) }.getOrNull()
 
-    override fun getPatchNames(): List<String>? = null
+    override fun getPatchNames(): List<String>? = currentExecutor?.getRuleNames()?.filterNotNull()
 
     override fun getSmaliFolders(): List<String> {
         val folders = mutableListOf("smali")
@@ -317,16 +349,26 @@ class PatchService : Service(), IPatchContext, IRulesInfo {
     }
 
     override fun error(resourceId: Int, vararg objArr: Any?) {
-        appendText(String.format(getString(resourceId), *objArr) + "\n")
+        errorCount.incrementAndGet()
+        appendText(safeFormat(getString(resourceId), objArr) + "\n")
     }
 
     override fun info(resourceId: Int, bold: Boolean, vararg objArr: Any?) {
-        appendInfo(String.format(getString(resourceId), *objArr), bold)
+        appendInfo(safeFormat(getString(resourceId), objArr), bold)
     }
 
     override fun info(str: String?, bold: Boolean, vararg objArr: Any?) {
-        appendInfo(String.format(str ?: "", *objArr), bold)
+        val text = str ?: ""
+        appendInfo(if (objArr.isEmpty()) text else safeFormat(text, objArr), bold)
     }
+
+    /** String.format that never throws: falls back to the raw text (it may hold '%' from a file path). */
+    private fun safeFormat(format: String, args: Array<out Any?>): String =
+        try {
+            String.format(format, *args)
+        } catch (e: Exception) {
+            format
+        }
 
     override fun patchFinished() {
         DLog.d("PatchService", "patch done")

@@ -172,6 +172,8 @@ object FragmentUtils {
     /** Pops the activity's back stack (the screen on top animates out with its return transition). */
     @JvmStatic
     fun remove(fragment: Fragment) {
+        // A repeated tap on Close/back must not pop the screen underneath: act only while this one is still showing.
+        if (!fragment.isAdded || fragment.isRemoving) return
         fragment.activity?.supportFragmentManager?.popBackStack()
     }
 

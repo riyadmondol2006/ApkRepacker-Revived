@@ -146,6 +146,7 @@ class AppEditorActivity : BaseActivity() {
 
     private fun openPatcher() {
         StringUtils.hideKeyboard(this)
+        if (supportFragmentManager.findFragmentByTag(PatcherFragment.TAG) != null) return
         FragmentUtils.add(PatcherFragment.newInstance(), supportFragmentManager, android.R.id.content, PatcherFragment.TAG)
     }
 
@@ -174,7 +175,11 @@ class AppEditorActivity : BaseActivity() {
                 patcher != null -> FragmentUtils.remove(patcher)
                 supportFragmentManager.backStackEntryCount > 0 -> performDefaultBack(this)
                 else -> {
-                    val page = tabFragments.getOrNull(mViewPager?.currentItem ?: -1)
+                    // After recreation the pager reuses fragments restored by the FragmentManager, so the
+                    // activity fields are not the attached instances: look the current page up by its tag.
+                    val current = mViewPager?.currentItem ?: -1
+                    val page = if (current < 0) null else
+                        supportFragmentManager.findFragmentByTag("f$current")?.takeIf { it.isAdded }
                     when {
                         page is OnBackPressedListener -> page.onBackPressed()
                         page != null && page.childFragmentManager.backStackEntryCount > 0 ->

@@ -77,6 +77,14 @@ class DecompileFragment : Fragment() {
         b.progressTip.accessibilityLiveRegion = View.ACCESSIBILITY_LIVE_REGION_POLITE
         b.decompileSubtitle.text = projectName?.takeIf { it.isNotBlank() } ?: selectedApk.name
 
+        // Restored after process death: the run is gone with the process (the session map is
+        // empty and the ViewModel is new). Don't silently start a second decompile; an explicit
+        // new one always arrives with savedInstanceState == null.
+        if (savedInstanceState != null && !viewModel.isStarted && DecompileService.session(runId) == null) {
+            FragmentUtils.remove(this)
+            return
+        }
+
         // Start (or re-attach to) the run first: the log adapter reads the session's lines.
         viewModel.start(selectedApk, options, runId)
         val adapter = LogLineAdapter(viewModel.lines)

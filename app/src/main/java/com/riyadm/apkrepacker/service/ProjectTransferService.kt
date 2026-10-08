@@ -7,6 +7,8 @@ import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.net.Uri
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.os.IBinder
 import android.provider.DocumentsContract
 import android.provider.OpenableColumns
@@ -52,7 +54,12 @@ class ProjectTransferService : Service() {
     private val serial = Mutex()
     private val pending = AtomicInteger(0)
     private val doneIds = AtomicInteger(0)
+    @Volatile
     private var inForeground = false
+    private val mainHandler = Handler(Looper.getMainLooper())
+
+    /** Id of the newest start command; stopSelf(id) then never kills a job that arrived meanwhile. */
+    private val latestStartId = AtomicInteger(0)
     private var wakeLock: JobWakeLock? = null
 
     override fun onCreate() {
@@ -62,6 +69,7 @@ class ProjectTransferService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        latestStartId.set(startId)
         val action = intent?.action
         val uri = intent?.data
         val project = intent?.getStringExtra(EXTRA_PROJECT)
@@ -80,12 +88,22 @@ class ProjectTransferService : Service() {
         pending.incrementAndGet()
         wakeLock?.acquire()
         scope.launch {
-            val result = serial.withLock { run(action, uri, project, label) }
-            publish(result)
-            wakeLock?.release()
-            if (pending.decrementAndGet() == 0) {
-                leaveForeground()
-                stopSelf()
+            try {
+                val result = serial.withLock { run(action, uri, project, label) }
+                publish(result)
+            } finally {
+                // Always, even if the job threw or was cancelled.
+                wakeLock?.release()
+                if (pending.decrementAndGet() == 0) {
+                    // Re-check on the main thread, where onStartCommand runs: a start that raced in
+                    // after the decrement bumped pending (or the start id) and keeps the service.
+                    mainHandler.post {
+                        if (pending.get() == 0) {
+                            leaveForeground()
+                            stopSelf(latestStartId.get())
+                        }
+                    }
+                }
             }
         }
         return START_NOT_STICKY
@@ -98,7 +116,7 @@ class ProjectTransferService : Service() {
                 ACTION_EXPORT_ZIP -> {
                     val dir = File(requireNotNull(project))
                     try {
-                        val out = contentResolver.openOutputStream(uri) ?: throw TransferException(R.string.transfer_error_open)
+                        val out = contentResolver.openOutputStream(uri, "wt") ?: throw TransferException(R.string.transfer_error_open)
                         ProjectTransfer.exportZip(dir, out, progress)
                     } catch (e: Exception) {
                         // Don't leave a truncated ZIP behind.
@@ -110,8 +128,8 @@ class ProjectTransferService : Service() {
 
                 ACTION_EXPORT_FOLDER -> {
                     val dir = File(requireNotNull(project))
-                    ProjectTransfer.exportFolder(dir, TreeFs.sink(this, uri), progress)
-                    Result(true, getString(R.string.transfer_export_folder_done, ProjectTransfer.safeName(dir.name)))
+                    val folder = ProjectTransfer.exportFolder(dir, TreeFs.sink(this, uri), progress)
+                    Result(true, getString(R.string.transfer_export_folder_done, folder.ifEmpty { ProjectTransfer.safeName(dir.name) }))
                 }
 
                 ACTION_IMPORT_ZIP -> {
@@ -232,6 +250,7 @@ class ProjectTransferService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        mainHandler.removeCallbacksAndMessages(null)
         wakeLock?.release()
         job.cancel()
     }

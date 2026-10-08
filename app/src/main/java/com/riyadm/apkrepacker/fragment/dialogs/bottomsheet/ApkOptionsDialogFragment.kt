@@ -12,6 +12,9 @@ import com.riyadm.apkrepacker.ui.motion.springIn
 /** Actions for an APK file chosen in the file manager. */
 class ApkOptionsDialogFragment : BottomSheetDialogFragment() {
 
+    /** Set on the first accepted tap: the sheet stays tappable while it animates out. */
+    private var handled = false
+
     private var listener: ItemClickListener? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
@@ -25,6 +28,8 @@ class ApkOptionsDialogFragment : BottomSheetDialogFragment() {
         }
 
         val click = View.OnClickListener { view ->
+            if (handled) return@OnClickListener
+            handled = true
             listener?.onApkItemClick(view.id)
             dismiss()
         }

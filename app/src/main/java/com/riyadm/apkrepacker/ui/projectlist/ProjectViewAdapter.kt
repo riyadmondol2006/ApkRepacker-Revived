@@ -29,12 +29,24 @@ class ProjectViewAdapter(context: Context) :
         }
 
     fun setData(data: List<ProjectItem?>?) {
-        val items = data.orEmpty().filterNotNull()
-        // Keep rows that were expanded expanded across reloads.
-        val expanded = currentList.filter { it.isChecked }.mapTo(HashSet()) { it.appProjectPath }
-        if (expanded.isNotEmpty()) items.forEach { if (it.appProjectPath in expanded) it.isChecked = true }
+        val previous = currentList.associateBy { it.appProjectPath }
+        val items = data.orEmpty().filterNotNull().map { fresh ->
+            val old = previous[fresh.appProjectPath] ?: return@map fresh
+            // Unchanged project: keep the instance the bound holder already references, so the
+            // expanded state it toggles stays in the list. Changed project: carry the state over.
+            if (sameProject(old, fresh)) old else fresh.also { it.isChecked = old.isChecked }
+        }
         submitList(items) { refreshGroupEdges() }
     }
+
+    private fun sameProject(a: ProjectItem, b: ProjectItem) =
+        a.appProjectPath == b.appProjectPath &&
+            a.appName == b.appName &&
+            a.appPackage == b.appPackage &&
+            a.appIcon == b.appIcon &&
+            a.apkPatch == b.apkPatch &&
+            a.appVersionName == b.appVersionName &&
+            a.appVersionCode == b.appVersionCode
 
     fun clear() {
         submitList(emptyList())

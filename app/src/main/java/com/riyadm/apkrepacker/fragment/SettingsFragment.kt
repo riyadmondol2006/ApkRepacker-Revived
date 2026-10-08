@@ -130,6 +130,7 @@ class SettingsFragment : RevivedPreferenceFragment(),
         preferenceManager.sharedPreferences?.registerOnSharedPreferenceChangeListener(this)
         updateThemeSummaries()
         updateDecodeFolderSummary()
+        updateAllFilesAccessSummary()
     }
 
     override fun onStop() {

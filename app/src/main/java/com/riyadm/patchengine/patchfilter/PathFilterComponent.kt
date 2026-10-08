@@ -15,8 +15,8 @@ class PathFilterComponent(ctx: IPatchContext, componentType: ComponentType) : Pa
         val i = ComponetClass.component[componentType.ordinal]
         when (i) {
             1 -> this.applicationName = ctx.getApplicationManifest()
-            2 -> this.componentList = ctx.getActivities()
-            3 -> this.componentList = ctx.getLauncherActivities()
+            2 -> this.componentList = ctx.getActivities() ?: emptyList()
+            3 -> this.componentList = ctx.getLauncherActivities() ?: emptyList()
         }
     }
 
@@ -29,10 +29,10 @@ class PathFilterComponent(ctx: IPatchContext, componentType: ComponentType) : Pa
             }
             this.cursor = i2 + 1
             return getSmaliPath(this.applicationName)
-        } else if ((i != 2 && i != 3) || this.cursor >= this.componentList!!.size) {
+        } else if ((i != 2 && i != 3) || this.cursor >= (this.componentList?.size ?: 0)) {
             return null
         } else {
-            val list = this.componentList!!
+            val list = this.componentList ?: return null
             val i3 = this.cursor
             this.cursor = i3 + 1
             return getSmaliPath(list[i3])
@@ -53,7 +53,8 @@ class PathFilterComponent(ctx: IPatchContext, componentType: ComponentType) : Pa
     }
 
     private fun getRelativePath(smaliFolderName: String, clsName: String?, notExistRetNull: Boolean): String? {
-        val relativePath = smaliFolderName + "/" + clsName!!.replace(".", "/") + ".smali"
+        if (clsName == null) return null
+        val relativePath = smaliFolderName + "/" + clsName.replace(".", "/") + ".smali"
         val absolutionPath = this.decodeRootPath + "/" + relativePath
         if (!notExistRetNull) {
             return relativePath
@@ -73,7 +74,7 @@ class PathFilterComponent(ctx: IPatchContext, componentType: ComponentType) : Pa
         val i = ComponetClass.component[this.compType.ordinal]
         when (i) {
             1 -> return clsName == this.applicationName
-            2, 3 -> return this.componentList!!.contains(clsName)
+            2, 3 -> return this.componentList?.contains(clsName) ?: false
         }
         return false
     }

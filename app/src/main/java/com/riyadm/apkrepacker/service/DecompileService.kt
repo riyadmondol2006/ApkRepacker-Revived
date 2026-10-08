@@ -54,6 +54,10 @@ class DecompileSession internal constructor(val runId: String) : DecodeSink {
 
     internal var listener: Listener? = null
 
+    /** Set by [DecompileService.forget] when the screen is closed for good while the run may still go on. */
+    @Volatile
+    internal var screenGone = false
+
     internal interface Listener {
         fun onLine(line: String)
         fun onFinished(project: File?)
@@ -67,8 +71,14 @@ class DecompileSession internal constructor(val runId: String) : DecodeSink {
     }
 
     override fun onDecodeFinished(result: File?) {
+        // A run ends once: a late result after the service timed it out must not contradict that.
+        if (_finished.value != null) return
         _finished.value = Outcome(result)
-        listener?.onFinished(result)
+        val l = listener
+        // The service must not stay reachable from the session (nor the session from a dead screen).
+        listener = null
+        l?.onFinished(result)
+        if (screenGone) DecompileService.drop(runId)
     }
 }
 
@@ -150,11 +160,12 @@ class DecompileService : Service(), DecompileSession.Listener {
         ProjectLoader.getInstance(applicationContext).loadProjects()
         publishResult(project)
         activeRun = null
+        // Pair this run's acquire with its release before begin() acquires again for the next one.
+        wakeLock?.release()
         val next = pendingStarts.removeFirstOrNull()
         if (next != null) {
             begin(next.first, next.second, next.third)
         } else {
-            wakeLock?.release()
             leaveForeground()
             stopSelf()
         }
@@ -228,9 +239,16 @@ class DecompileService : Service(), DecompileSession.Listener {
 
     /** Android 15+: dataSync services may run 6 hours a day; stop right away when told to. */
     override fun onTimeout(startId: Int, fgsType: Int) {
+        // The decode itself can't be interrupted; finishing the session now makes its late result
+        // a no-op (see DecompileSession.onDecodeFinished). onFinished() releases the wake lock
+        // of the running decode; the queue is dropped and the service stops.
         pendingStarts.clear()
         activeRun?.let { sessions[it]?.onDecodeFinished(null) }
-        wakeLock?.release()
+        if (activeRun != null) {
+            // The session was already over or gone, so onFinished() did not run.
+            activeRun = null
+            wakeLock?.release()
+        }
         leaveForeground()
         stopSelf()
     }
@@ -287,10 +305,19 @@ class DecompileService : Service(), DecompileSession.Listener {
             DecodeTask(context, options, null, session).execute(apk)
         }
 
-        /** Forgets a finished run once its screen is closed for good. */
+        /**
+         * Forgets a run once its screen is closed for good: a finished run goes now, a running one
+         * as soon as it finishes (nobody is left to show it). Rotation never calls this.
+         */
         @JvmStatic
         fun forget(runId: String) {
-            sessions[runId]?.takeIf { it.finished.value != null }?.let { sessions.remove(runId) }
+            val session = sessions[runId] ?: return
+            session.screenGone = true
+            if (session.finished.value != null) sessions.remove(runId)
+        }
+
+        internal fun drop(runId: String) {
+            sessions.remove(runId)
         }
     }
 }

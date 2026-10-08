@@ -25,4 +25,7 @@
     <string name="decompile_notification_failed">Не удалось декомпилировать %1$s.</string>
     <string name="decompile_done_title">Декомпиляция завершена</string>
     <string name="decompile_failed_title">Ошибка декомпиляции</string>
+    <string name="build_interrupted">Сборка прервана (приложение было перезапущено) или уже завершена. Откройте сборку заново, чтобы пересобрать.</string>
+    <string name="build_sign_key_load_failed">Не удалось загрузить ключ подписи.</string>
+    <string name="build_sign_key_password_required">Для ключа подписи \'%1$s\' не сохранён пароль, поэтому его нельзя открыть при фоновой сборке. Сохраните пароль в настройках подписи и повторите сборку.</string>
 </resources>

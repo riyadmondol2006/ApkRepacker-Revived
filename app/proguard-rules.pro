@@ -12,9 +12,8 @@
 #   public *;
 #}
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Keep line numbers so crash reports from release builds are readable.
+-keepattributes SourceFile,LineNumberTable
 
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
@@ -57,3 +56,6 @@ private *;
 -dontwarn javax.imageio.**
 -dontwarn java.lang.ProcessHandle
 -dontwarn org.apache.commons.text.**
+
+# The JKS key store implementation is only reached by name through JksSupport.
+-keep class sun1.security.provider.** { *; }

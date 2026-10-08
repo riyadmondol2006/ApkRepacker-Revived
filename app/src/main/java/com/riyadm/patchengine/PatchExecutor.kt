@@ -3,6 +3,8 @@ package com.riyadm.patchengine
 import com.riyadm.apkrepacker.R
 import com.riyadm.patchengine.interfaces.IPatchContext
 import com.riyadm.patchengine.interfaces.IRulesInfo
+import com.riyadm.patchengine.rules.PatchRuleGoto
+import com.riyadm.patchengine.rules.PatchRuleMatchGoto
 import com.riyadm.patchengine.rules.PatchRuleMatchReplace
 import java.util.zip.ZipFile
 
@@ -29,8 +31,12 @@ class PatchExecutor(
                 return
             }
             val input = mSourceZip!!.getInputStream(entry)
-            mPatch = PatchParser.parse(input, mPatchContext)
-            input.close()
+            val patch = try {
+                PatchParser.parse(input, mPatchContext)
+            } finally {
+                input.close()
+            }
+            mPatch = patch
             /*
             boolean needToDecode = false;
             if (!mProjectHelper.smaliClicked()) {
@@ -47,11 +53,26 @@ class PatchExecutor(
             if (!needToDecode) {
 
              */
-            applyRules(mPatch!!.getRules(), mSourceZip!!)
+            if (patch.requiredEngine > Patch.engineVersion) {
+                mPatchContext.error(
+                    R.string.general_error,
+                    "this patch needs a newer patch engine (requires version ${patch.requiredEngine}, " +
+                        "this app has ${Patch.engineVersion}); its rules were not applied"
+                )
+                return
+            }
+            applyRules(patch.getRules(), mSourceZip!!)
             // }
         } catch (e: Exception) {
             mPatchContext.error(R.string.general_error, e.message)
             e.printStackTrace()
+        } finally {
+            // The rules have all run (applyRules is synchronous), so the patch zip is not needed any more.
+            try {
+                mSourceZip?.close()
+            } catch (ignored: Exception) {
+            }
+            mSourceZip = null
         }
     }
 
@@ -85,13 +106,24 @@ class PatchExecutor(
     private fun applyRules(rules: List<PatchRule>, sourceZip: ZipFile) {
         val total = rules.size
         mRulesInfo?.allRules(total)
+        // With GOTO / MATCH_GOTO in the patch any named rule may be a jump target, so a batch must
+        // not swallow a named rule in its middle (a jump has to be able to start at it).
+        val hasJumps = rules.any { it is PatchRuleGoto || it is PatchRuleMatchGoto }
+        var executed = 0
         var index = 0
         while (index < total) {
+            if (++executed > MAX_EXECUTED_RULES) {
+                mPatchContext.error(
+                    R.string.general_error,
+                    "stopped after $MAX_EXECUTED_RULES executed rules (endless GOTO loop?)"
+                )
+                break
+            }
             mRulesInfo?.currentRules(index)
 
             // Consecutive regex MATCH_REPLACE rules on the same files run in one pass over those
             // files (see PatchRuleMatchReplace.runBatch); the result is the same as one by one.
-            val batch = batchAt(rules, index)
+            val batch = batchAt(rules, index, hasJumps)
             if (batch.size >= 2) {
                 PatchRuleMatchReplace.runBatch(batch, mProjectHelper, mPatchContext) { done ->
                     mRulesInfo?.currentRules(index + done + 1)
@@ -103,11 +135,20 @@ class PatchExecutor(
             val rule = rules[index]
             mPatchContext.info(R.string.patch_start_apply, true, rule.startLine)
             val started = System.nanoTime()
+            var nextRule: String? = null
             if (rule.isValid(mPatchContext)) {
-                rule.executeRule(mProjectHelper, sourceZip, mPatchContext)
+                nextRule = rule.executeRule(mProjectHelper, sourceZip, mPatchContext)
             }
             val seconds = (System.nanoTime() - started) / 1e9
             if (seconds >= 1.0) mPatchContext.info("Took ${"%.1f".format(seconds)} s", false)
+            if (nextRule != null) {
+                val target = findTargetRule(rules, nextRule)
+                if (target >= 0) {
+                    index = target
+                    continue
+                }
+                mPatchContext.error(R.string.patch_error_goto_target_notfound, nextRule)
+            }
             index++
         }
         mRulesInfo?.currentRules(total)
@@ -116,7 +157,7 @@ class PatchExecutor(
     }
 
     /** The run of rules from [start] that [PatchRuleMatchReplace.runBatch] can do together (may be just one). */
-    private fun batchAt(rules: List<PatchRule>, start: Int): List<PatchRuleMatchReplace> {
+    private fun batchAt(rules: List<PatchRule>, start: Int, hasJumps: Boolean): List<PatchRuleMatchReplace> {
         if (!PatchRuleMatchReplace.batchingEnabled) return emptyList()
         val first = rules[start] as? PatchRuleMatchReplace ?: return emptyList()
         val key = first.batchKey() ?: return emptyList()
@@ -126,6 +167,7 @@ class PatchExecutor(
         while (i < rules.size) {
             val next = rules[i] as? PatchRuleMatchReplace ?: break
             if (next.batchKey() != key) break
+            if (hasJumps && next.ruleName != null) break
             batch += next
             i++
         }
@@ -158,5 +200,10 @@ class PatchExecutor(
             }
         }
         return names
+    }
+
+    private companion object {
+        /** Upper bound on executed rules, so a GOTO loop can't hang the run. */
+        const val MAX_EXECUTED_RULES = 100_000
     }
 }

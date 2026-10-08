@@ -12,7 +12,7 @@ object SafeZip {
 
     /**
      * Resolves [entryName] inside [destDir], or returns null when the entry would end up
-     * outside it (the caller should skip the entry).
+     * outside it or is the folder itself (the caller should skip the entry).
      */
     @JvmStatic
     fun resolve(destDir: File, entryName: String): File? {
@@ -21,7 +21,8 @@ object SafeZip {
         return try {
             val root = destDir.canonicalFile
             val target = File(root, name).canonicalFile
-            if (target.path == root.path || target.path.startsWith(root.path + File.separator)) target else null
+            // The root itself is not an entry to write (a name like "." or "a/.."): skip it.
+            if (target.path.startsWith(root.path + File.separator)) target else null
         } catch (e: IOException) {
             null
         }

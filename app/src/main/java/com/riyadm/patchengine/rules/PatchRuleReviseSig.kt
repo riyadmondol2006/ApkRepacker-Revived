@@ -12,7 +12,6 @@ import org.apache.commons.io.IOUtils.closeQuietly
 import java.io.BufferedInputStream
 import java.io.ByteArrayOutputStream
 import java.io.IOException
-import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
 class PatchRuleReviseSig : PatchRule() {
@@ -45,12 +44,16 @@ class PatchRuleReviseSig : PatchRule() {
     override fun executeRule(projectHelper: ProjectHelper, zipFile: ZipFile, iPatchContext: IPatchContext): String? {
         val logger = iPatchContext
         val hexRSA = getHexRSA(projectHelper.getApkPath())
-        val packageName = projectHelper.getApkPackage()
+        if (hexRSA == null) {
+            logger.error(R.string.general_error, "No .RSA/.DSA signature entry found in the APK")
+            return null
+        }
+        val packageName = projectHelper.getApkPackage() ?: ""
         val targetFile = logger.getDecodeRootPath() + "/" + this.targetList[0]
         try {
             IOUtil.writeToFile(
                 targetFile,
-                readFileContent(targetFile).replace("%PACKAGE_NAME%", packageName!!).replace("%RSA_DATA%", hexRSA!!)
+                readFileContent(targetFile).replace("%PACKAGE_NAME%", packageName).replace("%RSA_DATA%", hexRSA)
             )
             return null
         } catch (e: Exception) {
@@ -60,36 +63,27 @@ class PatchRuleReviseSig : PatchRule() {
     }
 
     private fun getHexRSA(apkPath: String?): String? {
-        var ze: ZipEntry? = null
         var zfile: ZipFile? = null
-        var input: BufferedInputStream? = null
-        var output: ByteArrayOutputStream? = null
         try {
             zfile = ZipFile(apkPath)
             val entries = zfile.entries()
             while (entries.hasMoreElements()) {
                 val e = entries.nextElement()
-                ze = e
                 if (!e.isDirectory) {
                     val entryName = e.name
                     if (entryName.endsWith(".RSA") || entryName.endsWith(".rsa") || entryName.endsWith(".DSA") || entryName.endsWith(".dsa")) {
-                        input = BufferedInputStream(zfile.getInputStream(e))
-                        output = ByteArrayOutputStream()
-                        IOUtils.copy(input, output)
+                        BufferedInputStream(zfile.getInputStream(e)).use { input ->
+                            val output = ByteArrayOutputStream()
+                            IOUtils.copy(input, output)
+                            return HexUtil.bytesToHexString(output.toByteArray())
+                        }
                     }
                 }
             }
-            input = BufferedInputStream(zfile.getInputStream(ze))
-            output = ByteArrayOutputStream()
-            IOUtils.copy(input, output)
         } catch (e: IOException) {
             e.printStackTrace()
-        }
-        closeQuietly(input)
-        closeQuietly(output)
-        closeQuietly(zfile)
-        if (output != null) {
-            return HexUtil.bytesToHexString(output.toByteArray())
+        } finally {
+            closeQuietly(zfile)
         }
         return null
     }
