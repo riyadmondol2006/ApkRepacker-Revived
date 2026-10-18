@@ -95,6 +95,41 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
+      # The app bundles libpatchscan.so, built from the Rust crate in native/patchscan by the
+      # cargoBuildPatchScan Gradle task. The runner has rustup and NDKs but not the Android targets.
+      - name: Set up Rust for Android
+        run: |
+          rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+          rustup show active-toolchain
+          # The Gradle task links with the NDK's clang. Use the variable's NDK if it is a real one,
+          # else the newest NDK the image has.
+          if [ ! -x "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar" ]; then
+            NDK="${ANDROID_NDK_LATEST_HOME:-}"
+            if [ ! -x "$NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar" ]; then
+              NDK=$(ls -d "$ANDROID_HOME"/ndk/*/ 2>/dev/null | sort -V | tail -n 1)
+            fi
+            if [ ! -x "${NDK%/}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar" ]; then
+              echo "::error title=No Android NDK::The runner has no NDK under \$ANDROID_HOME/ndk; libpatchscan.so can't be built"
+              exit 1
+            fi
+            echo "ANDROID_NDK_HOME=${NDK%/}" >> "$GITHUB_ENV"
+          fi
+
+      # Downloaded crates, so cargo doesn't fetch them again on every run.
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+          key: cargo-registry-${{ hashFiles('native/*/Cargo.lock') }}
+          restore-keys: cargo-registry-
+
+      # The crate's unit tests run on the runner itself (x86_64 Linux), so a broken regex translator
+      # stops the release here, before the signing checks and the Gradle build.
+      - name: Test the native scanner
+        working-directory: native/patchscan
+        run: cargo test --release --locked
+
       - name: Restore the signing key
         env:
           SIGNING_KEYSTORE_BASE64: ${{ secrets.SIGNING_KEYSTORE_BASE64 }}
@@ -157,6 +192,21 @@ jobs:
             echo "::error title=Gradle build failed::$reason"
           fi
           exit "$status"
+
+      # A build without the native scanner still works (the app falls back to Java), so check the
+      # library really is in the APK for every ABI instead of shipping a slower release unnoticed.
+      - name: Check the APK has libpatchscan.so
+        run: |
+          APK_SRC=$(ls app/build/outputs/apk/release/*.apk | head -n 1)
+          missing=""
+          for abi in arm64-v8a armeabi-v7a x86_64; do
+            unzip -l "$APK_SRC" "lib/$abi/libpatchscan.so" > /dev/null 2>&1 || missing="$missing lib/$abi/libpatchscan.so"
+          done
+          if [ -n "$missing" ]; then
+            echo "::error title=Native library missing::$APK_SRC lacks$missing"
+            exit 1
+          fi
+          unzip -l "$APK_SRC" 'lib/*'
 
       - name: Name the release and collect the files
         id: meta

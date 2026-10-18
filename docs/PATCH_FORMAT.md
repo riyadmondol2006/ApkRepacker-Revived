@@ -25,7 +25,13 @@ MyPatch.zip
 └── extra.zip          ← a bundle a [MERGE] rule pulls from
 ```
 
-Only `patch.txt` is mandatory. Everything else is referenced by a rule.
+Only `patch.txt` is mandatory. Everything else is referenced by a rule, by its
+path relative to `patch.txt`.
+
+If `patch.txt` is not at the root (you zipped the folder, so it is
+`MyPatch/patch.txt`), the least nested `patch.txt` is used and its folder is
+treated as the root. Names written with `\` (PowerShell's `Compress-Archive`),
+an upper-case `PATCH.TXT` and macOS `__MACOSX/` folders are handled too.
 
 ## 2. How `patch.txt` is read
 
@@ -35,8 +41,14 @@ The file is read line by line. The rules of the game:
 - A **keyword** inside a rule looks like `KEYWORD:`. **Its value is on the next
   line**, not on the same line. This is the single most common mistake — put the
   value on its own line.
-- Blank lines are ignored. Lines starting with `#` are comments.
-- Leading and trailing spaces around a value are trimmed, so indentation is fine.
+- Blank lines are ignored. Lines starting with `#` are comments (outside rules;
+  inside a `REPLACE:` block a `#` line is replacement text, e.g. a smali comment).
+- Leading and trailing spaces around tags, keywords and values are trimmed, so
+  indentation is fine. Tags and keywords are case-sensitive: `[MATCH_REPLACE]`,
+  not `[match_replace]`.
+- The file is UTF-8 (a BOM is fine) with LF or CRLF line endings.
+- A rule that is not closed ends where the next rule starts (the missing
+  `[/RULE]` is reported). An unsupported rule is reported once and skipped.
 
 ```
 [AUTHOR]
@@ -88,7 +100,13 @@ Many rules take a `TARGET:`. A target can be:
   smali file(s):
   - `[APPLICATION]` – the `<application>` class
   - `[ACTIVITIES]` – every activity
-  - `[LAUNCHER_ACTIVITIES]` – the launcher activity
+  - `[LAUNCHER_ACTIVITIES]` – every launcher activity (MAIN + LAUNCHER intent filter)
+
+  An `<activity-alias>` stands for its `android:targetActivity`. Selectors are
+  resolved when the patch is read, so `[LAUNCHER_ACTIVITIES]` is the app's
+  launcher before the patch changes the manifest.
+  A TARGET with a `${VAR}` in it is resolved when its rule runs, so it can use a
+  value an earlier `[MATCH_ASSIGN]` captured.
 
 You can combine selectors, e.g. `[ACTIVITIES][LAUNCHER_ACTIVITIES]`.
 
@@ -97,6 +115,11 @@ You can combine selectors, e.g. `[ACTIVITIES][LAUNCHER_ACTIVITIES]`.
 A `MATCH_ASSIGN` rule can capture text into a variable. Anywhere later you can
 expand it with `${NAME}`. Regex capture groups are available as `${GROUP1}`,
 `${GROUP2}`, … inside `REPLACE:` and `ASSIGN:` values.
+
+Variables last for one run of the Patcher, so a patch can use what an earlier
+patch of the same run assigned. A `${NAME}` in a `TARGET:` is expanded when the
+patch is read, before any of its rules run, so there it only sees variables from
+earlier patches.
 
 ---
 
@@ -131,9 +154,12 @@ Notes:
 - In regex mode, special characters in `MATCH` must be escaped (`\{`, `\(`, `\.`
   …). `${GROUP1}` in `REPLACE` is the first captured group.
 - To **delete** matched text, leave `REPLACE:` empty.
+- In regex mode only the first non-blank line of `MATCH` is the pattern; write
+  line breaks as `\n`. `REPLACE` is used exactly as written, blank lines included.
 - In plain mode (`REGEX: false`), `MATCH` is compared line by line with
   surrounding whitespace trimmed, so a multi-line block matches regardless of
-  indentation.
+  indentation. Blank lines are skipped, in `MATCH` and in the file. The matched
+  lines are replaced; the rest of the file is left exactly as it was.
 
 ### `[MATCH_ASSIGN]` — capture a value into a variable
 
@@ -203,12 +229,10 @@ res/drawable/splash.png
 
 ### `[MERGE]` — merge a resource/smali bundle
 
-`SOURCE:` is a zip inside the patch; its resources and smali are meant to be merged into the
-project, renumbering resource IDs in `res/values/public.xml` as needed.
-
-> **Not working at the moment.** This rule is an unfinished stub carried over from the original
-> engine: it logs an error and the patch carries on with the next rule. Add the files with
-> `[ADD_FILES]` and edit `res/values/*.xml` with `[MATCH_REPLACE]` instead.
+`SOURCE:` is a zip inside the patch. Its files are copied into the project; the entries of its
+`res/values/public.xml` get new IDs after the project's highest ID of the same type, and its other
+`res/values*/` files are merged into the project's files of the same name. References to the
+renumbered IDs in the bundle's smali are updated too.
 
 ### `[SIGNATURE_REVISE]` — fill signature placeholders
 

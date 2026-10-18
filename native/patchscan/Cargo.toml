@@ -1,0 +1,22 @@
+[package]
+name = "patchscan"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Native pre-filter for Apk Repacker patch rules: which project files can match"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+jni = { version = "0.21", default-features = false }
+memchr = "2"
+rayon = "1"
+regex = "1"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
+# panic = "unwind" (the default): a panic is caught at the JNI boundary and the app falls back to Java.

@@ -1,8 +1,8 @@
 package com.riyadm.patchengine
 
 import com.riyadm.patchengine.interfaces.IPatchContext
+import com.riyadm.patchengine.utils.PatchZip
 import java.io.File
-import java.util.zip.ZipFile
 
 /**
  * Reads a patch's `patch.txt` header and rules without applying anything. Used by the Patcher UI
@@ -41,8 +41,9 @@ object PatchInspector {
     fun inspect(patchZipPath: String?): PatchInfo {
         if (patchZipPath.isNullOrEmpty()) return PatchInfo()
         return try {
-            ZipFile(patchZipPath).use { zip ->
-                val entry = zip.getEntry("patch.txt") ?: return PatchInfo()
+            // Found where PatchExecutor finds it (also in a folder, see PatchZip); nothing is copied here.
+            PatchZip.openZip(patchZipPath).use { zip ->
+                val entry = PatchZip.findPatchTxt(zip) ?: return PatchInfo()
                 val patch = zip.getInputStream(entry).use { PatchParser.parse(it, SilentContext) }
                 val rules = patch.rules
                 PatchInfo(

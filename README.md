@@ -79,6 +79,16 @@ works without it, only slower for folder export and import (see [Permissions](#p
   handled at once. The result is identical to running the rules one by one (checked byte for byte
   over thousands of files). On a Pixel 8 a five-rule patch over about 5,600 smali files went from
   20 s to 2 s, and the 19-rule demo patch takes about 2 s.
+- **Native scanner**: rules that search many files first ask a small Rust library
+  (`native/patchscan`) which files can match at all, reading them in parallel. The Java rule then
+  runs only on those files, so the result and the log are exactly the same as without it (checked
+  byte for byte, plus 115,000 fuzzed regexes against Android's own regex engine). On a Pixel 8 that
+  makes patching 3-5x faster on big apps: a 19-rule patch over 59,000 smali files dropped from 29 s
+  to 10 s.
+- **Works with APK Editor patches**: Windows line endings, a BOM, a patch zipped inside a folder,
+  `" />"` in a MATCH (apktool writes `"/>"`), `[MERGE]` resource bundles, and activities added
+  without `android:exported` (required on Android 12+) are all handled. `[SIGNATURE_REVISE]` finds
+  the original certificate in v1, v2 or v3 signatures, or in the installed app.
 
 ### Projects: save and load
 - **Export** any project as a **ZIP** (a few seconds for a 7,000-file project) or into a **folder**.
@@ -138,7 +148,12 @@ dynamic colour.
 
 ## Build from source
 
-You need **JDK 17 or newer** and the Android SDK.
+You need **JDK 17 or newer**, the Android SDK with an NDK, and Rust
+([rustup](https://rustup.rs)) with the Android targets for the native patch scanner:
+
+```bash
+rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+```
 
 ```bash
 ./gradlew :app:assembleDebug      # debug APK
@@ -154,6 +169,7 @@ APKs are written to `app/build/outputs/apk/`.
 | Kotlin | 2.4.20 |
 | Material Components | 1.14.0 |
 | apktool | 3.0.3 |
+| Rust (native patch scanner) | stable, `regex` + `rayon` |
 
 The `app` module is Kotlin only. The other modules are `codeeditor`, `colorpicker`, `common`,
 `expandablerecyclerview`, `photoview` and `vectormaster`.

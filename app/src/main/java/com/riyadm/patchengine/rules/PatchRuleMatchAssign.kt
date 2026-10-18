@@ -3,6 +3,7 @@ package com.riyadm.patchengine.rules
 import com.riyadm.apkrepacker.R
 import com.riyadm.apkrepacker.utils.common.DLog
 import com.riyadm.patchengine.LinedReader
+import com.riyadm.patchengine.NativeScan
 import com.riyadm.patchengine.PatchRule
 import com.riyadm.patchengine.PathFinder
 import com.riyadm.patchengine.ProjectHelper
@@ -67,9 +68,29 @@ class PatchRuleMatchAssign : PatchRule() {
 
     override fun executeRule(projectHelper: ProjectHelper, zipFile: ZipFile, iPatchContext: IPatchContext): String? {
         preProcessing(iPatchContext, this.matches)
-        var nextPath = this.pathFinder!!.getNextPath()
-        while (nextPath != null && !executeOnEntry(projectHelper, zipFile, iPatchContext, nextPath)) {
-            nextPath = this.pathFinder!!.getNextPath()
+        // A broken regex is reported once and nothing is assigned (it used to throw for every
+        // file and abort the whole patch). Checked after preProcessing: variables are part of it.
+        regexError(this.matches[0], this.bDotall)?.let {
+            iPatchContext.error(R.string.patch_error_regex_syntax, it)
+            return null
+        }
+        // Files are taken a chunk at a time, and the ones that can't match are skipped without
+        // being read (see NativeScan); the first match still ends the search.
+        val regex = validRegex(this.matches[0], this.bDotall)
+        val chunk = ArrayList<String>(NativeScan.CHUNK)
+        val finder = this.pathFinder!!.restart()
+        var nextPath = finder.getNextPath()
+        while (nextPath != null) {
+            chunk.clear()
+            while (nextPath != null && chunk.size < NativeScan.CHUNK) {
+                chunk += nextPath
+                nextPath = finder.getNextPath()
+            }
+            val canMatch = regex?.let { NativeScan.candidates("${projectHelper.getProjectPath()}", chunk, regexes = listOf(it)) }
+            for ((i, path) in chunk.withIndex()) {
+                if (canMatch != null && !canMatch[i]) continue
+                if (executeOnEntry(projectHelper, zipFile, iPatchContext, path)) return null
+            }
         }
         return null
     }
@@ -87,9 +108,9 @@ class PatchRuleMatchAssign : PatchRule() {
             val fileContent = readFileContent(filepath)
             val regStr = matches[0]
             if (bDotall) {
-                pattern = Pattern.compile(regStr.trim { it <= ' ' }, Pattern.DOTALL)
+                pattern = Pattern.compile(regexSource(regStr), Pattern.DOTALL)
             } else {
-                pattern = Pattern.compile(regStr.trim { it <= ' ' })
+                pattern = Pattern.compile(regexSource(regStr))
             }
             val m = pattern.matcher(fileContent)
             if (m.find(0)) {
@@ -105,8 +126,9 @@ class PatchRuleMatchAssign : PatchRule() {
                     val strAssign2 = strAssign.trim { it <= ' ' }
                     val position = strAssign2.indexOf("=")
                     if (position != -1) {
-                        val name = strAssign2.substring(0, position)
-                        val assignedVal = getRealValue(strAssign2.substring(position + 1), groupStrs)
+                        val name = strAssign2.substring(0, position).trim { it <= ' ' }
+                        // "NAME = value" is NAME and value, like NAME=value.
+                        val assignedVal = getRealValue(strAssign2.substring(position + 1).trim { it <= ' ' }, groupStrs)
                         patchCtx.setVariableValue(name, assignedVal)
                         patchCtx.info("%s=\"%s\"", false, name, assignedVal)
                     }
@@ -121,9 +143,12 @@ class PatchRuleMatchAssign : PatchRule() {
     }
 
     private fun getRealValue(valueBefore: String, groupStrs: List<String?>?): String {
+        // No capturing groups (regex with none, e.g. a constant ASSIGN value): nothing to expand.
+        val groups = groupStrs ?: return valueBefore
         var result = valueBefore
-        for (i in groupStrs!!.indices) {
-            result = result.replace("\${GROUP" + (i + 1) + "}", groupStrs[i]!!)
+        for (i in groups.indices) {
+            // A group that didn't participate in the match is null -> expand to "" instead of NPE.
+            result = result.replace("\${GROUP" + (i + 1) + "}", groups[i] ?: "")
         }
         return result
     }

@@ -12,6 +12,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
+import com.riyadm.apkrepacker.utils.SafeZip
 import java.util.regex.Pattern
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
@@ -22,8 +23,11 @@ class ResourceMerger(private val patchRuleMerge: PatchRuleMerge, private val roo
     override fun consumeAddedFile(projectHelper: ProjectHelper, zipFile: ZipFile, zipEntry: ZipEntry): Boolean {
         val zfile = zipFile
         val entry = zipEntry
-        val name = entry.name
-        val targetPath = this.rootPath + "/" + name
+        // Windows-made bundles store res\values\x.xml; an entry that would land outside the
+        // project is left to the caller, which skips it.
+        val name = entry.name.replace('\\', '/')
+        val target = SafeZip.resolve(File(this.rootPath ?: ""), name) ?: return false
+        val targetPath = target.path
         if ("res/values/public.xml" == name) {
             return true
         }

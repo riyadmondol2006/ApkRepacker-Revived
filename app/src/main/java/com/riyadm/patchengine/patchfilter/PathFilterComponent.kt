@@ -20,6 +20,12 @@ class PathFilterComponent(ctx: IPatchContext, componentType: ComponentType) : Pa
         }
     }
 
+    // The component list stays the one read with the patch: a later rule still targets the app's
+    // own launcher after an earlier one added another (SplashScreen patches rely on that).
+    override fun rewind() {
+        cursor = 0
+    }
+
     override fun getNextEntry(): String? {
         val i = ComponetClass.component[this.compType.ordinal]
         if (i == 1) {
@@ -40,16 +46,30 @@ class PathFilterComponent(ctx: IPatchContext, componentType: ComponentType) : Pa
     }
 
     private fun getSmaliPath(clsName: String?): String? {
-        var path = getRelativePath("smali", clsName, true)
-        var index = 2
-        while (path == null && index < 8) {
-            path = getRelativePath("smali_classes$index", clsName, true)
-            index++
+        if (clsName == null) return null
+        // Look in every smali*/ folder the project has (smali, smali_classes2, 3 ... any N),
+        // not just smali_classes2..7: apps with many dex files have smali_classes8+ and the old
+        // `index < 8` loop missed them, so [APPLICATION]/[ACTIVITIES]/[LAUNCHER_ACTIVITIES]
+        // targets for those classes resolved to a non-existent "smali/..." path.
+        for (folder in smaliFolders()) {
+            val path = getRelativePath(folder, clsName, true)
+            if (path != null) return path
         }
-        if (path == null) {
-            return getRelativePath("smali", clsName, false)
-        }
-        return path
+        // Not found in any folder: fall back to the primary "smali" relative path (may not exist).
+        return getRelativePath("smali", clsName, false)
+    }
+
+    /** Every `smali`/`smali_*` folder in the decoded project, `smali` first then classesN in order. */
+    private fun smaliFolders(): List<String> {
+        val root = this.decodeRootPath ?: return listOf("smali")
+        val dirs = File(root).listFiles { f -> f.isDirectory && (f.name == "smali" || f.name.startsWith("smali_")) }
+            ?: return listOf("smali")
+        return dirs.map { it.name }.sortedWith(compareBy({ smaliOrder(it) }, { it }))
+    }
+
+    private fun smaliOrder(name: String): Int {
+        if (name == "smali") return 1
+        return Regex("smali_classes(\\d+)").matchEntire(name)?.groupValues?.get(1)?.toIntOrNull() ?: Int.MAX_VALUE
     }
 
     private fun getRelativePath(smaliFolderName: String, clsName: String?, notExistRetNull: Boolean): String? {

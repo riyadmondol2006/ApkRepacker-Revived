@@ -64,8 +64,9 @@ class PatchRuleExecDex : PatchRule() {
                                 for (i in lines.indices) {
                                     sb.append(lines[i])
                                     if (i != lines.size - 1) {
-                                        // NOTE: kept from the Java original: appends the int 10 (text "10"), not '\n'
-                                        sb.append(10)
+                                        // Join multi-line PARAM values with a real newline. The Java
+                                        // original did sb.append(10), which appends the text "10".
+                                        sb.append('\n')
                                     }
                                 }
                                 param = sb.toString()

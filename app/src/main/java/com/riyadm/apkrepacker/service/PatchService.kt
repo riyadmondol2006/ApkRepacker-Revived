@@ -26,6 +26,7 @@ import com.riyadm.apkrepacker.utils.NotificationHelper
 import com.riyadm.apkrepacker.utils.common.DLog
 import com.riyadm.apkrepacker.utils.manifestparser.SdkConstants
 import com.riyadm.apkrepacker.utils.manifestparser.xml.AndroidManifestParser
+import com.riyadm.patchengine.ManifestFixer
 import com.riyadm.patchengine.PatchExecutor
 import com.riyadm.patchengine.rules.PatchRuleMatchReplace
 import com.riyadm.patchengine.ProjectHelper
@@ -40,7 +41,8 @@ import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.logging.Level
-import java.util.zip.ZipFile
+import javax.xml.parsers.DocumentBuilderFactory
+import org.w3c.dom.Element
 
 /**
  * Applies `.zip` patches to the open project, in order, on a background coroutine. Modeled on
@@ -64,6 +66,47 @@ class PatchService : Service(), IPatchContext, IRulesInfo {
 
         /** Advanced switch: false runs every rule on its own pass, as before single-pass execution. */
         const val PREF_SINGLE_PASS = "pref_patch_single_pass"
+
+        /**
+         * The activity classes of the manifest and the launcher ones among them (MAIN action and
+         * LAUNCHER category in one intent-filter). An `<activity-alias>` has no class (no smali
+         * file) of its own: it stands for its android:targetActivity, which is what is listed.
+         * Attributes are read by namespace, so any prefix for the android namespace works.
+         */
+        @JvmStatic
+        internal fun readComponents(manifest: File): Pair<List<String>, List<String>> {
+            val doc = DocumentBuilderFactory.newInstance().apply { isNamespaceAware = true }
+                .newDocumentBuilder().parse(manifest)
+            val root = doc.documentElement
+            val pkg = root.getAttribute("package")
+            val activities = LinkedHashSet<String>()
+            val launchers = LinkedHashSet<String>()
+            fun Element.android(name: String): String =
+                getAttributeNS(SdkConstants.ANDROID_URI, name).ifEmpty { getAttribute("android:$name") }
+            fun Element.children(vararg tags: String): List<Element> {
+                val nodes = childNodes
+                return (0 until nodes.length).mapNotNull { nodes.item(it) as? Element }
+                    .filter { (it.localName ?: it.tagName) in tags }
+            }
+            for (app in root.children("application")) {
+                for (component in app.children("activity", "activity-alias")) {
+                    val raw = if (component.localName == "activity-alias") component.android("targetActivity") else component.android("name")
+                    if (raw.isEmpty()) continue
+                    val name = when {
+                        raw.startsWith(".") -> pkg + raw
+                        '.' !in raw && pkg.isNotEmpty() -> "$pkg.$raw"
+                        else -> raw
+                    }
+                    activities += name
+                    val launcher = component.android("exported") != "false" && component.children("intent-filter").any { filter ->
+                        filter.children("action").any { it.android("name") == "android.intent.action.MAIN" } &&
+                            filter.children("category").any { it.android("name") == "android.intent.category.LAUNCHER" }
+                    }
+                    if (launcher) launchers += name
+                }
+            }
+            return activities.toList() to launchers.toList()
+        }
     }
 
     private val binder = LocalBinder()
@@ -133,11 +176,15 @@ class PatchService : Service(), IPatchContext, IRulesInfo {
         mPatchCount.postValue(0)
         mDone.postValue(false)
         errorCount.set(0)
+        // Variables live for one run (a patch may use what an earlier patch of the run assigned),
+        // not across runs: a stale value from another app would be used when a MATCH_ASSIGN misses.
+        globalVariables.clear()
 
         wakeLock?.acquire()
         uiScope.launch {
             try {
                 if (decodeSmali) decodeSmaliInto(projectDir)
+                val manifestBefore = runCatching { manifestFile().readText() }.getOrNull()
                 patchPaths.forEachIndexed { index, path ->
                     mRulesSize.postValue(0)
                     mCurrentRules.postValue(0)
@@ -152,6 +199,12 @@ class PatchService : Service(), IPatchContext, IRulesInfo {
                         currentExecutor = null
                     }
                     mPatchCount.postValue(index + 1)
+                }
+                // Only a manifest the patches changed: components they added without
+                // android:exported would make an Android 12+ app impossible to install.
+                if (manifestBefore != null && runCatching { manifestFile().readText() }.getOrNull() != manifestBefore) {
+                    val fixed = runCatching { ManifestFixer.addMissingExported(manifestFile()) }.getOrDefault(0)
+                    if (fixed > 0) appendInfo(resources.getQuantityString(R.plurals.patcher_exported_added, fixed, fixed), bold = false)
                 }
                 val errors = errorCount.get()
                 if (errors > 0) {
@@ -171,8 +224,11 @@ class PatchService : Service(), IPatchContext, IRulesInfo {
     private fun buildProjectHelper(projectDir: String): ProjectHelper = ProjectHelper().apply {
         mContext = applicationContext
         mProject = projectDir
-        mDataPath = applicationContext.filesDir.path
-        mCache = applicationContext.externalCacheDir
+        // With the separator: ADD_FILES (EXTRACT) appends a file name to it.
+        mDataPath = applicationContext.filesDir.path + File.separator
+        // Internal: externalCacheDir can be null (no shared storage), and EXECUTE_DEX loads its dex
+        // from here; the patch zip copy (see PatchZip) goes here too.
+        mCache = applicationContext.cacheDir
         mSmaliCliced = true
         // Set the source apk + package so rules like SIGNATURE_REVISE / EXECUTE_DEX have them
         // (they used to be null, which crashed those rules on the worker thread).
@@ -312,10 +368,11 @@ class PatchService : Service(), IPatchContext, IRulesInfo {
     }
 
     // region IPatchContext / IRulesInfo
-    private fun parseManifest() =
-        AndroidManifestParser.parse(File(getDecodeRootPath() + "/" + SdkConstants.FN_ANDROID_MANIFEST_XML))
+    private fun manifestFile() = File(getDecodeRootPath() + "/" + SdkConstants.FN_ANDROID_MANIFEST_XML)
 
-    override fun getActivities(): List<String>? = runCatching { parseManifest().activities.mapNotNull { it.name } }.getOrNull()
+    private fun parseManifest() = AndroidManifestParser.parse(manifestFile())
+
+    override fun getActivities(): List<String>? = runCatching { readComponents(manifestFile()).first }.getOrNull()
 
     /** The `<application android:name>` class (what `[APPLICATION]` targets need), or null when the app has no custom one. */
     override fun getApplicationManifest(): String? = runCatching {
@@ -324,22 +381,19 @@ class PatchService : Service(), IPatchContext, IRulesInfo {
 
     override fun getDecodeRootPath(): String? = projectHelper.getProjectPath()
 
-    override fun getLauncherActivities(): List<String>? =
-        runCatching { listOfNotNull(parseManifest().launcherActivity?.name) }.getOrNull()
+    /** Every launcher activity (as in APK Editor), in manifest order. */
+    override fun getLauncherActivities(): List<String>? = runCatching { readComponents(manifestFile()).second }.getOrNull()
 
     override fun getPatchNames(): List<String>? = currentExecutor?.getRuleNames()?.filterNotNull()
 
+    /** The project's smali folders (smali, smali_classes2, … smali_classes10 …), in dex order. */
     override fun getSmaliFolders(): List<String> {
-        val folders = mutableListOf("smali")
-        runCatching {
-            ZipFile(projectHelper.getApkPath()).use { zip ->
-                zip.entries().asSequence()
-                    .map { it.name }
-                    .filter { it.endsWith(".dex") && '/' !in it && it != "classes.dex" }
-                    .mapTo(folders) { "smali_" + it.removeSuffix(".dex") }
-            }
-        }
-        return folders
+        val dirs = File(projectHelper.getProjectPath() ?: "").listFiles()
+            ?.filter { it.isDirectory && (it.name == "smali" || it.name.startsWith("smali_")) }
+            ?.map { it.name }
+            .orEmpty()
+        if (dirs.isEmpty()) return listOf("smali")
+        return dirs.sortedWith(compareBy({ it != "smali" }, { it.filter(Char::isDigit).toIntOrNull() ?: Int.MAX_VALUE }, { it }))
     }
 
     override fun getVariableValue(str: String?): String? = globalVariables[str]

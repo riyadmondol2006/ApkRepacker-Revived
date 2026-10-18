@@ -1,11 +1,13 @@
 package com.riyadm.patchengine
 
 import com.riyadm.apkrepacker.R
+import com.riyadm.apkrepacker.utils.common.DLog
 import com.riyadm.patchengine.interfaces.IPatchContext
 import com.riyadm.patchengine.interfaces.IRulesInfo
 import com.riyadm.patchengine.rules.PatchRuleGoto
 import com.riyadm.patchengine.rules.PatchRuleMatchGoto
 import com.riyadm.patchengine.rules.PatchRuleMatchReplace
+import com.riyadm.patchengine.utils.PatchZip
 import java.util.zip.ZipFile
 
 class PatchExecutor(
@@ -20,17 +22,19 @@ class PatchExecutor(
 
     //применяем патч
     fun applyPatch() {
+        var opened: PatchZip.Opened? = null
         try {
-            val zipFile = ZipFile(mPatchPath)
-            mSourceZip = zipFile
-            val entry = zipFile.getEntry("patch.txt")
+            // patch.txt at the root, or in a folder / with Windows separators / upper case (see PatchZip).
+            val zip = PatchZip.open(mPatchPath ?: "", mProjectHelper.getCacheDir())
+            opened = zip
+            mSourceZip = zip.zip
+            val entry = zip.patchTxt
             if (entry == null) {
-                mSourceZip!!.close()
-                mSourceZip = null
                 mPatchContext.error(R.string.patch_error_no_entry, "patch.txt")
                 return
             }
-            val input = mSourceZip!!.getInputStream(entry)
+            zip.normalizedFrom?.let { mPatchContext.info("Using $it (not at the root of the zip)", false) }
+            val input = zip.zip.getInputStream(entry)
             val patch = try {
                 PatchParser.parse(input, mPatchContext)
             } finally {
@@ -61,15 +65,25 @@ class PatchExecutor(
                 )
                 return
             }
-            applyRules(patch.getRules(), mSourceZip!!)
+            // [PACKAGE] is only a hint (the original engine never checked it): note a mismatch, apply anyway.
+            val target = patch.packagename?.trim()
+            val project = mProjectHelper.getApkPackage()
+            if (!target.isNullOrEmpty() && target != "*" && !target.equals("ALL", ignoreCase = true) &&
+                project != null && target != project
+            ) {
+                mPatchContext.info("Note: this patch was made for $target (this app is $project)", false)
+            }
+            applyRules(patch.getRules(), zip.zip)
             // }
-        } catch (e: Exception) {
-            mPatchContext.error(R.string.general_error, e.message)
+        } catch (e: Throwable) {
+            // Throwable: an OutOfMemoryError / StackOverflowError (deep regex) used to skip the
+            // remaining patches of the run as well.
+            mPatchContext.error(R.string.general_error, e.message ?: e.toString())
             e.printStackTrace()
         } finally {
             // The rules have all run (applyRules is synchronous), so the patch zip is not needed any more.
             try {
-                mSourceZip?.close()
+                opened?.close()
             } catch (ignored: Exception) {
             }
             mSourceZip = null
@@ -125,8 +139,13 @@ class PatchExecutor(
             // files (see PatchRuleMatchReplace.runBatch); the result is the same as one by one.
             val batch = batchAt(rules, index, hasJumps)
             if (batch.size >= 2) {
-                PatchRuleMatchReplace.runBatch(batch, mProjectHelper, mPatchContext) { done ->
-                    mRulesInfo?.currentRules(index + done + 1)
+                try {
+                    PatchRuleMatchReplace.runBatch(batch, mProjectHelper, mPatchContext) { done ->
+                        mRulesInfo?.currentRules(index + done + 1)
+                    }
+                } catch (e: Throwable) {
+                    DLog.e("PatchExecutor", e)
+                    mPatchContext.error(R.string.general_error, "rules from line ${batch[0].startLine} failed: " + (e.message ?: e.toString()))
                 }
                 index += batch.size
                 continue
@@ -136,8 +155,15 @@ class PatchExecutor(
             mPatchContext.info(R.string.patch_start_apply, true, rule.startLine)
             val started = System.nanoTime()
             var nextRule: String? = null
-            if (rule.isValid(mPatchContext)) {
-                nextRule = rule.executeRule(mProjectHelper, sourceZip, mPatchContext)
+            try {
+                if (rule.isValid(mPatchContext)) {
+                    nextRule = rule.executeRule(mProjectHelper, sourceZip, mPatchContext)
+                }
+            } catch (e: Throwable) {
+                // One failing rule (a bug, an OutOfMemoryError, a regex too deep for the stack)
+                // is reported with its line; the rules after it still run, as for other rule errors.
+                DLog.e("PatchExecutor", e)
+                mPatchContext.error(R.string.general_error, "rule at line ${rule.startLine} failed: " + (e.message ?: e.toString()))
             }
             val seconds = (System.nanoTime() - started) / 1e9
             if (seconds >= 1.0) mPatchContext.info("Took ${"%.1f".format(seconds)} s", false)

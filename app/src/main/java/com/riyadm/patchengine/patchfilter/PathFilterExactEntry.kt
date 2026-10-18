@@ -7,6 +7,10 @@ class PathFilterExactEntry(ctx: IPatchContext?, pathStr: String?) : PathFilter()
     private var cursor = 0
     private val entryName: String? = pathStr
 
+    override fun rewind() {
+        cursor = 0
+    }
+
     override fun getNextEntry(): String? {
         val i = this.cursor
         if (i != 0) {

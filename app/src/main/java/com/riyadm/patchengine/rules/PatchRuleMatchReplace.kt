@@ -5,13 +5,13 @@ import android.util.Log
 import com.riyadm.apkrepacker.R
 import com.riyadm.apkrepacker.utils.common.DLog
 import com.riyadm.patchengine.LinedReader
+import com.riyadm.patchengine.NativeScan
 import com.riyadm.patchengine.PatchRule
 import com.riyadm.patchengine.PathFinder
 import com.riyadm.patchengine.ProjectHelper
 import com.riyadm.patchengine.Section
 import com.riyadm.patchengine.interfaces.IPatchContext
 import org.apache.commons.io.IOUtils.closeQuietly
-import java.io.BufferedOutputStream
 import java.io.FileOutputStream
 import java.io.IOException
 import java.nio.charset.Charset
@@ -92,14 +92,16 @@ class PatchRuleMatchReplace : PatchRule() {
         var pattern: Pattern? = null
         preProcessing(logger, matches)
         preProcessing(logger, replaces)
+        // Built again from this run's replaces (the variables may have changed since a GOTO).
+        replacingStr = null
         if (bRegex) {
             val regStr = matches[0]
             DLog.d(TAG, regStr)
             try {
                 if (bDotall) {
-                    pattern = Pattern.compile(regStr.trim { it <= ' ' }, Pattern.DOTALL)
+                    pattern = Pattern.compile(regexSource(regStr), Pattern.DOTALL)
                 } else {
-                    pattern = Pattern.compile(regStr.trim { it <= ' ' })
+                    pattern = Pattern.compile(regexSource(regStr))
                 }
             } catch (e: PatternSyntaxException) {
                 logger.error(R.string.patch_error_regex_syntax, e.message)
@@ -110,21 +112,34 @@ class PatchRuleMatchReplace : PatchRule() {
         }
 
         //происходит перебор файлов для патчинга
-        // String nextPath = pathFinder.getNextPath();
-        var nextPath = pathFinder!!.getNextPath()
+        val finder = pathFinder!!.restart()
+        isWildMatch = finder.isWildMatch()
+        val paths = ArrayList<String>()
+        var nextPath = finder.getNextPath()
         while (nextPath != null) {
-            Log.d(TAG, "nextPath: $nextPath")
-            //     Log.d(TAG, pattern.pattern());
-            executeOnEntry(
-                projectHelper,
-                logger,
-                nextPath,
-                pattern
-            )
-            // nextPath = pathFinder.getNextPath();
-            nextPath = pathFinder!!.getNextPath()
+            paths += nextPath
+            nextPath = finder.getNextPath()
         }
-        //Log.d(TAG, "next patch null");
+        // A wildcard target can be thousands of files: the ones that can't match are skipped
+        // without being read (see NativeScan). Exact targets report a missing match, so they
+        // are always searched.
+        val canMatch = if (!isWildMatch) null else NativeScan.candidates(
+            "${projectHelper.getProjectPath()}",
+            paths,
+            regexes = listOfNotNull(pattern?.pattern()),
+            lineSets = if (pattern == null) listOf(matches) else emptyList(),
+        )
+        var patched = 0
+        for ((i, path) in paths.withIndex()) {
+            // Skipped files have no match: executeOnEntry would leave them alone, silently.
+            if (canMatch != null && !canMatch[i]) continue
+            Log.d(TAG, "nextPath: $path")
+            if (executeOnEntry(projectHelper, logger, path, pattern)) patched++
+        }
+        // A wildcard target says once that nothing matched, instead of once per file.
+        if (isWildMatch && patched == 0) {
+            logger.info(R.string.patch_info_no_match_any, false, targetText, paths.size)
+        }
         return null
     }
 
@@ -136,7 +151,7 @@ class PatchRuleMatchReplace : PatchRule() {
      * @param targetFile    файл для парсинга
      * @param pattern       паттерн
      */
-    private fun executeOnEntry(projectHelper: ProjectHelper, patchCtx: IPatchContext, targetFile: String, pattern: Pattern?) {
+    private fun executeOnEntry(projectHelper: ProjectHelper, patchCtx: IPatchContext, targetFile: String, pattern: Pattern?): Boolean {
         var modified = false
         val filepath = projectHelper.getProjectPath() + "/" + targetFile
         Log.d(TAG, "Start match of target file: $filepath")
@@ -177,7 +192,12 @@ class PatchRuleMatchReplace : PatchRule() {
         } else {
             Log.d(TAG, "Pattern is null")
             try {
-                val lines = readFileLines(filepath)
+                // Matched as before, on the file's non-blank lines (see readFileLines), but the
+                // file is rewritten from its own text: only the matched lines change, blank lines
+                // and CRLF endings elsewhere stay as they were (the old rewrite dropped them all).
+                val content = readFileContent(filepath)
+                val spans = nonBlankLines(content)
+                val lines = spans.map { content.substring(it.first, it.last + 1) }
                 val matchedIndexes: MutableList<Int> = ArrayList()
                 //  int i2 = 0;
                 var i = 0
@@ -190,12 +210,15 @@ class PatchRuleMatchReplace : PatchRule() {
                     i++
                 }
                 if (matchedIndexes.isEmpty()) {
-                    patchCtx.error(R.string.patch_error_no_match, targetFile)
+                    // Like the regex mode: a wildcard target isn't expected to match every file.
+                    if (!isWildMatch) patchCtx.error(R.string.patch_error_no_match, targetFile)
                 } else {
                     try {
-                        writeReplaces(filepath, lines, matchedIndexes)
+                        writeReplaces(filepath, content, spans, matchedIndexes)
                         modified = true
-                        patchCtx.info(R.string.patch_info_num_replaced, false, matchedIndexes.size)
+                        val message = projectHelper.mContext?.getString(R.string.patch_info_num_replaced)
+                        if (message != null) patchCtx.info(targetFile + ": " + String.format(message, matchedIndexes.size), false)
+                        else patchCtx.info(R.string.patch_info_num_replaced, false, matchedIndexes.size)
                     } catch (e: IOException) {
                         patchCtx.error(R.string.patch_error_write_to, targetFile)
                         e.printStackTrace()
@@ -206,6 +229,7 @@ class PatchRuleMatchReplace : PatchRule() {
                 e.printStackTrace()
             }
         }
+        return modified
     }
 
     //проверяем ли матчинг валиден
@@ -246,33 +270,45 @@ class PatchRuleMatchReplace : PatchRule() {
         }
     }
 
+    /**
+     * Writes [content] with each matched run of lines replaced: from the start of its first line
+     * to the end of its last one (blank lines in between go with it, as before); the line
+     * terminator after it and everything outside the matches are kept as they are.
+     */
     @Throws(IOException::class)
-    private fun writeReplaces(filepath: String, lines: List<String>, matchedIndexes: List<Int>) {
+    private fun writeReplaces(filepath: String, content: String, spans: List<IntRange>, matchedIndexes: List<Int>) {
         val replaceStr = getReplaceString()
-        var out: BufferedOutputStream? = null
-        try {
-            out = BufferedOutputStream(FileOutputStream(filepath))
-            var startIdx = 0
-            for (i in matchedIndexes.indices) {
-                val curIdx = matchedIndexes[i]
-                writeLines(out, lines, startIdx, curIdx)
-                out.write(replaceStr.toByteArray(Charset.defaultCharset()))
-                out.write("\n".toByteArray(Charset.defaultCharset()))
-                startIdx = curIdx + matches.size
-            }
-            writeLines(out, lines, startIdx, lines.size)
-            Log.d(TAG, "Wring patched files")
-        } finally {
-            closeQuietly(out)
+        val sb = StringBuilder(content.length + 64)
+        var startPos = 0
+        for (curIdx in matchedIndexes) {
+            sb.append(content, startPos, spans[curIdx].first)
+            sb.append(replaceStr)
+            startPos = spans[curIdx + matches.size - 1].last + 1
         }
+        sb.append(content, startPos, content.length)
+        // Encoded first: an OutOfMemoryError here must not leave a truncated file.
+        val bytes = sb.toString().toByteArray(Charset.defaultCharset())
+        FileOutputStream(filepath).use { it.write(bytes) }
     }
 
-    @Throws(IOException::class)
-    private fun writeLines(out: BufferedOutputStream, lines: List<String>, startIdx: Int, endIdx: Int) {
-        for (i in startIdx until endIdx) {
-            out.write(lines[i].toByteArray(Charset.defaultCharset()))
-            out.write("\n".toByteArray(Charset.defaultCharset()))
+    /**
+     * The non-blank lines of [text] as character ranges without their terminator. Lines end at
+     * \n, \r or \r\n and "blank" means only chars <= ' ', exactly as BufferedReader.readLine plus
+     * readFileLines see them, so matching is unchanged.
+     */
+    private fun nonBlankLines(text: String): List<IntRange> {
+        val result = ArrayList<IntRange>()
+        var start = 0
+        var i = 0
+        val n = text.length
+        while (start < n) {
+            while (i < n && text[i] != '\n' && text[i] != '\r') i++
+            if ((start until i).any { text[it] > ' ' }) result += start until i
+            if (i < n && text[i] == '\r' && i + 1 < n && text[i + 1] == '\n') i++
+            i++
+            start = i
         }
+        return result
     }
     //endregion
 
@@ -280,7 +316,10 @@ class PatchRuleMatchReplace : PatchRule() {
         var result = replaceStr
         val groups = sec.getGroupStrs()
         for (i in groups!!.indices) {
-            result = result.replace("\${GROUP" + (i + 1) + "}", groups[i]!!)
+            // A group that didn't participate in the match is null: replace with "" (as the batch
+            // path's expand() does), not the NPE that groups[i]!! used to throw. This keeps the
+            // one-by-one and runBatch output identical.
+            result = result.replace("\${GROUP" + (i + 1) + "}", groups[i] ?: "")
         }
         return result
     }
@@ -358,9 +397,10 @@ class PatchRuleMatchReplace : PatchRule() {
             for (rule in rules) {
                 rule.preProcessing(ctx, rule.matches)
                 rule.preProcessing(ctx, rule.replaces)
+                rule.replacingStr = null
                 prepared += try {
                     val flags = if (rule.bDotall) Pattern.DOTALL else 0
-                    Prepared(rule, Pattern.compile(rule.matches[0].trim { it <= ' ' }, flags), rule.getReplaceString())
+                    Prepared(rule, Pattern.compile(regexSource(rule.matches[0]), flags), rule.getReplaceString())
                 } catch (e: PatternSyntaxException) {
                     null.also { ctx.error(R.string.patch_error_regex_syntax, e.message) }
                 }
@@ -369,7 +409,8 @@ class PatchRuleMatchReplace : PatchRule() {
             // One walk of the project for all rules: they share the same target.
             val tWalk = System.nanoTime()
             val files = LinkedHashSet<String>()
-            val finder = rules[0].pathFinder!!
+            val finder = rules[0].pathFinder!!.restart()
+            for (rule in rules) rule.isWildMatch = finder.isWildMatch()
             var next = finder.getNextPath()
             while (next != null) {
                 files += next
@@ -378,6 +419,16 @@ class PatchRuleMatchReplace : PatchRule() {
 
             val tScan = System.nanoTime()
             val root = projectHelper.getProjectPath()
+            // Files no rule can match are left alone without being read (see NativeScan). A rule
+            // that can't match a file doesn't change it, so neither can the rules after it. Only
+            // when every rule is a wildcard one: the others report files without a match.
+            val live = prepared.filterNotNull()
+            val all = files.toList()
+            val canMatch = if (live.isEmpty() || !rules.all { it.isWildMatch }) null else {
+                NativeScan.candidates("$root", all, regexes = live.map { it.pattern.pattern() })
+            }
+            val work = if (canMatch == null) all else all.filterIndexed { i, _ -> canMatch[i] }
+
             // Per rule: (file, number of replacements) and the files without a match.
             val replaced = Array(rules.size) { java.util.concurrent.ConcurrentLinkedQueue<Pair<String, Int>>() }
             val missed = Array(rules.size) { java.util.concurrent.ConcurrentLinkedQueue<String>() }
@@ -387,7 +438,7 @@ class PatchRuleMatchReplace : PatchRule() {
             val threads = com.riyadm.apkrepacker.utils.WorkerThreads.count()
             val pool = java.util.concurrent.Executors.newFixedThreadPool(threads)
             try {
-                val futures = files.map { file ->
+                val futures = work.map { file ->
                     pool.submit(Runnable {
                         val path = "$root/$file"
                         try {
@@ -433,8 +484,9 @@ class PatchRuleMatchReplace : PatchRule() {
             }
 
             val tDone = System.nanoTime()
+            val searched = if (canMatch == null) "" else " (${work.size} could match)"
             ctx.info(
-                "Applied ${rules.size} rules to ${files.size} files: finding files " +
+                "Applied ${rules.size} rules to ${files.size} files$searched: finding files " +
                     "${"%.1f".format((tScan - tWalk) / 1e9)} s, reading and patching ${"%.1f".format((tDone - tScan) / 1e9)} s",
                 false,
             )
@@ -446,6 +498,9 @@ class PatchRuleMatchReplace : PatchRule() {
                     ctx.info(file + ": " + String.format(message, count), false)
                 }
                 missed[i].sorted().forEach { ctx.error(R.string.patch_error_no_match, it) }
+                if (rule.isWildMatch && replaced[i].isEmpty() && prepared[i] != null) {
+                    ctx.info(R.string.patch_info_no_match_any, false, rule.targetText, files.size)
+                }
                 onRuleDone?.invoke(i)
             }
             errors.sortedBy { it.second }.forEach { (kind, file) ->

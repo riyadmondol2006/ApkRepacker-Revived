@@ -73,9 +73,13 @@ class PatchRuleAddFiles : PatchRule() {
                     addFile(path, input)
                 } else {
                     val path = projectHelper.getAppDataPath() + RandomHelper.getRandomString(6)
-                    FileOutputStream(path).use { fos -> IOUtil.copy(input, fos) }
-                    logger.info("Copying files from " + patchZip.name + " to " + path, false)
-                    addFilesInZip(projectHelper, path, null, logger)
+                    try {
+                        FileOutputStream(path).use { fos -> IOUtil.copy(input, fos) }
+                        logger.info("Copying files from " + patchZip.name + " to " + path, false)
+                        addFilesInZip(projectHelper, path, null, logger)
+                    } finally {
+                        File(path).delete()
+                    }
                 }
             }
         } catch (e: Exception) {

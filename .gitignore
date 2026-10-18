@@ -12,3 +12,6 @@ build/
 *.keystore
 *.jks.b64
 keystore.properties
+
+# Rust build output (native/patchscan)
+native/*/target/

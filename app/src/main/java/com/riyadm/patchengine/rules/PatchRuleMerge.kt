@@ -9,10 +9,11 @@ import com.riyadm.patchengine.ProjectHelper
 import com.riyadm.patchengine.interfaces.IPatchContext
 import com.riyadm.patchengine.resource.ResourceItem
 import com.riyadm.patchengine.resource.ResourceMerger
-import com.riyadm.patchengine.utils.IOUtil
 import com.riyadm.patchengine.utils.RandomHelper
 import org.apache.commons.io.IOUtils
 import org.apache.commons.io.IOUtils.closeQuietly
+import org.w3c.dom.Element
+import org.w3c.dom.Node
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
@@ -20,6 +21,7 @@ import java.io.InputStream
 import java.io.RandomAccessFile
 import java.nio.charset.Charset
 import java.util.zip.ZipFile
+import javax.xml.parsers.DocumentBuilderFactory
 
 class PatchRuleMerge : PatchRule() {
 
@@ -61,10 +63,11 @@ class PatchRuleMerge : PatchRule() {
         var input: InputStream? = null
         try {
             input = zipFile.getInputStream(entry)
-            val path = IOUtil.makeDir("tmp/" + RandomHelper.getRandomString(6))
-            val fos2 = FileOutputStream(path)
-            IOUtils.copy(input, fos2)
-            fos2.close()
+            // Copy the bundle to a real temp *file*. The old code used IOUtil.makeDir(), which
+            // returns a directory path, so FileOutputStream(path) always threw and the whole
+            // merge silently did nothing (nothing was ever extracted or renumbered).
+            val path = activity.getAppDataPath() + RandomHelper.getRandomString(6)
+            FileOutputStream(path).use { fos2 -> IOUtils.copy(input, fos2) }
             mergeIds(activity.getProjectPath() + "/res/values/public.xml", path, activity.mContext)
             addFilesInZip(activity, path, ResourceMerger(this, activity.getProjectPath()), logger)
         } catch (e: Exception) {
@@ -212,19 +215,33 @@ class PatchRuleMerge : PatchRule() {
 
     @Throws(IOException::class)
     private fun getResourceItems(input: InputStream?): List<ResourceItem>? {
+        if (input == null) {
+            return null
+        }
+        // Parse every <public type=".." name=".." id="0x.." /> entry out of a public.xml. The
+        // original left this as a stub returning null, so mergeIds() NPE'd and merging never ran.
         val result: MutableList<ResourceItem> = ArrayList()
-        /*BufferedReader br = new BufferedReader(new InputStreamReader(input));
-        while (true) {
-            String readLine = br.readLine();
-            if (readLine == null) {
-                return result;
+        try {
+            val doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(input)
+            doc.documentElement.normalize()
+            val nodeList = doc.getElementsByTagName("public")
+            for (i in 0 until nodeList.length) {
+                val node = nodeList.item(i)
+                if (node.nodeType == Node.ELEMENT_NODE) {
+                    val element = node as Element
+                    result.add(
+                        ResourceItem(
+                            element.getAttribute("type"),
+                            element.getAttribute("name"),
+                            ResourceItem.string2Id(element.getAttribute("id"))
+                        )
+                    )
+                }
             }
-            ResourceItem item = ResourceItem.parseFrom(readLine);
-            if (item != null) {
-                result.add(item);
-            }
-        }*/
-        return null
+        } catch (e: Exception) {
+            throw IOException(e)
+        }
+        return result
     }
 
     override fun isValid(iPatchContext: IPatchContext): Boolean {

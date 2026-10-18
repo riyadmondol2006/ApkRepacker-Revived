@@ -19,6 +19,7 @@
     <string name="patch_error_write_to">Cannot write to %s.</string>
     <string name="patch_examples_copied">"Patch examples copied to %s"</string>
     <string name="patch_info_num_replaced">%d match(es) replaced.</string>
+    <string name="patch_info_no_match_any">%1$s: no match in %2$d files.</string>
     <string name="patch_start_apply">Apply patch rule at line %d …</string>
     <string name="patch_start_parse">Parse rules inside patch.txt …</string>
     <string name="patch">Patch</string>

@@ -30,6 +30,10 @@
         <item quantity="one">%d rule</item>
         <item quantity="other">%d rules</item>
     </plurals>
+    <plurals name="patcher_exported_added">
+        <item quantity="one">Added android:exported=\"true\" to %d component the patches added with an intent filter (Android 12+ requires it).</item>
+        <item quantity="other">Added android:exported=\"true\" to %d components the patches added with an intent filter (Android 12+ requires it).</item>
+    </plurals>
     <plurals name="patcher_done_with_errors_summary">
         <item quantity="one">Patching finished with %d error. See the log.</item>
         <item quantity="other">Patching finished with %d errors. See the log.</item>

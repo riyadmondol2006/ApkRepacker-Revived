@@ -1,4 +1,7 @@
 import org.gradle.api.artifacts.transform.TransformParameters
+import org.gradle.process.ExecOperations
+
+import javax.inject.Inject
 
 plugins {
     alias(libs.plugins.android.application)
@@ -90,6 +93,177 @@ android {
 
 base {
     archivesName = "ApkRepackerRevived-v${android.defaultConfig.versionName}(${android.defaultConfig.versionCode})"
+}
+
+/*
+ * libpatchscan.so: the native patch-rule pre-filter, built from the Rust crate in native/patchscan
+ * for every ABI the app ships. Needs cargo (rustup) with the three Android targets and an NDK for
+ * its clang linker (docs/RELEASING.md). -PskipRust=true packages the app without it; the app then
+ * falls back to its Java scanner. CI never passes it, so a release can't silently lose the library.
+ */
+abstract class CargoBuildPatchScan extends DefaultTask {
+    // ABI -> Rust target triple, and the NDK clang prefix for that triple.
+    static final Map<String, String> TRIPLES = [
+        'arm64-v8a'  : 'aarch64-linux-android',
+        'armeabi-v7a': 'armv7-linux-androideabi',
+        'x86_64'     : 'x86_64-linux-android',
+    ]
+    static final Map<String, String> CLANG = [
+        'aarch64-linux-android'  : 'aarch64-linux-android',
+        'armv7-linux-androideabi': 'armv7a-linux-androideabi',
+        'x86_64-linux-android'   : 'x86_64-linux-android',
+    ]
+
+    @InputFiles
+    @PathSensitive(PathSensitivity.RELATIVE)
+    abstract ConfigurableFileCollection getCrateFiles()
+
+    @Internal
+    abstract DirectoryProperty getCrateDir()
+
+    @Input
+    abstract Property<Integer> getMinSdk()
+
+    @Input
+    abstract Property<Boolean> getSkip()
+
+    // Where to look for the NDK when no ANDROID_NDK_* variable is set (<sdk>/ndk/<version>).
+    @Internal
+    abstract Property<String> getSdkDir()
+
+    @Internal
+    abstract DirectoryProperty getCargoTargetDir()
+
+    @OutputDirectory
+    abstract DirectoryProperty getJniLibsDir()
+
+    @Inject
+    abstract ExecOperations getExecOperations()
+
+    @TaskAction
+    void build() {
+        File out = jniLibsDir.get().asFile
+        out.deleteDir()
+        out.mkdirs()
+        if (skip.get()) {
+            logger.warn("w: -PskipRust=true: building without libpatchscan.so (the app uses its Java scanner)")
+            return
+        }
+
+        String hostTag = System.getProperty('os.name').toLowerCase().contains('mac') ? 'darwin-x86_64' : 'linux-x86_64'
+        String rustTargets = TRIPLES.values().join(' ')
+        String cargo = findCargo()
+        if (cargo == null) {
+            throw new GradleException("cargo was not found (on PATH or in ~/.cargo/bin), so libpatchscan.so can't be built.\n" +
+                    "Install Rust from https://rustup.rs, then: rustup target add $rustTargets\n" +
+                    "Or build without the native scanner: -PskipRust=true")
+        }
+        File ndk = findNdk(hostTag)
+        if (ndk == null) {
+            throw new GradleException("No Android NDK was found, so libpatchscan.so can't be built.\n" +
+                    "Install one (Android Studio > SDK Manager > SDK Tools > NDK, or sdkmanager \"ndk;27.0.12077973\") " +
+                    "or set ANDROID_NDK_HOME.\nOr build without the native scanner: -PskipRust=true")
+        }
+        File bin = new File(ndk, "toolchains/llvm/prebuilt/$hostTag/bin")
+        logger.lifecycle("cargo: $cargo, NDK: $ndk")
+
+        Map<String, String> env = [:]
+        // A rustup proxy run by full path still needs rustc next to it.
+        env['PATH'] = new File(cargo).parent + File.pathSeparator + (System.getenv('PATH') ?: '')
+        TRIPLES.values().each { triple ->
+            String clang = new File(bin, "${CLANG[triple]}${minSdk.get()}-clang").absolutePath
+            String ar = new File(bin, 'llvm-ar').absolutePath
+            String key = triple.replace('-', '_')
+            env["CARGO_TARGET_${key.toUpperCase()}_LINKER".toString()] = clang
+            env["CC_$key".toString()] = clang
+            env["AR_$key".toString()] = ar
+        }
+
+        List<String> args = [cargo, 'build', '--release', '--locked',
+                             '--manifest-path', crateDir.file('Cargo.toml').get().asFile.absolutePath,
+                             '--target-dir', cargoTargetDir.get().asFile.absolutePath]
+        TRIPLES.values().each { args += ['--target', it] }
+        try {
+            execOperations.exec {
+                it.commandLine(args)
+                it.workingDir(crateDir.get().asFile)
+                it.environment(env)
+            }
+        } catch (Exception e) {
+            throw new GradleException("cargo build failed for libpatchscan.so (see the output above). " +
+                    "Missing targets? rustup target add $rustTargets  (or -PskipRust=true to build without it)", e)
+        }
+
+        TRIPLES.each { abi, triple ->
+            File so = new File(cargoTargetDir.get().asFile, "$triple/release/libpatchscan.so")
+            if (!so.isFile()) {
+                throw new GradleException("cargo finished but $so is missing")
+            }
+            File dest = new File(out, "$abi/libpatchscan.so")
+            dest.parentFile.mkdirs()
+            java.nio.file.Files.copy(so.toPath(), dest.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+        }
+    }
+
+    private static String findCargo() {
+        String exe = System.getProperty('os.name').toLowerCase().contains('windows') ? 'cargo.exe' : 'cargo'
+        List<File> dirs = (System.getenv('PATH') ?: '').split(File.pathSeparator).findAll { it }.collect { new File(it) }
+        if (System.getenv('CARGO_HOME')) {
+            dirs << new File(System.getenv('CARGO_HOME'), 'bin')
+        }
+        dirs << new File(System.getProperty('user.home'), '.cargo/bin')
+        File found = dirs.collect { new File(it, exe) }.find { it.isFile() && it.canExecute() }
+        return found?.absolutePath
+    }
+
+    private File findNdk(String hostTag) {
+        Closure<Boolean> usable = { File dir -> dir != null && new File(dir, "toolchains/llvm/prebuilt/$hostTag/bin/llvm-ar").isFile() }
+        for (String name : ['ANDROID_NDK_HOME', 'ANDROID_NDK_LATEST_HOME', 'ANDROID_NDK_ROOT']) {
+            String value = System.getenv(name)
+            if (value) {
+                if (usable(new File(value))) {
+                    return new File(value)
+                }
+                logger.warn("w: $name=$value is not a usable NDK, ignoring it")
+            }
+        }
+        List<String> sdks = [sdkDir.getOrNull(), System.getenv('ANDROID_HOME'), System.getenv('ANDROID_SDK_ROOT')].findAll { it }
+        for (String sdk : sdks) {
+            File[] versions = new File(sdk, 'ndk').listFiles()
+            File newest = (versions ?: new File[0]).findAll { usable(it) }.max { File a, File b -> compareVersions(a.name, b.name) }
+            if (newest != null) {
+                return newest
+            }
+        }
+        return null
+    }
+
+    private static int compareVersions(String a, String b) {
+        List<Integer> x = a.findAll(/\d+/)*.toInteger(), y = b.findAll(/\d+/)*.toInteger()
+        for (int i = 0; i < Math.max(x.size(), y.size()); i++) {
+            int c = (i < x.size() ? x[i] : 0) <=> (i < y.size() ? y[i] : 0)
+            if (c != 0) return c
+        }
+        return 0
+    }
+}
+
+def patchScanCrate = rootProject.layout.projectDirectory.dir('native/patchscan')
+def cargoBuildPatchScan = tasks.register('cargoBuildPatchScan', CargoBuildPatchScan) {
+    description = 'Builds libpatchscan.so (native/patchscan) for every ABI the app ships.'
+    crateDir = patchScanCrate
+    crateFiles.from(fileTree(patchScanCrate) { exclude 'target/**' })
+    minSdk = rootProject.ext.minSdkVersion as Integer
+    skip = providers.gradleProperty('skipRust').map { it.toBoolean() }.orElse(false)
+    sdkDir = androidComponents.sdkComponents.sdkDirectory.map { it.asFile.absolutePath }
+    cargoTargetDir = layout.buildDirectory.dir('rust/target')
+    jniLibsDir = layout.buildDirectory.dir('rust/jniLibs')
+}
+// Packaged next to src/main/jniLibs (libaapt2.so). The source set API takes a plain directory, so
+// the merge tasks depend on the cargo task explicitly.
+android.sourceSets.main.jniLibs.srcDir(layout.buildDirectory.dir('rust/jniLibs').get().asFile)
+tasks.matching { it.name ==~ /merge\w*JniLibFolders/ }.configureEach {
+    dependsOn cargoBuildPatchScan
 }
 
 // ARSCLib (AntiSplit) without its desktop-only parts: the Android framework tables and its own

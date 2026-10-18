@@ -42,6 +42,13 @@ class PathFilterWildcard(context: IPatchContext, pathStr: String) : PathFilter()
         this.initialized = true
     }
 
+    override fun rewind() {
+        fileCursor = 0
+        fileList.clear()
+        folderList.clear()
+        initialized = false
+    }
+
     override fun getNextEntry(): String? {
         if (!this.initialized) {
             init()

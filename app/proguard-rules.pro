@@ -59,3 +59,6 @@ private *;
 
 # The JKS key store implementation is only reached by name through JksSupport.
 -keep class sun1.security.provider.** { *; }
+
+# NativeScan.scan is called from libpatchscan.so (JNI): its class and method names must stay.
+-keep class com.riyadm.patchengine.NativeScan { native <methods>; }

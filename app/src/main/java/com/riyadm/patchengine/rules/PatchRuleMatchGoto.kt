@@ -2,6 +2,7 @@ package com.riyadm.patchengine.rules
 
 import com.riyadm.apkrepacker.R
 import com.riyadm.patchengine.LinedReader
+import com.riyadm.patchengine.NativeScan
 import com.riyadm.patchengine.PatchRule
 import com.riyadm.patchengine.PathFinder
 import com.riyadm.patchengine.ProjectHelper
@@ -66,12 +67,37 @@ class PatchRuleMatchGoto : PatchRule() {
 
     override fun executeRule(projectHelper: ProjectHelper, zipFile: ZipFile, iPatchContext: IPatchContext): String? {
         preProcessing(iPatchContext, matches)
-        var nextPath = pathFinder!!.getNextPath()
-        while (nextPath != null) {
-            if (entryMatches(projectHelper, iPatchContext, nextPath)) {
-                return gotoRule
+        // A broken regex is reported once and the rule doesn't jump (it used to throw for every
+        // file and abort the whole patch). Checked after preProcessing: variables are part of it.
+        if (isUseRegex) {
+            regexError(matches[0], bDotall)?.let {
+                iPatchContext.error(R.string.patch_error_regex_syntax, it)
+                return null
             }
-            nextPath = pathFinder!!.getNextPath()
+        }
+        // Files are taken a chunk at a time, and the ones that can't match are skipped without
+        // being read (see NativeScan); the first match still ends the search.
+        val regex = if (isUseRegex) validRegex(matches[0], bDotall) else null
+        val chunk = ArrayList<String>(NativeScan.CHUNK)
+        val finder = pathFinder!!.restart()
+        var nextPath = finder.getNextPath()
+        while (nextPath != null) {
+            chunk.clear()
+            while (nextPath != null && chunk.size < NativeScan.CHUNK) {
+                chunk += nextPath
+                nextPath = finder.getNextPath()
+            }
+            val canMatch = when {
+                !isUseRegex -> NativeScan.candidates("${projectHelper.getProjectPath()}", chunk, lineSets = listOf(matches))
+                regex != null -> NativeScan.candidates("${projectHelper.getProjectPath()}", chunk, regexes = listOf(regex))
+                else -> null
+            }
+            for ((i, path) in chunk.withIndex()) {
+                if (canMatch != null && !canMatch[i]) continue
+                if (entryMatches(projectHelper, iPatchContext, path)) {
+                    return gotoRule
+                }
+            }
         }
         return null
     }
@@ -85,9 +111,9 @@ class PatchRuleMatchGoto : PatchRule() {
                 val sections: MutableList<Section> = ArrayList()
                 val regStr = matches[0]
                 if (bDotall) {
-                    pattern = Pattern.compile(regStr.trim { it <= ' ' }, Pattern.DOTALL)
+                    pattern = Pattern.compile(regexSource(regStr), Pattern.DOTALL)
                 } else {
-                    pattern = Pattern.compile(regStr.trim { it <= ' ' })
+                    pattern = Pattern.compile(regexSource(regStr))
                 }
                 val m = pattern.matcher(content)
                 var position = 0

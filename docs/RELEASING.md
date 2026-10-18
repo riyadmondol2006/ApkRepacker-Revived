@@ -134,3 +134,20 @@ export SIGNING_KEY_PASSWORD=...
 
 Without those variables the release build is simply left unsigned, and `:app:assembleDebug` is
 the normal choice for development.
+
+## Native code (Rust)
+
+The APK bundles `libpatchscan.so`, built from the Rust crate in
+[`native/patchscan`](../native/patchscan) for each ABI (`arm64-v8a`, `armeabi-v7a`, `x86_64`) by
+the `cargoBuildPatchScan` Gradle task. The workflow sets this up itself. To build on your own
+computer you need [rustup](https://rustup.rs), the Android targets and an NDK (any recent one;
+Android Studio → SDK Manager → SDK Tools → NDK):
+
+```bash
+rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+```
+
+Gradle finds `cargo` on `PATH` or in `~/.cargo/bin`, and the NDK from `ANDROID_NDK_HOME` or the
+newest one under `<sdk>/ndk/`. Without them the build stops and says what is missing. To build
+without the library anyway, pass `-PskipRust=true`: the app then uses its slower Java scanner.
+Releases never do this; the workflow checks the library is in the APK for all three ABIs.

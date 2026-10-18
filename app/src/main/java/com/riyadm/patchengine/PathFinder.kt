@@ -8,7 +8,7 @@ import com.riyadm.patchengine.patchfilter.PathFilterComponent
 import com.riyadm.patchengine.patchfilter.PathFilterExactEntry
 import com.riyadm.patchengine.patchfilter.PathFilterWildcard
 
-class PathFinder(ctx: IPatchContext, pathStr: String, line: Int) {
+class PathFinder(private val ctx: IPatchContext, private val pathStr: String, private val line: Int) {
 
     private val TAG = "PathFinder"
 
@@ -96,6 +96,18 @@ class PathFinder(ctx: IPatchContext, pathStr: String, line: Int) {
             }
         }
         return nextEntry
+    }
+
+    /**
+     * The finder for one run of its rule. The walk starts from the first file again, so a rule
+     * reached a second time by GOTO searches again. Selectors keep what they resolved to when
+     * the patch was read, as in the original engine; only a target with `${VAR}` is resolved
+     * again, with the values the variables have now (an earlier MATCH_ASSIGN may have set them).
+     */
+    fun restart(): PathFinder {
+        if (pathStr.contains("\${")) return PathFinder(ctx, pathStr, line)
+        filters?.forEach { it.rewind() }
+        return this
     }
 
     fun isValid(): Boolean {

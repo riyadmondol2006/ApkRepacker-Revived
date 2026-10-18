@@ -4,16 +4,13 @@ import android.util.Log
 import com.riyadm.apkrepacker.R
 import com.riyadm.patchengine.interfaces.IBeforeAddFile
 import com.riyadm.patchengine.interfaces.IPatchContext
-import com.riyadm.patchengine.utils.IOUtil
 import org.apache.commons.io.IOUtils
-import org.apache.commons.io.IOUtils.closeQuietly
 import java.io.BufferedInputStream
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
-import java.io.InputStream
 import java.io.InputStreamReader
 import java.nio.charset.StandardCharsets
 import java.util.regex.Pattern
@@ -114,83 +111,61 @@ abstract class PatchRule {
         bTrim: Boolean,
         endKeywords: List<String>
     ): String? {
-        var string: String?
-        var line = br.readLine()
         while (true) {
-            string = line
-            if (line != null) {
-                var s: String = line
-                if (bTrim) {
-                    s = line.trim { it <= ' ' }
-                }
-                string = s
-                if (endKeywords.contains(s)) {
-                    break
-                }
-                lines.add(s)
-                line = br.readLine()
-                continue
+            val line = br.readLine() ?: return null
+            val trimmed = line.trim { it <= ' ' }
+            // Keywords are found with surrounding spaces too, also in untrimmed (REPLACE) blocks:
+            // an indented "[/MATCH_REPLACE]" used to be taken as replacement text, and the block
+            // then swallowed the rest of the patch.
+            if (endKeywords.contains(trimmed)) {
+                return trimmed
             }
-            break
+            if (bTrim) {
+                // Blank lines in a trimmed (MATCH) block are dropped: files are compared without
+                // their blank lines, and a blank first line would be an empty regex that matches
+                // everywhere.
+                if (trimmed.isNotEmpty()) {
+                    lines.add(trimmed)
+                }
+            } else {
+                lines.add(line)
+            }
         }
-        return string
     }
+
+    /**
+     * The trimmed regex of a MATCH, as the rule compiles it, or null when it doesn't compile (the
+     * rule's own Pattern.compile then fails as before).
+     */
+    protected fun validRegex(regex: String, dotall: Boolean): String? {
+        val trimmed = regexSource(regex)
+        return try {
+            Pattern.compile(trimmed, if (dotall) Pattern.DOTALL else 0)
+            trimmed
+        } catch (e: java.util.regex.PatternSyntaxException) {
+            null
+        }
+    }
+
+    /** The values of each [preProcessing] list as written in patch.txt, before variables were expanded. */
+    private val rawValues = java.util.IdentityHashMap<MutableList<String>, List<String>>()
 
     protected fun preProcessing(ctx: IPatchContext, values: MutableList<String>) {
+        // Expanded from the text as written each time, so a rule run again (GOTO loop) sees the
+        // variables' current values instead of the ones from its first run.
+        val raw = rawValues.getOrPut(values) { ArrayList(values) }
         for (i in values.indices) {
-            val assignedVal = assignValues(ctx, values[i])
-            if (assignedVal != null) {
-                Log.d("PatchRule", assignedVal)
-                values[i] = assignedVal
-            } else
-                Log.d("PatchRule", "assignedVal null")
+            values[i] = assignValues(ctx, raw[i]) ?: raw[i]
         }
     }
 
-    private fun getParentFolder(path: String): String? {
-        val pos = path.lastIndexOf("/")
-        if (pos > 0) {
-            return path.substring(0, pos)
-        }
-        return null
-    }
-
-    private fun addFileEntry(
-        projectHelper: ProjectHelper,
-        zfile: ZipFile,
-        entry: ZipEntry,
-        targetDir: String?,
-        logger: IPatchContext
-    ) {
-        val path = targetDir + "/" + entry.name
-        var parent = getParentFolder(path)
-        // assert parent != null;
-        while (!File(parent!!).exists()) {
-            parent = getParentFolder(parent)
-        }
-        var parentDir: String = parent
-        val paths = Pattern.compile("/").split(path.substring(parentDir.length + 1))
-        if (paths.size > 1) {
-            var i = 0
-            while (i < paths.size - 1) {
-                try {
-                    IOUtil.makeDir(parentDir, paths[i])
-                    parentDir = parentDir + "/" + paths[i]
-                    i++
-                } catch (e: Exception) {
-                    logger.error(R.string.failed_create_dir, e.message)
-                    return
-                }
-            }
-        }
-        var input: InputStream? = null
-        try {
-            input = zfile.getInputStream(entry)
-            FileOutputStream(path).use { out -> IOUtils.copy(input, out) }
-        } catch (e2: Exception) {
-            logger.error(R.string.general_error, e2.message)
-        } finally {
-            closeQuietly(input)
+    /** The PatternSyntaxException message when [regex] (trimmed, as rules compile it) doesn't compile, else null. */
+    protected fun regexError(regex: String, dotall: Boolean): String? {
+        return try {
+            Pattern.compile(regexSource(regex), if (dotall) Pattern.DOTALL else 0)
+            null
+        } catch (e: java.util.regex.PatternSyntaxException) {
+            e.message ?: "invalid regex"
         }
     }
 
@@ -198,31 +173,52 @@ abstract class PatchRule {
     fun addFilesInZip(projectHelper: ProjectHelper, zipFile: String, hook: IBeforeAddFile?, logger: IPatchContext) {
         var consumed: Boolean
         val targetDir = projectHelper.getProjectPath()
-        val zfile2 = ZipFile(zipFile)
-        val entries = zfile2.entries()
-        while (entries.hasMoreElements()) {
-            val ze = entries.nextElement()
-            // Never write outside the project for names like "../x" (see SafeZip).
-            if (targetDir == null || SafeZip.resolve(File(targetDir), ze.name) == null) {
-                logger.error(R.string.general_error, "Skipped unsafe entry name: " + ze.name)
-                continue
-            }
-            if (!ze.isDirectory) {
-                if (hook != null) {
-                    consumed = hook.consumeAddedFile(projectHelper, zfile2, ze)
-                } else {
-                    consumed = false
+        ZipFile(zipFile).use { zfile2 ->
+            val entries = zfile2.entries()
+            while (entries.hasMoreElements()) {
+                val ze = entries.nextElement()
+                // Never write outside the project for names like "../x" (see SafeZip). The resolved
+                // file is also what gets written, so "a\b.xml" (zips made on Windows) lands in a/.
+                val target = if (targetDir == null) null else SafeZip.resolve(File(targetDir), ze.name)
+                if (target == null) {
+                    logger.error(R.string.general_error, "Skipped unsafe entry name: " + ze.name)
+                    continue
                 }
-                if (!consumed) {
-                    addFileEntry(projectHelper, zfile2, ze, targetDir, logger)
+                if (!ze.isDirectory) {
+                    if (hook != null) {
+                        consumed = hook.consumeAddedFile(projectHelper, zfile2, ze)
+                    } else {
+                        consumed = false
+                    }
+                    if (!consumed) {
+                        addFileEntry(zfile2, ze, target, logger)
+                    }
                 }
             }
         }
-        zfile2.close()
+    }
+
+    private fun addFileEntry(zfile: ZipFile, entry: ZipEntry, target: File, logger: IPatchContext) {
+        // The original created each missing folder by hand and gave up on the first one that
+        // already existed; mkdirs() does both.
+        val parent = target.parentFile
+        if (parent != null && !parent.isDirectory && !parent.mkdirs()) {
+            logger.error(R.string.failed_create_dir, parent.path)
+            return
+        }
+        try {
+            zfile.getInputStream(entry).use { input ->
+                FileOutputStream(target).use { out -> IOUtils.copy(input, out) }
+            }
+        } catch (e2: Exception) {
+            logger.error(R.string.general_error, e2.message)
+        }
     }
 
     @Throws(IOException::class)
     fun parseAsKeyword(line: String?, br: LinedReader): Boolean {
+        // A comment line between a rule's keywords (MATCH:/REPLACE: blocks keep theirs as text).
+        if (line != null && line.startsWith("#")) return true
         if (NAME != line) {
             return false
         }
@@ -242,7 +238,8 @@ abstract class PatchRule {
      */
     fun isInSmaliFolder(targetFile: String?): Boolean {
         if (targetFile != null) {
-            val pos = targetFile.lastIndexOf('/')
+            // The first folder: "smali/com/a/B.smali" is in smali (lastIndexOf only saw "smali/B.smali").
+            val pos = targetFile.indexOf('/')
             if (pos != -1) {
                 val firstDir = targetFile.substring(0, pos)
                 return "smali" == firstDir || firstDir.startsWith("smali_")
@@ -254,6 +251,16 @@ abstract class PatchRule {
     companion object {
 
         private const val TAG = "PatchRule"
+
+        private val SPACED_SELF_CLOSE = Regex(" +/>")
+
+        /**
+         * The regex a MATCH compiles to: trimmed, and with " />" also matching "/>". Patches were
+         * written against APK Editor's decoder, which put a space before "/>" in XML; apktool
+         * writes `<category android:name="..."/>`, so such a MATCH would silently miss.
+         */
+        @JvmStatic
+        fun regexSource(raw: String): String = SPACED_SELF_CLOSE.replace(raw.trim { it <= ' ' }, "\\\\s*/>")
 
         private const val NAME = "NAME:"
 
