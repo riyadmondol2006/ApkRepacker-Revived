@@ -19,8 +19,12 @@ package com.riyadm.apkrepacker.ui.filemanager.holder
 
 import android.content.Context
 import android.graphics.drawable.Drawable
+import android.os.Build
 import android.os.Parcel
 import android.os.Parcelable
+import android.system.ErrnoException
+import android.system.Os
+import android.system.OsConstants
 import android.text.format.DateUtils
 import android.text.format.Formatter
 import com.riyadm.apkrepacker.ui.filemanager.utils.FileUtils
@@ -37,12 +41,23 @@ class FileHolder : Parcelable, Comparable<FileHolder> {
     private var mMimeType: String? = ""
     private val mExtension: String
 
+    /** Where [icon] is inflated from on first use (no list row shows it, so it's never eager). */
+    private var mIconContext: Context? = null
+
+    // File attributes, read once by [loadAttributes] (off the main thread for listings).
+    @Volatile
+    private var mAttributesLoaded = false
+    private var mIsDirectory = false
+    private var mSize = 0L
+    private var mLastModified = 0L
+    private var mFileType: FileUtil.FileType = FileUtil.FileType.MISC_FILE
+
     constructor(f: File, c: Context) {
         mFile = f
         mExtension = parseExtension()
 
         mMimeType = FileUtil.getMimeType(f)
-        mIcon = Utils.getIconForFile(c, mMimeType, mFile)
+        mIconContext = c.applicationContext
     }
 
     /**
@@ -69,7 +84,10 @@ class FileHolder : Parcelable, Comparable<FileHolder> {
      * @return The icon.
      */
     var icon: Drawable?
-        get() = mIcon
+        get() {
+            if (mIcon == null) mIcon = mIconContext?.let { Utils.getIconForFile(it, mMimeType, mFile) }
+            return mIcon
+        }
         set(icon) {
             mIcon = icon
         }
@@ -96,7 +114,7 @@ class FileHolder : Parcelable, Comparable<FileHolder> {
         get() = if (mPreview != null) {
             mPreview
         } else {
-            mIcon
+            icon
         }
 
     /**
@@ -118,13 +136,67 @@ class FileHolder : Parcelable, Comparable<FileHolder> {
     val mimeType: String?
         get() = mMimeType
 
+    /**
+     * Reads whether this is a folder, its size, date and type with a single stat call (a missing
+     * file or a broken link reads as an empty file, like [File]'s own getters). Listings call this
+     * on their background thread; the getters below load lazily if nobody did.
+     */
+    fun loadAttributes(): FileHolder {
+        try {
+            val st = Os.stat(mFile.path)
+            mIsDirectory = OsConstants.S_ISDIR(st.st_mode)
+            mSize = st.st_size
+            mLastModified = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                st.st_mtim.tv_sec * 1000L + st.st_mtim.tv_nsec / 1_000_000L
+            } else {
+                st.st_mtime * 1000L
+            }
+        } catch (e: ErrnoException) {
+            mIsDirectory = false
+            mSize = 0L
+            mLastModified = 0L
+        }
+        mFileType = if (mIsDirectory) FileUtil.FileType.DIRECTORY else FileUtil.FileType.getFileType(mFile)
+        mAttributesLoaded = true
+        return this
+    }
+
+    private fun ensureAttributes() {
+        if (!mAttributesLoaded) loadAttributes()
+    }
+
+    val isDirectory: Boolean
+        get() {
+            ensureAttributes()
+            return mIsDirectory
+        }
+
+    /** Size in bytes as of [loadAttributes] (not recursive). */
+    val size: Long
+        get() {
+            ensureAttributes()
+            return mSize
+        }
+
+    val lastModified: Long
+        get() {
+            ensureAttributes()
+            return mLastModified
+        }
+
+    val fileType: FileUtil.FileType
+        get() {
+            ensureAttributes()
+            return mFileType
+        }
+
     fun getFormattedModificationDate(c: Context?): CharSequence {
-        return DateUtils.getRelativeDateTimeString(c, mFile.lastModified(),
+        return DateUtils.getRelativeDateTimeString(c, lastModified,
                 DateUtils.MINUTE_IN_MILLIS, DateUtils.YEAR_IN_MILLIS * 10, 0)
     }
 
     fun getFormattedHour(c: Context?): CharSequence {
-        return DateUtils.getRelativeDateTimeString(c, mFile.lastModified(),
+        return DateUtils.getRelativeDateTimeString(c, lastModified,
                 DateUtils.MINUTE_IN_MILLIS, DateUtils.YEAR_IN_MILLIS * 10, 0)
     }
 
@@ -136,10 +208,10 @@ class FileHolder : Parcelable, Comparable<FileHolder> {
     }
 
     private fun getSizeInBytes(recursive: Boolean): Long {
-        return if (recursive && mFile.isDirectory)
+        return if (recursive && isDirectory)
             FileUtils.folderSize(mFile)
         else
-            mFile.length()
+            size
     }
 
     override fun describeContents(): Int {

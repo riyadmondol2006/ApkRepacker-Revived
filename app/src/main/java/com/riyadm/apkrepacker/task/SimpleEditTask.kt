@@ -1,6 +1,7 @@
 package com.riyadm.apkrepacker.task
 
 import android.content.Context
+import android.widget.Toast
 import com.riyadm.apkrepacker.R
 import com.riyadm.apkrepacker.fragment.SimpleEditorFragment
 import com.riyadm.apkrepacker.model.QickEdit
@@ -39,18 +40,23 @@ class SimpleEditTask(
     }
 
     override fun onPostExecute(result: Boolean?) {
-        // null when the task itself failed: report it like any other failure, never leave the dialog up.
+        // null when the task itself failed: report it like any other failure, never leave the progress up.
         val success = result == true
-        simpleEditorFragment.hideProgress(success)
+        val signed = preferenceHelper?.isSignResultApk == true
+        simpleEditorFragment.hideProgress(success, signed)
+        if (!simpleEditorFragment.isAdded) {
+            // The editor was closed meanwhile: still say how it went.
+            val context = mContext?.applicationContext ?: return
+            val text = resultFile?.takeIf { success }?.let { context.getString(R.string.simple_edit_saved_to, it.absolutePath) }
+                ?: context.getString(R.string.simple_edit_failed)
+            Toast.makeText(context, text, Toast.LENGTH_LONG).show()
+            return
+        }
         if (success) {
             resultFile?.let { SignUtil.v4SignatureFile(it) }?.takeIf { it.isFile }?.let {
                 simpleEditorFragment.showTaskMessage(R.string.toast_v4_signature_written, it.name)
             }
         }
-    }
-
-    override fun onProgressUpdate(vararg values: Int?) {
-        simpleEditorFragment.updateProgress(values[0])
     }
 
     private fun process(input: File): Boolean {

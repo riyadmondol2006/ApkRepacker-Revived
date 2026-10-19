@@ -17,6 +17,7 @@
 package com.riyadm.apkrepacker.ui.filemanager.storage.operation
 
 import android.content.Context
+import android.os.SystemClock
 import com.riyadm.apkrepacker.ui.filemanager.storage.DocumentFileUtils
 import com.riyadm.apkrepacker.ui.filemanager.storage.operation.argument.CopyArguments
 import com.riyadm.apkrepacker.ui.filemanager.storage.operation.ui.OperationStatusDisplayer
@@ -72,6 +73,7 @@ class CopyOperation(context: Context, statusDisplayer: OperationStatusDisplayer)
             private val statusDisplayer: OperationStatusDisplayer,
             private val operationId: Int
     ) {
+        private var lastProgressAt = Long.MIN_VALUE / 2
 
         fun copy(args: CopyArguments): Boolean {
             val files = args.getFilesToCopy()
@@ -125,8 +127,13 @@ class CopyOperation(context: Context, statusDisplayer: OperationStatusDisplayer)
          * @return The new filesCopied count.
          */
         private fun copyFile(filesCopied: Int, fileCount: Int, oldFile: File, newFile: File): Int {
-            statusDisplayer.showCopyProgress(operationId, newFile.parentFile!!, oldFile,
-                    filesCopied, fileCount)
+            // A notification per file floods the system, which drops updates past a few per second anyway.
+            val now = SystemClock.uptimeMillis()
+            if (now - lastProgressAt >= PROGRESS_INTERVAL_MS) {
+                lastProgressAt = now
+                statusDisplayer.showCopyProgress(operationId, newFile.parentFile!!, oldFile,
+                        filesCopied, fileCount)
+            }
 
             try {
                 FileInputStream(oldFile).use { input ->
@@ -214,5 +221,6 @@ class CopyOperation(context: Context, statusDisplayer: OperationStatusDisplayer)
 
     companion object {
         private const val COPY_BUFFER_SIZE = 32 * 1024
+        private const val PROGRESS_INTERVAL_MS = 250L
     }
 }

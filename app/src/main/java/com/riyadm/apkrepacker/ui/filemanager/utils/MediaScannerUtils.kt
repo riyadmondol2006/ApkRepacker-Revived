@@ -23,6 +23,8 @@ import android.os.Build
 import android.provider.MediaStore
 import com.riyadm.apkrepacker.task.base.CoroutinesAsyncTask
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.LinkOption
 
 object MediaScannerUtils {
     private val sLogScannerListener: MediaScannerConnection.OnScanCompletedListener =
@@ -37,11 +39,47 @@ object MediaScannerUtils {
             }
 
     /**
+     * Whether the media scanner can know [file]: it is not in app-private storage (internal app
+     * data, Android/data, Android/obb) and no folder above it has a .nomedia file. Scanning
+     * anything else only costs time (a copy into Android/data used to queue tens of thousands).
+     */
+    @JvmStatic
+    fun isIndexable(file: File): Boolean {
+        val absolute = file.absoluteFile
+        if (isPrivatePath(absolute.path)) return false
+        var dir = absolute.parentFile
+        while (dir != null) {
+            if (File(dir, FileUtils.NOMEDIA_FILE_NAME).exists()) return false
+            dir = dir.parentFile
+        }
+        return true
+    }
+
+    /** For a folder that [isIndexable] (or whose parent passed this): may its contents be scanned? */
+    @JvmStatic
+    fun isIndexableFolder(dir: File, names: Array<String>): Boolean =
+        !isPrivatePath(dir.absolutePath) && names.none { it.equals(FileUtils.NOMEDIA_FILE_NAME, ignoreCase = true) }
+
+    private fun isPrivatePath(path: String): Boolean {
+        if (path == "/data" || path.startsWith("/data/")) return true
+        for (segment in PRIVATE_SEGMENTS) {
+            val at = path.indexOf(segment, ignoreCase = true)
+            if (at >= 0) {
+                val end = at + segment.length
+                if (end == path.length || path[end] == '/') return true
+            }
+        }
+        return false
+    }
+
+    private val PRIVATE_SEGMENTS = arrayOf("/Android/data", "/Android/obb")
+
+    /**
      * Request a MediaScanner scan for a single file.
      */
     @JvmStatic
     fun informFileAdded(c: Context, f: File?) {
-        if (f == null)
+        if (f == null || !isIndexable(f))
             return
 
         MediaScannerConnection.scanFile(c.applicationContext, arrayOf(f.absolutePath), null,
@@ -54,30 +92,33 @@ object MediaScannerUtils {
             return
 
         val filePaths = ArrayList<String>()
-        getPathsUnder(filePaths, parentFile)
+        getPathsOfFolder(filePaths, parentFile)
+        if (filePaths.isEmpty()) return
 
         MediaScannerConnection.scanFile(c.applicationContext, filePaths.toTypedArray(), null,
                 sLogScannerListener)
     }
 
     /**
-     * Fills "paths" with the paths of all files contained in "from", recursively.
+     * Fills "paths" with the paths of all files contained in "from", recursively, leaving out
+     * the parts the media scanner can't know (see [isIndexable]). Links are not followed.
      * @param paths An initialized list instance.
      * @param from The root folder.
      */
     @JvmStatic
     fun getPathsOfFolder(paths: MutableList<String>, from: File?) {
-        if (from == null)
+        if (from == null || !isIndexable(from))
             return
 
         getPathsUnder(paths, from)
     }
 
     private fun getPathsUnder(pathList: MutableList<String>, folder: File) {
-        val files = folder.listFiles()
-        if (files != null) {
-            for (f in files) {
-                if (f.isDirectory) {
+        val names = folder.list()
+        if (names != null && isIndexableFolder(folder, names)) {
+            for (name in names) {
+                val f = File(folder, name)
+                if (Files.isDirectory(f.toPath(), LinkOption.NOFOLLOW_LINKS)) {
                     getPathsUnder(pathList, f)
                 } else {
                     pathList.add(f.absolutePath)

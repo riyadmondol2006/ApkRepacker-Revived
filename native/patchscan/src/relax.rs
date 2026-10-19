@@ -5,8 +5,13 @@
 //! cannot contain a Java match either. It may match more: anchors, word boundaries and
 //! lookarounds become empty, backreferences match anything, `.` also matches line breaks, and
 //! character classes Java and ICU might read differently match any character. Whatever can't be
-//! widened safely (case-insensitive or comments mode, nested classes and set operations, unknown
-//! escapes) is refused with [`Unsupported`], and the caller scans the files in Java as before.
+//! widened safely (comments mode, nested classes and set operations, unknown escapes) is refused
+//! with [`Unsupported`], and the caller scans the files in Java as before.
+//!
+//! Case-insensitive patterns ([`relax_case_insensitive`]) are only widened for ASCII text: ICU may
+//! fold case fully (`ß` matches `ss`), which Rust's simple folding doesn't, so a pattern with a
+//! non-ASCII character is refused and the caller must treat every non-ASCII file as a match. For
+//! an ASCII pattern on ASCII text both fold the same way.
 
 use std::fmt::Write;
 
@@ -40,7 +45,20 @@ const MAX_DEPTH: usize = 200;
 /// The relaxed Rust form of the Java regex [pattern] (flags: none, or DOTALL, which changes nothing
 /// here since `.` already matches line breaks).
 pub fn relax(pattern: &str) -> Result<String> {
-    let mut p = Parser { s: pattern.chars().collect(), i: 0, depth: 0 };
+    relax_with(pattern, false)
+}
+
+/// The relaxed form of the Java regex [pattern] compiled with CASE_INSENSITIVE, to be compiled
+/// case-insensitively too. It is a superset of the Java regex on ASCII text only: the pattern
+/// must be ASCII (else it is refused), and non-ASCII text must count as a match without it.
+/// Negated sets (`[^a]`, `\W`, ...), whose case closure ICU may build differently, match any
+/// character.
+pub fn relax_case_insensitive(pattern: &str) -> Result<String> {
+    relax_with(pattern, true)
+}
+
+fn relax_with(pattern: &str, case_insensitive: bool) -> Result<String> {
+    let mut p = Parser { s: pattern.chars().collect(), i: 0, depth: 0, ci: case_insensitive };
     let out = p.alternation()?;
     if p.i != p.s.len() {
         return Err(Unsupported("unbalanced ')'"));
@@ -52,6 +70,8 @@ struct Parser {
     s: Vec<char>,
     i: usize,
     depth: usize,
+    /// Case-insensitive mode: ASCII characters only, negated sets match anything.
+    ci: bool,
 }
 
 impl Parser {
@@ -110,9 +130,10 @@ impl Parser {
                 match quoted.pop() {
                     Some(last) => {
                         for q in quoted {
+                            self.check_char(q)?;
                             push_literal(&mut out, q);
                         }
-                        literal(last)
+                        self.literal(last)?
                     }
                     None => {
                         if matches!(self.peek(), Some('*' | '+' | '?' | '{')) {
@@ -141,7 +162,7 @@ impl Parser {
             '^' | '$' => Ok(EMPTY.into()),
             '\\' => self.escape(),
             '*' | '+' | '?' | '{' => Err(Unsupported("dangling quantifier")),
-            c => Ok(literal(c)),
+            c => self.literal(c),
         }
     }
 
@@ -255,8 +276,10 @@ impl Parser {
         if self.eat('>') { Ok(()) } else { Err(Unsupported("bad group name")) }
     }
 
-    /// Inline flags `idmsuxU-...` up to `)` (returns false) or `:` (true). Turning on
-    /// case-insensitive or comments mode is refused; the others don't change the relaxed regex.
+    /// Inline flags `idmsuxU-...` up to `)` (returns false) or `:` (true). Turning on comments
+    /// mode is refused, and case-insensitive mode too unless the whole pattern already is (then
+    /// `-i` is ignored as well: matching without case still finds every case-sensitive match).
+    /// The other flags don't change the relaxed regex.
     fn flags(&mut self) -> Result<bool> {
         let mut on = true;
         loop {
@@ -264,7 +287,8 @@ impl Parser {
                 Some(')') => return Ok(false),
                 Some(':') => return Ok(true),
                 Some('-') => on = false,
-                Some('i') | Some('x') if on => return Err(Unsupported("case-insensitive or comments flag")),
+                Some('i') if on && !self.ci => return Err(Unsupported("case-insensitive flag")),
+                Some('x') if on => return Err(Unsupported("comments flag")),
                 Some(c) if is_flag(c) => {}
                 _ => return Err(Unsupported("bad flags")),
             }
@@ -276,10 +300,11 @@ impl Parser {
         let c = self.next().ok_or(Unsupported("trailing backslash"))?;
         Ok(match c {
             'd' => DIGIT.into(),
-            'D' => NOT_DIGIT.into(),
             's' => format!("[{SPACE_ITEMS}]"),
-            'S' => NOT_SPACE.into(),
             'w' => format!("[{WORD_ITEMS}]"),
+            'D' | 'S' | 'W' if self.ci => ANY.into(),
+            'D' => NOT_DIGIT.into(),
+            'S' => NOT_SPACE.into(),
             'W' => NOT_WORD.into(),
             'h' | 'H' | 'v' | 'V' => ANY.into(),
             'R' => "(?s:.{1,2})".into(),
@@ -308,8 +333,24 @@ impl Parser {
                 }
                 ANY_TEXT.into()
             }
-            c => literal(self.char_escape(c)?),
+            c => {
+                let ch = self.char_escape(c)?;
+                self.literal(ch)?
+            }
         })
+    }
+
+    /// Case-insensitive mode can't widen non-ASCII characters (see [`relax_case_insensitive`]).
+    fn check_char(&self, c: char) -> Result<()> {
+        if self.ci && !c.is_ascii() {
+            return Err(Unsupported("non-ASCII character in a case-insensitive pattern"));
+        }
+        Ok(())
+    }
+
+    fn literal(&self, c: char) -> Result<String> {
+        self.check_char(c)?;
+        Ok(literal(c))
     }
 
     /// The character a character escape stands for (`\t`, `\x41`, `A`, `\0101`, `\cA`, `\.`).
@@ -414,8 +455,8 @@ impl Parser {
     }
 
     /// After `[`. Flat classes (characters, ranges, shorthands) are kept as they are; ones with
-    /// properties or `\h`/`\v` match any character; nested classes and set operations, which
-    /// Java and ICU parse differently, are refused.
+    /// properties or `\h`/`\v` match any character, and so do negated ones in case-insensitive
+    /// mode; nested classes and set operations, which Java and ICU parse differently, are refused.
     fn class(&mut self) -> Result<String> {
         let negated = self.eat('^');
         let mut items = String::new();
@@ -423,6 +464,7 @@ impl Parser {
         // `[:alpha:]` or `[:^L:]`, where Java sees the plain characters.
         let mut any = self.peek() == Some(':');
         let mut shorthand = false;
+        let mut negated_shorthand = false;
         let mut first = true;
         loop {
             let c = self.next().ok_or(Unsupported("unclosed class"))?;
@@ -448,15 +490,15 @@ impl Parser {
                             items.push_str(WORD_ITEMS);
                         }
                         'D' => {
-                            shorthand = true;
+                            negated_shorthand = true;
                             items.push_str(NOT_DIGIT);
                         }
                         'S' => {
-                            shorthand = true;
+                            negated_shorthand = true;
                             items.push_str(NOT_SPACE);
                         }
                         'W' => {
-                            shorthand = true;
+                            negated_shorthand = true;
                             items.push_str(NOT_WORD);
                         }
                         'p' | 'P' => {
@@ -477,7 +519,8 @@ impl Parser {
             }
             first = false;
         }
-        if any || (negated && shorthand) {
+        shorthand |= negated_shorthand;
+        if any || (negated && shorthand) || (self.ci && (negated || negated_shorthand)) {
             return Ok(ANY.into());
         }
         Ok(format!("[{}{items}]", if negated { "^" } else { "" }))
@@ -501,8 +544,11 @@ impl Parser {
             if end < start {
                 return Err(Unsupported("bad range"));
             }
+            self.check_char(start)?;
+            self.check_char(end)?;
             let _ = write!(items, "\\x{{{:X}}}-\\x{{{:X}}}", start as u32, end as u32);
         } else {
+            self.check_char(start)?;
             let _ = write!(items, "\\x{{{:X}}}", start as u32);
         }
         Ok(())
@@ -616,6 +662,53 @@ mod tests {
         assert!(!finds("[a:]", "q"));
         // `\cX`: kept where Java (X ^ 0x40) and ICU (X & 0x1F) agree.
         assert!(finds(r"\cA\c@\c[\c_", "\u{1}\u{0}\u{1B}\u{1F}"));
+    }
+
+    fn finds_ci(java: &str, text: &str) -> bool {
+        let relaxed = relax_case_insensitive(java).unwrap_or_else(|e| panic!("{java}: {e:?}"));
+        regex::bytes::RegexBuilder::new(&relaxed)
+            .case_insensitive(true)
+            .build()
+            .unwrap_or_else(|e| panic!("{java} -> {relaxed}: {e}"))
+            .is_match(text.as_bytes())
+    }
+
+    /// The find-in-files search: CASE_INSENSITIVE patterns, literal ones quoted as ExtGrep does,
+    /// whole words wrapped in `\b`.
+    #[test]
+    fn case_insensitive() {
+        assert!(finds_ci("getdeviceid", "invoke-virtual {v0}, Landroid/telephony/TelephonyManager;->getDeviceId()"));
+        assert!(finds_ci(r"\bGETDEVICEID\b", "->getDeviceId()"));
+        assert!(!finds_ci("getdeviceids", "->getDeviceId()"));
+        assert!(finds_ci(r"const-string v0, \x22", "CONST-STRING V0, \""));
+        assert!(finds_ci(r"\.method public", ".METHOD PUBLIC"));
+        assert!(finds_ci(r"Lcom/A/\$B;->x\(\)", "lcom/a/$b;->X()"));
+        assert!(finds_ci("[a-c]x", "BX"));
+        assert!(finds_ci("[A-C]x", "bX"));
+        assert!(!finds_ci("[a-c]x", "dx"));
+        assert!(finds_ci(r"\x41\u0062\0103", "abc"));
+        assert!(finds_ci("(a)\\1", "aA"));
+        assert!(finds_ci("(?i)ab", "AB"));
+        assert!(finds_ci("(?-i)ab", "AB"));
+        assert!(finds_ci("(?-i:a)b", "AB"));
+        // Negated sets match anything: ICU may build their case closure differently.
+        assert!(finds_ci("[^a]", "A"));
+        assert!(finds_ci(r"[\Wx]", "A"));
+        assert!(finds_ci(r"\W", "a"));
+        assert!(finds_ci(r"\D\S", "1 "));
+        assert!(finds_ci(r"[\d]", "7"));
+        assert!(!finds_ci(r"[\d]", "x"));
+    }
+
+    #[test]
+    fn case_insensitive_refused() {
+        for java in ["ß", "straße", r"\u00DF", r"\x{212A}", "[ſ]", r"[a-\u00FF]", r"\Qé\E", "\\é", r"\0337", "(?x)a b", "(?x:a)", "[a"] {
+            assert!(relax_case_insensitive(java).is_err(), "{java} should be refused, got {:?}", relax_case_insensitive(java));
+        }
+        // The same patterns, case-sensitive.
+        for java in ["ß", r"\u00DF", "[ſ]", r"\Qé\E"] {
+            assert!(relax(java).is_ok(), "{java}");
+        }
     }
 
     #[test]

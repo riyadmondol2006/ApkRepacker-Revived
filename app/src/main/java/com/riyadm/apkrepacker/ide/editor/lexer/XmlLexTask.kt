@@ -113,8 +113,11 @@ open class XmlLexTask : Antlr4LexTask<XMLLexer>(XMLLexer.VOCABULARY) {
     }
 
     protected fun parse(lexer: XMLLexer, endType: Int) {
-        while (true) {
-            if (lexer.nextToken().type == endType)
+        // Stops at the end of the text too: an unclosed "<?xml" used to spin here forever on the
+        // shared lexer thread, which stopped highlighting in every open file.
+        while (!abort) {
+            val type = lexer.nextToken().type
+            if (type == endType || type == Recognizer.EOF)
                 break
         }
     }

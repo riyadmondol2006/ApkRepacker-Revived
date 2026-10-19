@@ -5,6 +5,7 @@ import com.riyadm.apkrepacker.utils.QickEditParams
 import com.riyadm.apkrepacker.utils.common.DLog
 import com.riyadm.apkrepacker.utils.qickedit.IconGenerate
 import com.riyadm.apkrepacker.utils.qickedit.ManifestEditor
+import com.riyadm.apkrepacker.utils.qickedit.ZipRepacker
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -14,6 +15,7 @@ import java.io.OutputStream
 import java.util.Locale
 import java.util.zip.Deflater
 import java.util.zip.ZipEntry
+import java.util.zip.ZipException
 import java.util.zip.ZipFile
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
@@ -77,9 +79,40 @@ class QickEdit {
         }
     }
 
+    /**
+     * Unchanged entries are copied raw by [ZipRepacker] (no inflate/deflate round trip, which took
+     * most of the time); only the manifest and the icon bitmaps are written anew. An archive it can't
+     * read (zip64, multi-disk, broken headers) goes through the streaming copy instead.
+     */
     @Throws(IOException::class)
     private fun repackApk(srcApk: File, targetApk: File, type: String?, name: String?, iconFiles: Map<String, String>) {
-        val dir = targetApk.parentFile
+        try {
+            ZipRepacker.repack(srcApk, targetApk) { entryName -> replacement(entryName, targetApk, type, name, iconFiles) }
+        } catch (e: ZipException) {
+            DLog.i("raw repack failed (${e.message}), repack by streaming")
+            repackStreamed(srcApk, targetApk, type, name, iconFiles)
+        }
+    }
+
+    /** The new content of [entryName], or null when it is copied unchanged. */
+    private fun replacement(entryName: String, targetApk: File, type: String?, name: String?, iconFiles: Map<String, String>): File? = when {
+        // replaced launcher icon: every density's bitmap gets the generated PNG of that density
+        type != null && name != null && isIconBitmap(entryName, type, name, iconFiles) -> iconFile(targetApk, entryName, name, iconFiles)
+        // patched manifest
+        entryName == MANIFEST -> {
+            DLog.i("patch manifest")
+            patchManifest(zipFile!!.getEntry(entryName))!!
+        }
+        else -> null
+    }
+
+    private fun iconFile(targetApk: File, entryName: String, name: String, iconFiles: Map<String, String>): File {
+        val density = iconFiles[entryName] ?: densityOf(entryName)
+        return File(targetApk.parentFile!!.absolutePath + File.separator + density + File.separator + name + ".png")
+    }
+
+    @Throws(IOException::class)
+    private fun repackStreamed(srcApk: File, targetApk: File, type: String?, name: String?, iconFiles: Map<String, String>) {
         ZipInputStream(FileInputStream(srcApk)).use { zin ->
             ZipOutputStream(FileOutputStream(targetApk)).use { zout ->
                 zout.setLevel(Deflater.BEST_COMPRESSION)
@@ -87,13 +120,8 @@ class QickEdit {
                     val entry = zin.nextEntry ?: break
                     val entryName = entry.name
                     when {
-                        // replaced launcher icon: every density's bitmap gets the generated PNG of that density
-                        type != null && name != null && isIconBitmap(entryName, type, name, iconFiles) -> {
-                            val density = iconFiles[entryName] ?: densityOf(entryName)
-                            val icon = File(dir!!.absolutePath + File.separator + density + File.separator + name + ".png")
-                            writeDeflated(zout, entryName, icon)
-                        }
-                        // patched manifest
+                        type != null && name != null && isIconBitmap(entryName, type, name, iconFiles) ->
+                            writeDeflated(zout, entryName, iconFile(targetApk, entryName, name, iconFiles))
                         entryName == MANIFEST -> {
                             DLog.i("patch manifest")
                             writeDeflated(zout, entryName, patchManifest(entry)!!)

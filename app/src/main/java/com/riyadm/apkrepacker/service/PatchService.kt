@@ -263,6 +263,16 @@ class PatchService : Service(), IPatchContext, IRulesInfo {
                 val dest = File(project, src.name)
                 if (!dest.exists()) FileUtils.moveDirectory(src, dest) else FileUtils.copyDirectory(src, dest)
             }
+            // The decode also left the original dex files in build/apk, dated like the smali, so
+            // that the first build only re-assembles the folders a patch changes: keep them too.
+            val cache = File(temp, "build/apk")
+            cache.walkTopDown().filter { it.isFile && it.name.endsWith(".dex") }.forEach { dex ->
+                val dest = File(project, "build/apk/" + dex.relativeTo(cache).path)
+                runCatching {
+                    FileUtils.deleteQuietly(dest)
+                    FileUtils.moveFile(dex, dest)
+                }
+            }
             appendInfo(getString(R.string.patcher_decoded_smali), bold = false)
         } catch (e: Throwable) {
             DLog.e("PatchService", e)

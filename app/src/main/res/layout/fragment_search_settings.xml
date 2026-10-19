@@ -83,7 +83,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:minHeight="@dimen/touch_target"
-                        android:text="@string/files"
+                        android:text="@string/search_file_names_only"
                         android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
 
                     <LinearLayout

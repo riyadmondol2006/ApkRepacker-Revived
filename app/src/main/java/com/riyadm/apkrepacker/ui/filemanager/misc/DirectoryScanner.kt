@@ -25,9 +25,7 @@ import com.riyadm.apkrepacker.ui.filemanager.holder.DirectoryHolder
 import com.riyadm.apkrepacker.ui.filemanager.holder.FileHolder
 import com.riyadm.apkrepacker.ui.filemanager.utils.FileUtils
 import com.riyadm.apkrepacker.ui.filemanager.utils.Utils
-import com.riyadm.apkrepacker.ui.filemanager.utils.Utils.getIconForFile
 import com.riyadm.apkrepacker.ui.preferences.PreferenceHelper
-import com.riyadm.apkrepacker.utils.FileUtil
 import com.riyadm.apkrepacker.utils.PreferenceUtils
 import com.riyadm.apkrepacker.utils.common.DLog
 import java.io.File
@@ -129,29 +127,27 @@ class DirectoryScanner(
                     continue
                 }
 
+                // One stat per entry, here on the scanner thread: the list rows, the diff and the
+                // sort below all read these cached attributes instead of the disk.
+                val holder = FileHolder(currentFile, mContext).loadAttributes()
+
                 // It's a directory. Handle it.
-                if (currentFile.isDirectory) {
+                if (holder.isDirectory) {
                     // It's the sd card.
                     if (currentFile.absolutePath == mSdCardPath) {
-                        listSdCard!!.add(FileHolder(currentFile,
-                                FileUtil.getMimeType(currentFile),
-                                Utils.getSdCardIcon(mContext)))
+                        holder.icon = Utils.getSdCardIcon(mContext)
+                        listSdCard!!.add(holder)
                     }
                     // It's a normal directory.
                     else {
-//                      if (!mWriteableOnly || currentFile.canWrite()) {
-                        val mimetype = FileUtil.getMimeType(currentFile)
-                        listDir!!.add(FileHolder(currentFile,
-                                mimetype,
-                                getIconForFile(mContext, mimetype, currentFile)))
-//                      }
+                        listDir!!.add(holder)
                     }
                     // It's a file. Handle it too :P
                 } else {
                     val fileName = currentFile.name
 
                     // Get the file's mimetype.
-                    val mimetype = FileUtil.getMimeType(currentFile)
+                    val mimetype = holder.mimeType
                     val filetype = FileUtils.getExtension(fileName)
 
                     val fileTypeAllowed = mFilterFiletype.isEmpty() || filetype.equals(mFilterFiletype, ignoreCase = true)
@@ -159,10 +155,7 @@ class DirectoryScanner(
                             || mFilterMimetype.contentEquals("*/*")
                             || mimetype!!.contentEquals(mFilterMimetype))
                     if (!mDirectoriesOnly && fileTypeAllowed && mimeTypeAllowed) {
-                        listFile!!.add(FileHolder(currentFile,
-                                mimetype,
-                                // Take advantage of the already parsed mimetype to set a specific icon.
-                                getIconForFile(mContext, mimetype, currentFile)))
+                        listFile!!.add(holder)
                     }
                 }
             }
@@ -170,14 +163,21 @@ class DirectoryScanner(
 
         DLog.d(TAG, "Sorting results...")
 
-        val sortBy = PreferenceUtils.getInteger(mContext, "pref_sort", 0)
-        val ascending = true //PreferenceFragment.getAscending(mContext);
+        // The sort dialog stores its choice's position (name, date, size); the comparators use
+        // their own codes. Reading the position as a code sorted "date" by name and never by date.
+        val sortBy = when (PreferenceUtils.getInteger(mContext, "pref_sort", 0)) {
+            1 -> Comparators.LAST_MODIFIED
+            2 -> Comparators.SIZE
+            else -> Comparators.NAME
+        }
+        // Newest first for dates, A to Z / smallest first otherwise.
+        val ascending = sortBy != Comparators.LAST_MODIFIED
 
         // Sort lists
         if (!cancelled) {
             Collections.sort(listSdCard!!)
-            Collections.sort(listDir!!, Comparators.getForDirectory(sortBy, ascending))
-            Collections.sort(listFile!!, Comparators.getForFile(sortBy, ascending))
+            Comparators.sort(listDir!!, sortBy, ascending, directories = true)
+            Comparators.sort(listFile!!, sortBy, ascending, directories = false)
         }
 
         // Return lists
@@ -245,10 +245,49 @@ class DirectoryScanner(
  * The container class for all comparators.
  */
 internal object Comparators {
-    private const val NAME = 1
-    private const val SIZE = 2
-    private const val LAST_MODIFIED = 3
+    const val NAME = 1
+    const val SIZE = 2
+    const val LAST_MODIFIED = 3
     private const val EXTENSION = 4
+
+    /**
+     * Sorts [list] (stably) as [getForFile] / [getForDirectory] order it, but computes each
+     * holder's key once instead of in every comparison (n log n lowercased names otherwise).
+     */
+    @JvmStatic
+    fun sort(list: MutableList<FileHolder>, comparator: Int, ascending: Boolean, directories: Boolean) {
+        val kind = if (directories) {
+            when (comparator) {
+                NAME, SIZE, EXTENSION -> NAME
+                LAST_MODIFIED -> LAST_MODIFIED
+                else -> 0
+            }
+        } else {
+            comparator
+        }
+        val locale = Locale.getDefault()
+        val key: (FileHolder) -> Comparable<*> = when (kind) {
+            NAME -> { holder -> holder.name.lowercase(locale) }
+            SIZE -> { holder -> holder.size }
+            EXTENSION -> { holder -> holder.extension }
+            LAST_MODIFIED -> { holder -> holder.lastModified }
+            else -> {
+                Collections.sort(list, null)
+                return
+            }
+        }
+        val keyed = list.map { KeyedHolder(key(it), it) }
+        val order = if (ascending) KeyedHolder.ORDER else Comparator { a, b -> KeyedHolder.ORDER.compare(b, a) }
+        val sorted = keyed.sortedWith(order)
+        for (i in sorted.indices) list[i] = sorted[i].holder
+    }
+
+    private class KeyedHolder(val key: Comparable<*>, val holder: FileHolder) {
+        companion object {
+            @Suppress("UNCHECKED_CAST")
+            val ORDER: Comparator<KeyedHolder> = Comparator { a, b -> (a.key as Comparable<Any>).compareTo(b.key) }
+        }
+    }
 
     @JvmStatic
     fun getForFile(comparator: Int, ascending: Boolean): Comparator<FileHolder>? {
@@ -299,7 +338,7 @@ internal class NameComparator(asc: Boolean) : FileHolderComparator(asc) {
 internal class SizeComparator(asc: Boolean) : FileHolderComparator(asc) {
 
     override fun comp(f1: FileHolder, f2: FileHolder): Int {
-        return java.lang.Long.compare(f1.file.length(), f2.file.length())
+        return java.lang.Long.compare(f1.size, f2.size)
     }
 }
 
@@ -313,6 +352,6 @@ internal class ExtensionComparator(asc: Boolean) : FileHolderComparator(asc) {
 internal class LastModifiedComparator(asc: Boolean) : FileHolderComparator(asc) {
 
     override fun comp(f1: FileHolder, f2: FileHolder): Int {
-        return java.lang.Long.compare(f1.file.lastModified(), f2.file.lastModified())
+        return java.lang.Long.compare(f1.lastModified, f2.lastModified)
     }
 }

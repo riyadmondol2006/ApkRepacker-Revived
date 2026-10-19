@@ -12,7 +12,6 @@ import com.riyadm.apkrepacker.databinding.ListItemFileBinding
 import com.riyadm.apkrepacker.ui.filemanager.FileTone
 import com.riyadm.apkrepacker.ui.filemanager.misc.ThumbnailHelper
 import com.riyadm.apkrepacker.ui.motion.pressSpring
-import com.riyadm.apkrepacker.utils.FileUtil
 import java.io.File
 
 /**
@@ -34,15 +33,19 @@ open class FileListViewHolder private constructor(private val binding: ListItemF
     }
 
     open fun bind(filePath: File, position: Int, listener: OnItemClickListener, selected: Boolean, projectMode: Boolean) {
+        bind(FileHolder(filePath, itemView.context), position, listener, selected, projectMode)
+    }
+
+    /** Binds [item] from its cached attributes ([FileHolder.loadAttributes]); no disk access here. */
+    fun bind(item: FileHolder, position: Int, listener: OnItemClickListener, selected: Boolean, projectMode: Boolean) {
         val context = itemView.context
-        val item = FileHolder(filePath, context)
-        val type = FileUtil.FileType.getFileType(filePath)
-        val isDirectory = filePath.isDirectory
+        val type = item.fileType
+        val isDirectory = item.isDirectory
 
         val tile = binding.listItemImage
         val tone = FileTone.of(type)
         tile.setTone(tone.container, tone.onContainer)
-        tile.setIconRes(FileUtil.getImageResource(filePath))
+        tile.setIconRes(FileTone.iconOf(type))
         ThumbnailHelper.requestIcon(item, tile.iconView, projectMode)
 
         binding.listItemName.text = item.name

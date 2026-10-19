@@ -1,5 +1,7 @@
 package com.riyadm.apkrepacker.fragment
 
+import android.content.ClipData
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
@@ -23,9 +25,9 @@ import com.google.android.material.snackbar.Snackbar
 import com.riyadm.apkrepacker.R
 import com.riyadm.apkrepacker.databinding.FragmentSimpleEditorBinding
 import com.riyadm.apkrepacker.filepicker.FilePickerDialog
-import com.riyadm.apkrepacker.fragment.dialogs.ProgressDialogFragment
 import com.riyadm.apkrepacker.task.SimpleEditTask
 import com.riyadm.apkrepacker.utils.AppUtils
+import com.riyadm.apkrepacker.utils.FileProvider
 import com.riyadm.apkrepacker.utils.FragmentUtils
 import com.riyadm.apkrepacker.utils.QickEditParams
 import com.riyadm.apkrepacker.utils.SignUtil
@@ -36,7 +38,7 @@ import java.io.File
  * Quick editor for an installed APK: app name, package, version, install location and SDK
  * levels, plus a new icon. Save rebuilds and signs the APK ([SimpleEditTask]).
  */
-class SimpleEditorFragment : Fragment(), ProgressDialogFragment.ProgressDialogFragmentListener {
+class SimpleEditorFragment : Fragment() {
 
     private var binding: FragmentSimpleEditorBinding? = null
     private lateinit var selected: File
@@ -45,7 +47,7 @@ class SimpleEditorFragment : Fragment(), ProgressDialogFragment.ProgressDialogFr
     private var installLocation = 0
     private var appInfo: AppInfo? = null
     private var newIcon: Bitmap? = null
-    private var progressDialog: ProgressDialogFragment? = null
+    private var saving = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,6 +71,8 @@ class SimpleEditorFragment : Fragment(), ProgressDialogFragment.ProgressDialogFr
         val views = binding ?: return
         views.toolbar.setNavigationOnClickListener { FragmentUtils.remove(this) }
         views.saveExFab.setOnClickListener { buildApp() }
+        // A save still running when the view was recreated.
+        showSaving(views)
         try {
             val info = AppInfo(view.context, selected)
             if (!info.isValid()) throw IllegalStateException("AppInfo failed")
@@ -215,40 +219,48 @@ class SimpleEditorFragment : Fragment(), ProgressDialogFragment.ProgressDialogFr
 
     // ---- build progress (called by SimpleEditTask) -------------------------------------------
 
+    /** Save in progress: the bar under the toolbar runs and the Save button is disabled. */
     fun showProgress() {
-        val dialog = ProgressDialogFragment.newInstance().apply {
-            arguments = bundleOf(
-                ProgressDialogFragment.TITLE to getString(R.string.build_run_title),
-                ProgressDialogFragment.MESSAGE to getString(R.string.dialog_please_wait),
-                ProgressDialogFragment.CANCELABLE to false,
-            )
-        }
-        progressDialog = dialog
-        dialog.show(childFragmentManager, ProgressDialogFragment.TAG)
+        saving = true
+        binding?.let { showSaving(it) }
     }
 
-    fun updateProgress(vararg values: Int?) {
-        val progress = childFragmentManager.findFragmentByTag(ProgressDialogFragment.TAG) as? ProgressDialogFragment
-        values.firstOrNull()?.let { progress?.updateProgress(it) }
+    private fun showSaving(views: FragmentSimpleEditorBinding) {
+        views.saveProgress.isVisible = saving
+        views.saveExFab.isEnabled = !saving
+        views.saveExFab.setText(if (saving) R.string.simple_edit_saving else R.string.save)
     }
 
-    fun hideProgress(result: Boolean) {
-        progressDialog?.dismissAllowingStateLoss()
-        progressDialog = null
+    /** Where the APK went, with Install (signed only) and Share; a Snackbar when it failed. */
+    fun hideProgress(result: Boolean, signed: Boolean) {
+        saving = false
+        binding?.let { showSaving(it) }
         val context = context ?: return
-        if (result) {
-            MaterialAlertDialogBuilder(context)
-                .setTitle(R.string.toast_apk_succes_edited)
-                .setMessage(R.string.dialog_install_app)
-                .setNegativeButton(R.string.cancel, null)
-                .setPositiveButton(R.string.ok) { _, _ -> outputFile?.let { AppUtils.installApk(context, it) } }
-                .show()
-        } else {
-            snack(getString(R.string.toast_apk_falied_edited))
+        val apk = outputFile
+        if (!result || apk == null) {
+            snack(getString(R.string.simple_edit_failed))
+            return
         }
+        val message = if (signed) R.string.simple_edit_saved_to else R.string.simple_edit_saved_unsigned
+        MaterialAlertDialogBuilder(context)
+            .setTitle(R.string.simple_edit_saved_title)
+            .setMessage(getString(message, apk.absolutePath))
+            .setNegativeButton(R.string.close, null)
+            .setNeutralButton(R.string.m3d_share) { _, _ -> shareApk(apk) }
+            .apply { if (signed) setPositiveButton(R.string.install_app) { _, _ -> AppUtils.installApk(context, apk) } }
+            .show()
     }
 
-    override fun onProgressCancelled() {}
+    private fun shareApk(apk: File) {
+        val context = context ?: return
+        val uri = FileProvider.getUriForFile(context, apk)
+        val send = Intent(Intent.ACTION_SEND)
+            .setType("application/vnd.android.package-archive")
+            .putExtra(Intent.EXTRA_STREAM, uri)
+            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        send.clipData = ClipData.newRawUri(apk.name, uri)
+        startActivity(Intent.createChooser(send, getString(R.string.m3d_share_apk_title)))
+    }
 
     fun setOutputFile(outputFile: File?) {
         this.outputFile = outputFile

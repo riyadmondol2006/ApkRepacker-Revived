@@ -74,6 +74,7 @@ import com.riyadm.codeeditor.util.IndentStringBuilder;
 import com.riyadm.codeeditor.util.LexTask;
 import com.riyadm.codeeditor.util.NonProgLexTask;
 import com.riyadm.codeeditor.util.Pair;
+import com.riyadm.codeeditor.util.SpanShift;
 import com.riyadm.codeeditor.util.TextWarriorException;
 import com.riyadm.codeeditor.view.autocomplete.AutoCompletePanel;
 
@@ -374,7 +375,7 @@ public abstract class FreeScrollingTextField extends View implements Document.Te
             mAutoCompletePanel.setLanguage(mLexTask.getLanguage());
         }
         mFieldController._lexer.setWorkerTask(getLexTask());
-        mFieldController.determineSpans();
+        mFieldController.determineSpansNow();
     }
     public LexTask getLexTask() {
         return mLexTask;
@@ -622,7 +623,7 @@ public abstract class FreeScrollingTextField extends View implements Document.Te
         hDoc = doc;
         resetView();
         mFieldController.cancelSpanning(); //stop existing lex threads
-        mFieldController.determineSpans();
+        mFieldController.determineSpansNow();
         invalidate();
     }
 
@@ -856,28 +857,20 @@ public abstract class FreeScrollingTextField extends View implements Document.Te
         //----------------------------------------------
         // set up span coloring settings
         //----------------------------------------------
-        int spanIndex = 0;
         //得到一个词法分析的结果
         List<Pair> spans = hDoc.getSpans();
         if (spans.isEmpty()) return;
+        // span ends are moved by the edits made since the spans were lexed
+        SpanShift spanShift = hDoc.getSpanShift();
 
         // There must be at least one span to paint, even for an empty file,
         // where the span contains only the EOF character
         TextWarriorException.assertVerbose(!spans.isEmpty(), "No spans to paint in TextWarrior.paint()");
-        //TODO use binary search
-        Pair nextSpan = spans.get(spanIndex++);
-        Pair currSpan;
-        int spanOffset = 0;
-        do {
-            currSpan = nextSpan;
-            if (spanIndex < spans.size()) {
-                spanOffset = currSpan.getFirst();
-                nextSpan = spans.get(spanIndex++);
-            } else {
-                nextSpan = null;
-            }
-        }
-        while (nextSpan != null && spanOffset <= currentIndex);
+        // Pair.first is the last char of a span; find the span holding currentIndex
+        int spanIndex = SpanShift.findSpan(spans, currentIndex, spanShift);
+        Pair currSpan = spans.get(spanIndex++);
+        int spanOffset = spanShift.map(currSpan.getFirst());
+        Pair nextSpan = spanIndex < spans.size() ? spans.get(spanIndex++) : null;
         /*
         ColorScheme.Colorable currType = currSpan.getSecond();
         ColorScheme.Colorable lastType = currType;
@@ -935,16 +928,19 @@ public abstract class FreeScrollingTextField extends View implements Document.Te
                 // check if formatting changes are needed
                 //if (reachedNextSpan(currentIndex, nextSpan)) {
                 if (nextSpan != null && currentIndex > spanOffset){
-                    currSpan = nextSpan;
-                    spanOffset = currSpan.getFirst();
+                    // skip empty spans too, so the colors don't fall behind
+                    do {
+                        currSpan = nextSpan;
+                        spanOffset = spanShift.map(currSpan.getFirst());
+
+                        if (spanIndex < spans.size()) {
+                            nextSpan = spans.get(spanIndex++);
+                        } else {
+                            nextSpan = null;
+                        }
+                    } while (nextSpan != null && currentIndex > spanOffset);
                     spanColor = mColorScheme.getTokenColor(currSpan.second);
                     mTextPaint.setColor(spanColor);
-
-                    if (spanIndex < spans.size()) {
-                        nextSpan = spans.get(spanIndex++);
-                    } else {
-                        nextSpan = null;
-                    }
                 }
 
                 if (currentIndex == mCaretPosition && isCursorVisiable) {

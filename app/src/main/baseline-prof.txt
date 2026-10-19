@@ -1,0 +1,80 @@
+# Baseline profile: the code ART compiles ahead of time at install, instead of interpreting it on
+# the first runs. The app is sideloaded (no cloud profiles), so this is all it gets. AGP packs it
+# into the APK (assets/dexopt/baseline.prof, rewritten for R8's names) and androidx.profileinstaller
+# installs it. Rule syntax: https://developer.android.com/topic/performance/baselineprofiles/manually-create-measure
+# H = hot (compile), S = used at startup, P = used after startup, L lines = classes to preload.
+
+# Startup: the application, the main activity and its four tabs.
+HSPLcom/riyadm/apkrepacker/App;->**(**)**
+HSPLcom/riyadm/apkrepacker/App$*;->**(**)**
+HSPLcom/riyadm/apkrepacker/activity/BaseActivity**;->**(**)**
+HSPLcom/riyadm/apkrepacker/activity/MainActivity**;->**(**)**
+HSPLcom/riyadm/apkrepacker/fragment/OnBackPressedListener;->**(**)**
+HSPLcom/riyadm/apkrepacker/fragment/ProjectsFragment**;->**(**)**
+HSPLcom/riyadm/apkrepacker/fragment/AppsFragment**;->**(**)**
+HSPLcom/riyadm/apkrepacker/fragment/SettingsFragment**;->**(**)**
+HSPLcom/riyadm/apkrepacker/fragment/AboutFragment**;->**(**)**
+HSPLcom/riyadm/apkrepacker/fragment/MyFilesFragment**;->**(**)**
+HSPLcom/riyadm/apkrepacker/fragment/base/**;->**(**)**
+HSPLcom/riyadm/apkrepacker/databinding/**;->**(**)**
+HSPLcom/riyadm/apkrepacker/viewmodel/ProjectsFragmentViewModel**;->**(**)**
+HSPLcom/riyadm/apkrepacker/viewmodel/projects/**;->**(**)**
+HSPLcom/riyadm/apkrepacker/update/**;->**(**)**
+HSPLcom/riyadm/apkrepacker/ui/appslist/**;->**(**)**
+HSPLcom/riyadm/apkrepacker/ui/projectlist/**;->**(**)**
+HSPLcom/riyadm/apkrepacker/ui/motion/**;->**(**)**
+HSPLcom/riyadm/apkrepacker/ui/rows/**;->**(**)**
+HSPLcom/riyadm/apkrepacker/ui/preferences/**;->**(**)**
+HSPLcom/riyadm/apkrepacker/ui/widget/**;->**(**)**
+HSPLcom/riyadm/apkrepacker/ui/filemanager/**;->**(**)**
+HSPLcom/riyadm/apkrepacker/utils/*;->**(**)**
+HSPLcom/riyadm/apkrepacker/utils/common/*;->**(**)**
+HSPLcom/riyadm/apkrepacker/utils/view/*;->**(**)**
+
+Lcom/riyadm/apkrepacker/App;
+Lcom/riyadm/apkrepacker/activity/BaseActivity**;
+Lcom/riyadm/apkrepacker/activity/MainActivity**;
+Lcom/riyadm/apkrepacker/fragment/ProjectsFragment**;
+Lcom/riyadm/apkrepacker/fragment/AppsFragment**;
+Lcom/riyadm/apkrepacker/fragment/SettingsFragment**;
+Lcom/riyadm/apkrepacker/fragment/AboutFragment**;
+Lcom/riyadm/apkrepacker/databinding/**;
+Lcom/riyadm/apkrepacker/viewmodel/ProjectsFragmentViewModel**;
+Lcom/riyadm/apkrepacker/viewmodel/projects/**;
+Lcom/riyadm/apkrepacker/update/**;
+Lcom/riyadm/apkrepacker/ui/appslist/**;
+Lcom/riyadm/apkrepacker/ui/projectlist/**;
+Lcom/riyadm/apkrepacker/ui/motion/**;
+Lcom/riyadm/apkrepacker/ui/rows/**;
+Lcom/riyadm/apkrepacker/ui/preferences/**;
+Lcom/riyadm/apkrepacker/utils/*;
+
+# Libraries on the main screens that ship no profile of their own.
+HSPLandroidx/recyclerview/**;->**(**)**
+HSPLme/zhanghai/android/fastscroll/**;->**(**)**
+HSPLcom/bumptech/glide/**;->**(**)**
+HSPLkotlinx/coroutines/**;->**(**)**
+HSPLcom/google/android/material/appbar/**;->**(**)**
+HSPLcom/google/android/material/navigation/**;->**(**)**
+HSPLcom/google/android/material/bottomnavigation/**;->**(**)**
+HSPLcom/google/android/material/navigationrail/**;->**(**)**
+HSPLcom/google/android/material/chip/**;->**(**)**
+HSPLcom/google/android/material/card/**;->**(**)**
+HSPLcom/google/android/material/button/**;->**(**)**
+HSPLcom/google/android/material/floatingactionbutton/**;->**(**)**
+HSPLcom/google/android/material/imageview/**;->**(**)**
+HSPLcom/google/android/material/shape/**;->**(**)**
+HSPLcom/google/android/material/ripple/**;->**(**)**
+HSPLcom/google/android/material/color/**;->**(**)**
+HSPLcom/google/android/material/theme/**;->**(**)**
+HSPLcom/google/android/material/textview/**;->**(**)**
+HSPLcom/google/android/material/internal/**;->**(**)**
+HSPLcom/google/android/material/resources/**;->**(**)**
+HSPLcom/google/android/material/animation/**;->**(**)**
+HSPLcom/google/android/material/motion/**;->**(**)**
+HSPLcom/google/android/material/snackbar/**;->**(**)**
+HSPLcom/google/android/material/search/**;->**(**)**
+
+# The rest of the app's own code (editors, decompile/build screens, patcher): compiled, so their
+# first use doesn't start interpreted. Library code beyond the above stays JIT-compiled.
+HPLcom/riyadm/apkrepacker/**;->**(**)**

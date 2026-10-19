@@ -347,13 +347,17 @@ dependencies {
  *  - brut.xml.XmlUtils sets JAXP features that Android's DocumentBuilderFactory rejects, which
  *    silently disables --debuggable, --net-sec-conf and some manifest fixes.
  * The app ships Android versions of both (src/main/java/brut/...), so the originals are stripped
- * from the dependency jars here, together with the desktop aapt2 binaries.
+ * from the dependency jars here, together with the desktop aapt2 binaries. smali's
+ * ClassFileNameHandler is replaced the same way (src/main/java/com/android/tools/smali/util/) by a
+ * copy that names files identically with far fewer file system calls (faster baksmali).
  */
 abstract class StripApktoolDesktopClasses implements TransformAction<TransformParameters.None> {
     private static final Map<String, List<String>> STRIPPED = [
         'apktool-lib-': ['brut/androlib/res/decoder/ResNinePatchStreamDecoder.class',
                          'prebuilt/linux/', 'prebuilt/macosx/', 'prebuilt/windows/'],
         'brut.j.xml-' : ['brut/xml/XmlUtils.class', 'brut/xml/XmlUtils$'],
+        'smali-util-' : ['com/android/tools/smali/util/ClassFileNameHandler.class',
+                         'com/android/tools/smali/util/ClassFileNameHandler$'],
     ]
 
     @InputArtifact
@@ -397,6 +401,8 @@ dependencies {
         from.attribute(apktoolStripped, false).attribute(ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE, 'jar')
         to.attribute(apktoolStripped, true).attribute(ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE, 'jar')
     }
+    // The ClassFileNameHandler copy uses smali-util's PathUtil; smali only exposes it at runtime.
+    compileOnly libs.smali.util
 }
 configurations.configureEach {
     if (name.endsWith('CompileClasspath') || name.endsWith('RuntimeClasspath')) {

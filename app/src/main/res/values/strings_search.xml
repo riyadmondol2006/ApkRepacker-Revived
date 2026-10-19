@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Find in files -->
+    <string name="search_file_names_only">Search file names only</string>
+    <string name="search_results_capped">Showing the first %1$d of %2$d matches</string>
+</resources>

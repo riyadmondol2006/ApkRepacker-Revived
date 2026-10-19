@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.riyadm.apkrepacker.R
 import com.riyadm.apkrepacker.databinding.ItemAppsBinding
 import com.riyadm.apkrepacker.ui.motion.pressSpring
@@ -15,13 +16,14 @@ import com.riyadm.apkrepacker.ui.rows.IconShapeMorpher
 import com.riyadm.apkrepacker.ui.rows.applyGroupedShape
 import com.riyadm.apkrepacker.utils.PackageMeta
 
-class AppsAdapter(@Suppress("unused") context: Context) :
+class AppsAdapter(context: Context) :
     ListAdapter<PackageMeta, AppsAdapter.ViewHolder>(Diff) {
 
     private var listener: OnItemInteractionListener? = null
 
     init {
         setHasStableIds(true)
+        PackageIcon.register(context)
     }
 
     fun setData(packages: List<PackageMeta>?) {
@@ -82,9 +84,12 @@ class AppsAdapter(@Suppress("unused") context: Context) :
                 if (adapterPosition != RecyclerView.NO_POSITION) listener?.onBackupButtonClicked(item)
             }
 
+            // Loaded per visible row; PackageManager is the source, so there's nothing to keep on disk.
             Glide.with(binding.tvAppIcon)
-                .load(item.iconDrawable ?: R.drawable.default_app_icon)
+                .load(PackageIcon(item.packageName, item.versionCode))
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .placeholder(android.R.color.transparent)
+                .error(R.drawable.default_app_icon)
                 .centerInside()
                 .into(binding.tvAppIcon)
         }

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Find in files -->
+    <string name="search_file_names_only">Искать только в именах файлов</string>
+    <string name="search_results_capped">Показаны первые %1$d из %2$d совпадений</string>
+</resources>

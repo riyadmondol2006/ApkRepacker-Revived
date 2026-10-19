@@ -172,6 +172,6 @@ class CompressOperation(private val context: Context) : FileOperation<CompressAr
     }
 
     companion object {
-        private const val BUFFER_SIZE = 1024
+        private const val BUFFER_SIZE = 8 * 1024
     }
 }

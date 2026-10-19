@@ -16,6 +16,7 @@ import android.webkit.MimeTypeMap
 import com.riyadm.apkrepacker.App
 import com.riyadm.apkrepacker.R
 import com.riyadm.apkrepacker.filepicker.Utility
+import com.riyadm.apkrepacker.ui.filemanager.utils.TreeDeleter
 import com.riyadm.apkrepacker.ui.preferences.PreferenceHelper
 import com.riyadm.apkrepacker.utils.common.DLog
 import java.io.BufferedInputStream
@@ -203,17 +204,17 @@ object FileUtil {
         throw Exception(String.format("Error creating %s", name))
     }
 
+    /**
+     * Deletes [file], with everything below it if it is a folder (projects are tens of thousands
+     * of files, so several threads work on it). Links are deleted, never followed out of the
+     * tree. Throws at the first entry that can't be deleted, or if [file] doesn't exist.
+     */
     @JvmStatic
     @Throws(Exception::class)
     fun deleteFile(file: File?): File {
-        if (file!!.isDirectory) {
-            for (child in file.listFiles()!!) {
-                deleteFile(child)
-            }
-        }
-
-        if (file.delete()) return file
-        throw Exception(String.format("Error deleting %s", file.name))
+        val failed = TreeDeleter.delete(file!!, WorkerThreads.count(), stopOnFailure = true, missingRootFails = true).failed
+            ?: return file
+        throw Exception(String.format("Error deleting %s", failed.name))
     }
 
     @JvmStatic

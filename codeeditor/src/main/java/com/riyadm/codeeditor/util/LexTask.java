@@ -2,49 +2,23 @@ package com.riyadm.codeeditor.util;
 
 import com.riyadm.codeeditor.lang.Language;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public abstract class LexTask implements Runnable {
-    /**
-     * A collection of Pairs, where Pair.first is the start
-     * position of the token, and Pair.second is the type of the token.
-     */
+public abstract class LexTask {
     protected final Language language;
-    protected boolean abort;
-    private Lexer _lexManager;
     /**
-     * can be set by another thread to stop the scan immediately
+     * Set by another thread to stop the scan immediately; tokenize() loops
+     * check it on every token
      */
-    private boolean isRun;
+    protected volatile boolean abort;
 
     public LexTask(Language language) {
         this.language = language;
-        isRun = false;
         abort = false;
     }
 
     public void abort() {
         abort = true;
-    }
-
-    public boolean isRun() {
-        return isRun;
-    }
-
-    void setLexer(Lexer p) {
-        _lexManager = p;
-    }
-
-    @Override
-    public synchronized void run() {
-        isRun = true;
-        List<Pair> _tokens = new ArrayList<>();
-        abort = false;
-        tokenize(_tokens, _lexManager.getText());
-        if (_tokens.size() > 0)
-            _lexManager.tokenizeDone(_tokens);
-        isRun = false;
     }
 
     public int format(IndentStringBuilder sb, CharSequence input, int width, int curPos) {
@@ -60,6 +34,12 @@ public abstract class LexTask implements Runnable {
         return new Selection(0, text.length() - 1);
     }
 
+    /**
+     * Fills _tokens with Pairs, where Pair.first is the end position
+     * (inclusive) of the token, in increasing order, and Pair.second is the
+     * type of the token. Runs on the lexer thread and should return early
+     * once abort is set.
+     */
     protected abstract void tokenize(List<Pair> _tokens, String text);
 
     public final Language getLanguage() {

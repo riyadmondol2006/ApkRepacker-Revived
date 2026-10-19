@@ -1,6 +1,6 @@
 package com.riyadm.apkrepacker.model
 
-import org.apache.commons.io.FileUtils
+import com.riyadm.apkrepacker.utils.grep.FileListing
 import java.io.File
 import java.util.Locale
 
@@ -14,7 +14,7 @@ class SearchFinder {
 
     fun query(query: String) {
         val needle = query.lowercase(Locale.getDefault())
-        fileList = FileUtils.listFiles(currentPath, extensions, true)
+        fileList = FileListing.listFiles(currentPath!!, extensions, true)
             .filter { it.name.lowercase(Locale.getDefault()).contains(needle) }
             .sorted()
     }

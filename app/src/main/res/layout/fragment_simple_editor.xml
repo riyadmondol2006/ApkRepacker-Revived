@@ -22,6 +22,16 @@
             app:navigationContentDescription="@string/close"
             app:navigationIcon="@drawable/ic_close"
             app:title="@string/action_simple_edit" />
+
+        <!-- Shown while Save rebuilds the APK. -->
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/save_progress"
+            style="@style/Widget.Material3Expressive.LinearProgressIndicator.Wavy"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/simple_edit_saving"
+            android:indeterminate="true"
+            android:visibility="gone" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView

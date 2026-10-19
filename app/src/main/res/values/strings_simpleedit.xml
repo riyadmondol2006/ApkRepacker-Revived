@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Simple Edit: Save button label and progress while the APK is rebuilt -->
+    <string name="simple_edit_saving">Saving…</string>
+    <!-- Simple Edit: result dialog -->
+    <string name="simple_edit_saved_title">APK saved</string>
+    <string name="simple_edit_saved_to">Saved to %1$s</string>
+    <string name="simple_edit_saved_unsigned">Saved to %1$s\n\nSigning is off in Settings, so this APK is unsigned and can\'t be installed as it is.</string>
+    <string name="simple_edit_failed">Couldn\'t save the edited APK.</string>
+</resources>

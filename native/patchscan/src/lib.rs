@@ -3,7 +3,8 @@
 //! One call per patch rule (or batch of rules): which of the target files can contain a match.
 //! The Java rule then runs on those files only, so it still decides every match and writes every
 //! replacement; this library only skips files that certainly don't match. See relax.rs for how a
-//! Java regex is widened so that "no match here" is always true for Java too.
+//! Java regex is widened so that "no match here" is always true for Java too. The project text
+//! search (find in files) uses it the same way, one call per search.
 
 pub mod relax;
 pub mod scan;
@@ -11,7 +12,7 @@ pub mod scan;
 use std::panic::{catch_unwind, AssertUnwindSafe};
 
 use jni::objects::{JClass, JObject, JObjectArray, JString};
-use jni::sys::{jbooleanArray, jint};
+use jni::sys::{jboolean, jbooleanArray, jint, JNI_FALSE};
 use jni::JNIEnv;
 
 /// `NativeScan.scan(root, files, regexes, lineSets, threads)`: a boolean per file (true: may
@@ -40,10 +41,7 @@ pub extern "system" fn Java_com_riyadm_patchengine_NativeScan_scan<'local>(
         }
         let queries = scan::Queries::new(&regexes, &sets).ok()?;
         let found = scan::candidates(&root, &files, &queries, threads.max(1) as usize);
-        let flags: Vec<u8> = found.into_iter().map(u8::from).collect();
-        let array = env.new_boolean_array(flags.len() as i32).ok()?;
-        env.set_boolean_array_region(&array, 0, &flags).ok()?;
-        Some(array.into_raw())
+        boolean_array(&mut env, found)
     }));
     match result {
         Ok(Some(array)) => array,
@@ -53,6 +51,40 @@ pub extern "system" fn Java_com_riyadm_patchengine_NativeScan_scan<'local>(
             std::ptr::null_mut()
         }
     }
+}
+
+/// `NativeScan.textScan(files, regex, ignoreCase, threads)`: for the text search, a boolean per
+/// file (absolute paths; true: may match), or null like [scan].
+#[no_mangle]
+pub extern "system" fn Java_com_riyadm_patchengine_NativeScan_textScan<'local>(
+    mut env: JNIEnv<'local>,
+    _class: JClass<'local>,
+    files: JObjectArray<'local>,
+    regex: JString<'local>,
+    ignore_case: jboolean,
+    threads: jint,
+) -> jbooleanArray {
+    let result = catch_unwind(AssertUnwindSafe(|| -> Option<jbooleanArray> {
+        let files = string_array(&mut env, &files)?;
+        let regex = java_string(&mut env, &regex)?;
+        let query = scan::TextQuery::new(&regex, ignore_case != JNI_FALSE).ok()?;
+        let found = scan::text_candidates(&files, &query, threads.max(1) as usize);
+        boolean_array(&mut env, found)
+    }));
+    match result {
+        Ok(Some(array)) => array,
+        _ => {
+            let _ = env.exception_clear();
+            std::ptr::null_mut()
+        }
+    }
+}
+
+fn boolean_array(env: &mut JNIEnv, values: Vec<bool>) -> Option<jbooleanArray> {
+    let flags: Vec<u8> = values.into_iter().map(u8::from).collect();
+    let array = env.new_boolean_array(flags.len() as i32).ok()?;
+    env.set_boolean_array_region(&array, 0, &flags).ok()?;
+    Some(array.into_raw())
 }
 
 fn java_string(env: &mut JNIEnv, s: &JString) -> Option<String> {

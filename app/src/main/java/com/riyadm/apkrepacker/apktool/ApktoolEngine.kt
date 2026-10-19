@@ -200,7 +200,7 @@ object ApktoolEngine {
     /**
      * apktool only re-assembles a smali folder when it is newer than its dex in `build/apk/`.
      * Right after decoding, that dex is exactly the APK's original one, so it is put there (dated
-     * after the smali files): building an unedited project then never re-assembles code, which is
+     * like the newest smali file): building an unedited project then never re-assembles code, which is
      * faster, byte-identical, and avoids running out of memory on huge dex files (a 44 MB dex needs
      * ~700 MB of heap to assemble, more than Android gives an app). Editing, adding or deleting
      * any file in a smali folder makes it newer again, and BuildOptions.force rebuilds everything.
@@ -222,8 +222,10 @@ object ApktoolEngine {
                     seeded.add(dex)
                 }
             }
-            // Dated after every decoded file; anything the user changes later is newer.
-            val time = maxOf(System.currentTimeMillis(), brut.util.BrutIO.recursiveModifiedTime(smaliDirs)) + 1000
+            // Not older than any decoded file (apktool needs the folder to be strictly newer), and not
+            // in the future either: a file changed within a second of decoding (say, by a patch
+            // applied right away) was older than a dex dated now + 1 s and silently not assembled.
+            val time = brut.util.BrutIO.recursiveModifiedTime(smaliDirs)
             for (dex in seeded) {
                 if (!dex.setLastModified(time)) throw java.io.IOException("can't set the date of $dex")
             }
@@ -440,16 +442,21 @@ object ApktoolEngine {
     }
 
     // Heap model for smali assembly, fitted on the host (HotSpot, apktool 3.0.3, -Xmx bisection on
-    // SystemUI/Settings/Keep/a 14-dex app): one job needs ~64 MB + 12-36x its dex size. 20 MB per
-    // dex MB is the typical factor (~16) with a 1.25 margin for ART's GC; 16 is used for the
-    // "can't fit at all" warning. apktool's job count also parallelizes work inside each dex, so
-    // heap jumps at 4 jobs regardless of folder sizes (Keep: 384 MB at 2 jobs, 704 MB at 4;
-    // Settings 160 -> 384 MB) while 2 jobs are as fast or faster: builds use at most 2.
-    // The OOM retry with one job in build() covers outliers.
-    private const val BUILD_MAX_JOBS = 2
+    // SystemUI/Settings/Keep/a 14-dex app/MovieBox): one folder needs ~64 MB + 12-36x its dex size.
+    // 20 MB per dex MB is the typical factor (~16) with a 1.25 margin for ART's GC; 16 is used for
+    // the "can't fit at all" warning. Folders assembled at the same time add up (MovieBox, 10-11 MB
+    // dex each: 1 folder needs 260 MB, 2 need 436 MB, 3 need 656 MB; 2 take 10 s instead of 18 s
+    // one after the other, 3 take 12 s instead of 27 s, but 40 s right at the 2-folder minimum).
+    // apktool assembles folders on jobs - 1 worker threads while the calling thread builds the
+    // resources (aapt2), so 2 jobs = one folder at a time next to aapt2, and n folders at once take
+    // n + 1 jobs. Running out of memory throws away the whole attempt (build() then retries with one
+    // job) and a nearly full heap makes the GC run all the time, so a second or third folder only
+    // runs alongside when the model leaves 15% of the heap free.
+    private const val BUILD_MAX_PARALLEL_FOLDERS = 3
     private const val BUILD_BASE_HEAP_MB = 64.0
     private const val BUILD_HEAP_PER_DEX_MB = 20.0
     private const val BUILD_HEAP_PER_DEX_MB_MIN = 16.0
+    private const val BUILD_PARALLEL_HEAP_SHARE = 0.85
 
     private fun maxJobs(): Int = maxOf(1, minOf(Runtime.getRuntime().availableProcessors(), 4))
 
@@ -461,19 +468,22 @@ object ApktoolEngine {
     fun decodeJobCount(): Int = maxJobs()
 
     /**
-     * Threads for assembling dex folders of [staleDexSizes] bytes: the largest n <= min(cores, 2) such
-     * that 64 + 20 x (sum of the n biggest dex sizes in MB) fits in [heapMb]; at least 1.
+     * apktool jobs for assembling dex folders of [staleDexSizes] bytes: 1 + the largest n <=
+     * max(1, min(cores - 1, 3)) such that 64 + 20 x (sum of the n biggest dex sizes in MB) fits in
+     * [heapMb] (in 85% of it for n >= 2); 1 when no folder is stale or the biggest doesn't fit.
      */
     @JvmStatic
     @JvmOverloads
     fun buildJobCount(staleDexSizes: List<Long>, heapMb: Double = Runtime.getRuntime().maxMemory() / (1024.0 * 1024.0)): Int {
-        var jobs = 1
+        var folders = 0
         var sumMb = 0.0
-        for ((i, size) in staleDexSizes.sortedDescending().take(minOf(maxJobs(), BUILD_MAX_JOBS)).withIndex()) {
+        val maxFolders = minOf(maxOf(1, maxJobs() - 1), BUILD_MAX_PARALLEL_FOLDERS)
+        for ((i, size) in staleDexSizes.sortedDescending().take(maxFolders).withIndex()) {
             sumMb += size / (1024.0 * 1024.0)
-            if (BUILD_BASE_HEAP_MB + BUILD_HEAP_PER_DEX_MB * sumMb <= heapMb) jobs = i + 1 else break
+            val limit = if (i == 0) heapMb else heapMb * BUILD_PARALLEL_HEAP_SHARE
+            if (BUILD_BASE_HEAP_MB + BUILD_HEAP_PER_DEX_MB * sumMb <= limit) folders = i + 1 else break
         }
-        return jobs
+        return if (folders == 0) 1 else folders + 1
     }
 
     /**

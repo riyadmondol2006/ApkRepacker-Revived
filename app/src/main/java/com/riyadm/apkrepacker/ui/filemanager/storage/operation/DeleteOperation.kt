@@ -29,6 +29,8 @@ import com.riyadm.apkrepacker.ui.filemanager.storage.DocumentFileUtils
 import com.riyadm.apkrepacker.ui.filemanager.storage.operation.argument.DeleteArguments
 import com.riyadm.apkrepacker.ui.filemanager.utils.FileUtils
 import com.riyadm.apkrepacker.ui.filemanager.utils.MediaScannerUtils
+import com.riyadm.apkrepacker.ui.filemanager.utils.TreeDeleter
+import com.riyadm.apkrepacker.utils.WorkerThreads
 
 
 class DeleteOperation(context: Context) : FileOperation<DeleteArguments>() {
@@ -42,12 +44,18 @@ class DeleteOperation(context: Context) : FileOperation<DeleteArguments>() {
 
         for (fh in args.getVictims()) {
             val tbd = fh.file
-            val paths = FileUtils.getPathsUnder(tbd)
-
-            val deleted = FileUtils.delete(tbd)
+            // One pass over the tree deletes it and collects the paths the media scanner may
+            // know (none under Android/data or a .nomedia folder).
+            val result = TreeDeleter.delete(
+                tbd,
+                WorkerThreads.count(),
+                reportRoot = MediaScannerUtils.isIndexable(tbd),
+                report = MediaScannerUtils::isIndexableFolder,
+            )
+            val deleted = result.success
             allSucceeded = allSucceeded and deleted
 
-            if (deleted) MediaScannerUtils.informPathsDeleted(context, paths)
+            if (deleted) MediaScannerUtils.informPathsDeleted(context, result.reported)
         }
         return allSucceeded
     }

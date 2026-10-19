@@ -38,7 +38,11 @@ public class TextBuffer implements CharSequence
 	private UndoStack _undoStack;
 
 	/** Continuous seq of chars that have the same format (color, font, etc.) */
-	protected List<Pair> _spans;
+	protected volatile List<Pair> _spans;
+	/** Edits made since _spans were lexed */
+	private volatile SpanShift _spanShift = SpanShift.NONE;
+	/** Bumped on every change to the text, so a lex can tell if it is stale */
+	private long _version;
 
 
 	public TextBuffer(){
@@ -72,6 +76,8 @@ public class TextBuffer implements CharSequence
 	}
 
 	synchronized public void setBuffer(char[] newBuffer, int textSize, int lineCount){
+		++_version;
+		_spanShift = SpanShift.UNTRACKED;
 		_contents = newBuffer;
 		initGap(textSize);
 		_lineCount = lineCount;
@@ -371,6 +377,8 @@ public class TextBuffer implements CharSequence
 		if(undoable){
 			_undoStack.captureInsert(charOffset, c.length, timestamp);
 		}
+		++_version;
+		_spanShift = _spanShift.insert(charOffset, c.length);
 
 		int insertIndex = logicalToRealIndex(charOffset);
 
@@ -410,6 +418,8 @@ public class TextBuffer implements CharSequence
 		if(undoable){
 			_undoStack.captureDelete(charOffset, totalChars, timestamp);
 		}
+		++_version;
+		_spanShift = _spanShift.delete(charOffset, totalChars);
 
 		int newGapStart = charOffset + totalChars;
 
@@ -442,6 +452,15 @@ public class TextBuffer implements CharSequence
 	 * of insertions/deletions. No error checking is done.
 	 */
 	synchronized void shiftGapStart(int displacement){
+		++_version;
+		// the gap start is the same logical and real index
+		if(displacement >= 0){
+			_spanShift = _spanShift.insert(_gapStartIndex, displacement);
+		}
+		else{
+			_spanShift = _spanShift.delete(_gapStartIndex + displacement, -displacement);
+		}
+
 		if(displacement >= 0){
 			_lineCount += countNewlines(_gapStartIndex, displacement);
 		}
@@ -572,13 +591,20 @@ public class TextBuffer implements CharSequence
 		return i < _gapStartIndex;
 	}
 
-	public void clearSpans(){
-		_spans = new Vector<Pair>();
-	    _spans.add(new Pair(0, Lexer.NORMAL));
+	synchronized public void clearSpans(){
+		List<Pair> spans = new Vector<Pair>();
+		spans.add(new Pair(0, Lexer.NORMAL));
+		_spans = spans;
+		_spanShift = SpanShift.NONE;
 	}
 
 	public List<Pair> getSpans(){
 		return _spans;
+	}
+
+	/** The edits since the current spans were set; see SpanShift */
+	public SpanShift getSpanShift(){
+		return _spanShift;
 	}
 
 	/**
@@ -586,11 +612,47 @@ public class TextBuffer implements CharSequence
 	 * Spans are continuous sequences of characters that have the same format
 	 * like color, font, etc.
 	 *
-	 * @param spans A collection of Pairs, where Pair.first is the start
-	 * 		position of the token, and Pair.second is the type of the token.
+	 * @param spans A collection of Pairs, where Pair.first is the end
+	 * 		position (inclusive) of the token, in increasing order, and
+	 * 		Pair.second is the type of the token.
 	 */
-	public void setSpans(List<Pair> spans){
+	synchronized public void setSpans(List<Pair> spans){
 		_spans = spans;
+		_spanShift = SpanShift.NONE;
+	}
+
+	/**
+	 * Sets spans lexed from the text at the given version. Does nothing and
+	 * returns false if the text has changed since then.
+	 */
+	synchronized public boolean setSpans(List<Pair> spans, long version){
+		if(version != _version){
+			return false;
+		}
+		setSpans(spans);
+		return true;
+	}
+
+	synchronized public long getVersion(){
+		return _version;
+	}
+
+	/**
+	 * The text up to the EOF sentinel and its version, read under one lock
+	 * so that a lex on another thread knows exactly which text it got.
+	 */
+	synchronized public Snapshot snapshot(){
+		return new Snapshot(toString(), _version);
+	}
+
+	public static final class Snapshot{
+		public final String text;
+		public final long version;
+
+		Snapshot(String text, long version){
+			this.text = text;
+			this.version = version;
+		}
 	}
 
 	/**
@@ -633,18 +695,18 @@ public class TextBuffer implements CharSequence
 	}
 
 	@Override
-	public String toString()
+	synchronized public String toString()
 	{
-		// TODO: Implement this method
-		int len=getTextLength();
-		StringBuffer buf=new StringBuffer();
-		for (int i=0;i < len;i++){
-			char c=charAt(i);
-			if (c==Language.EOF)
-				break;
-			buf.append(c);
+		// copy both sides of the gap in bulk; the text ends at the first EOF
+		int len = getTextLength();
+		char[] chars = new char[len];
+		System.arraycopy(_contents, 0, chars, 0, _gapStartIndex);
+		System.arraycopy(_contents, _gapEndIndex, chars, _gapStartIndex, len - _gapStartIndex);
+		int end = 0;
+		while (end < len && chars[end] != Language.EOF){
+			++end;
 		}
-		return new String(buf);
+		return new String(chars, 0, end);
 	}
 
 

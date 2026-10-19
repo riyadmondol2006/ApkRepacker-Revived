@@ -267,11 +267,33 @@ public class DocumentProvider implements CharSequence
 	 * Spans are continuous sequences of characters that have the same format
 	 * like color, font, etc.
 	 *
-	 * @param spans A collection of Pairs, where Pair.first is the start
-	 * 		position of the token, and Pair.second is the type of the token.
+	 * @param spans A collection of Pairs, where Pair.first is the end
+	 * 		position (inclusive) of the token, in increasing order, and
+	 * 		Pair.second is the type of the token.
 	 */
 	public void setSpans(List<Pair> spans){
 		_theText.setSpans(spans);
+	}
+
+	/**
+	 * Sets spans lexed from the text at the given version, unless the text
+	 * has changed since. Returns whether they were set.
+	 */
+	public boolean setSpans(List<Pair> spans, long version){
+		return _theText.setSpans(spans, version);
+	}
+
+	/** The edits made since the current spans were set */
+	public SpanShift getSpanShift(){
+		return _theText.getSpanShift();
+	}
+
+	public TextBuffer.Snapshot snapshot(){
+		return _theText.snapshot();
+	}
+
+	public long getVersion(){
+		return _theText.getVersion();
 	}
 
 	public void setMetrics(Document.TextFieldMetrics metrics){

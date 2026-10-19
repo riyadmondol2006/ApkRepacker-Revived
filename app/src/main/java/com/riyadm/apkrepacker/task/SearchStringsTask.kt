@@ -6,6 +6,7 @@ import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.BackgroundColorSpan
 import android.text.style.ForegroundColorSpan
+import com.riyadm.apkrepacker.R
 import com.riyadm.apkrepacker.fragment.FindFragment
 import com.riyadm.apkrepacker.task.base.CoroutinesAsyncTask
 import com.riyadm.apkrepacker.ui.findresult.ChildData
@@ -24,9 +25,17 @@ class SearchStringsTask(
     private var mParentList: List<ParentData>? = null
     private val mFindFiles = ArrayList<String>()
     private val mExtGrep: ExtGrep? = StringUtils.extGreps
+    private var mNote: String? = null
 
     override fun doInBackground(vararg params: String?): Void? {
-        mParentList = getList(mExtGrep!!.execute())
+        val outcome = mExtGrep!!.execute(MAX_RESULTS)
+        mParentList = getList(outcome.results)
+        // Replace in files works on every file with a match, also those past the shown results.
+        mFindFiles.clear()
+        outcome.files.mapTo(mFindFiles) { it.absolutePath }
+        if (outcome.total > outcome.results.size) {
+            mNote = mContext.getString(R.string.search_results_capped, outcome.results.size, outcome.total)
+        }
         return null
     }
 
@@ -40,7 +49,7 @@ class SearchStringsTask(
 
     override fun onPostExecute(result: Void?) {
         super.onPostExecute(result)
-        mFindFragment.setStringResult(mParentList!!, mFindFiles)
+        mFindFragment.setStringResult(mParentList!!, mFindFiles, mNote)
         mFindFragment.hideProgress()
     }
 
@@ -58,7 +67,6 @@ class SearchStringsTask(
             if (res.file!! != file) {
                 file = res.file!!
                 childDataList = ArrayList()
-                mFindFiles.add(file.absolutePath)
                 parentDataList.add(ParentData(file.absolutePath.substring((ProjectUtils.getProjectPath() + "/").length), childDataList))
             }
 
@@ -73,5 +81,10 @@ class SearchStringsTask(
         }
 
         return parentDataList
+    }
+
+    companion object {
+        /** Matching lines shown at most; a search for a common word can find millions. */
+        private const val MAX_RESULTS = 5000
     }
 }

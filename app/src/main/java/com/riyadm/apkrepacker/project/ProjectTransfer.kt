@@ -1,17 +1,21 @@
 package com.riyadm.apkrepacker.project
 
+import android.os.ParcelFileDescriptor
+import android.system.Os
 import androidx.annotation.StringRes
 import brut.androlib.meta.ApkInfo
 import com.riyadm.apkrepacker.R
 import com.riyadm.apkrepacker.apktool.ProjectMeta
-import com.riyadm.apkrepacker.utils.SafeZip
 import com.riyadm.apkrepacker.utils.WorkerThreads
 import org.json.JSONObject
-import java.io.BufferedOutputStream
 import java.io.File
+import java.io.FileInputStream
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
+import java.nio.file.Files
+import java.nio.file.LinkOption
+import java.nio.file.attribute.BasicFileAttributes
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.Executors
@@ -19,9 +23,8 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
-import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
 import java.util.zip.ZipInputStream
-import java.util.zip.ZipOutputStream
 
 /** A failure the user should be told about; [resId] is the (localized) message. */
 class TransferException(@StringRes val resId: Int, vararg val args: Any?) : IOException("transfer failed: $resId")
@@ -63,35 +66,44 @@ object ProjectTransfer {
 
     // region export
 
-    /** Writes [project] as a ZIP to [out] (closed afterwards). Files sit at the ZIP's root. */
+    /**
+     * Writes [project] as a ZIP to [out] (closed afterwards). Files sit at the ZIP's root. The
+     * files are deflated by several threads and written in name order.
+     */
     @Throws(IOException::class)
     fun exportZip(project: File, out: OutputStream, progress: Progress?) {
-        val total = countFiles(project, topLevel = true, depth = 0)
+        val entries = ArrayList<ParallelZip.Entry>()
+        var total = 0
+        fun add(dir: File, prefix: String, topLevel: Boolean, depth: Int) {
+            if (depth > MAX_TREE_DEPTH) return
+            for (child in dir.listFiles().orEmpty().sortedBy { it.name }) {
+                // One lstat gives everything needed below (link, folder, date, size).
+                val attributes = try {
+                    Files.readAttributes(child.toPath(), BasicFileAttributes::class.java, LinkOption.NOFOLLOW_LINKS)
+                } catch (e: IOException) {
+                    continue
+                }
+                if (attributes.isSymbolicLink) continue
+                if (topLevel && child.name in EXPORT_SKIP_TOP_LEVEL && attributes.isDirectory) continue
+                val entryName = prefix + child.name
+                val time = attributes.lastModifiedTime().toMillis()
+                if (attributes.isDirectory) {
+                    entries += ParallelZip.Entry("$entryName/", null, time)
+                    add(child, "$entryName/", topLevel = false, depth = depth + 1)
+                } else {
+                    entries += ParallelZip.Entry(entryName, child, time, attributes.size())
+                    total++
+                }
+            }
+        }
+        add(project, "", topLevel = true, depth = 0)
         if (total == 0) {
             runCatching { out.close() }
             throw TransferException(R.string.transfer_error_empty_project)
         }
         var done = 0
-        ZipOutputStream(BufferedOutputStream(out, 64 * 1024)).use { zip ->
-            fun add(dir: File, prefix: String, topLevel: Boolean, depth: Int) {
-                if (depth > MAX_TREE_DEPTH) return
-                for (child in dir.listFiles().orEmpty().sortedBy { it.name }) {
-                    if (isSymlink(child)) continue
-                    if (topLevel && child.name in EXPORT_SKIP_TOP_LEVEL && child.isDirectory) continue
-                    val entryName = prefix + child.name
-                    if (child.isDirectory) {
-                        zip.putNextEntry(ZipEntry("$entryName/").apply { time = child.lastModified() })
-                        zip.closeEntry()
-                        add(child, "$entryName/", topLevel = false, depth = depth + 1)
-                    } else {
-                        zip.putNextEntry(ZipEntry(entryName).apply { time = child.lastModified() })
-                        child.inputStream().use { it.copyTo(zip, 64 * 1024) }
-                        zip.closeEntry()
-                        progress?.onProgress(++done, total, child.name)
-                    }
-                }
-            }
-            add(project, "", topLevel = true, depth = 0)
+        ParallelZip.write(out, entries, WorkerThreads.count()) { entry ->
+            progress?.onProgress(++done, total, entry.file!!.name)
         }
     }
 
@@ -206,31 +218,7 @@ object ProjectTransfer {
     fun importZip(input: InputStream, suggestedName: String, projectsDir: File, progress: Progress?): List<File> {
         val stage = newStage(projectsDir)
         try {
-            var extracted = 0L
-            var files = 0
-            ZipInputStream(input.buffered(64 * 1024)).use { zip ->
-                val buffer = ByteArray(64 * 1024)
-                while (true) {
-                    val entry = zip.nextEntry ?: break
-                    // Entry names are untrusted ("../x"): never write outside the stage folder.
-                    val target = SafeZip.resolve(stage, entry.name) ?: continue
-                    if (entry.isDirectory) {
-                        target.mkdirs()
-                        continue
-                    }
-                    target.parentFile?.mkdirs()
-                    target.outputStream().use { out ->
-                        while (true) {
-                            val read = zip.read(buffer)
-                            if (read < 0) break
-                            extracted += read
-                            if (extracted > MAX_IMPORT_BYTES) throw TransferException(R.string.transfer_error_too_big)
-                            out.write(buffer, 0, read)
-                        }
-                    }
-                    progress?.onProgress(++files, 0, target.name)
-                }
-            }
+            if (!extractSeekable(input, stage, progress)) extractStream(input, stage, progress)
             val roots = findProjects(Node.FileNode(stage))
             if (roots.isEmpty()) throw TransferException(R.string.transfer_error_no_project)
             return roots.map { (node, isStageRoot) ->
@@ -241,6 +229,102 @@ object ProjectTransfer {
         } finally {
             discardStage(stage)
         }
+    }
+
+    /** Reads the ZIP front to back: works for any stream, one entry at a time. */
+    private fun extractStream(input: InputStream, stage: File, progress: Progress?) {
+        var extracted = 0L
+        var files = 0
+        val root = stage.canonicalFile
+        ZipInputStream(input.buffered(64 * 1024)).use { zip ->
+            val buffer = ByteArray(64 * 1024)
+            while (true) {
+                val entry = zip.nextEntry ?: break
+                // Entry names are untrusted ("../x"): never write outside the stage folder.
+                val target = ParallelZip.resolveInFreshDir(root, entry.name) ?: continue
+                if (entry.isDirectory) {
+                    target.mkdirs()
+                    continue
+                }
+                target.parentFile?.mkdirs()
+                target.outputStream().use { out ->
+                    while (true) {
+                        val read = zip.read(buffer)
+                        if (read < 0) break
+                        extracted += read
+                        if (extracted > MAX_IMPORT_BYTES) throw TransferException(R.string.transfer_error_too_big)
+                        out.write(buffer, 0, read)
+                    }
+                }
+                progress?.onProgress(++files, 0, target.name)
+            }
+        }
+    }
+
+    /**
+     * When [input] is a plain file (the usual case for a ZIP picked from storage), opens it as a
+     * [ZipFile] and inflates the entries on several threads. Returns false, having read nothing
+     * from [input], when that is not possible; the caller then reads it as a stream.
+     */
+    private fun extractSeekable(input: InputStream, stage: File, progress: Progress?): Boolean {
+        if (input !is FileInputStream) return false
+        val dup = try {
+            ParcelFileDescriptor.dup(input.fd)
+        } catch (e: Exception) {
+            return false
+        }
+        dup.use { pfd ->
+            val zip = try {
+                ZipFile(seekablePath(pfd))
+            } catch (e: Exception) {
+                return false
+            }
+            zip.use { extractZipFile(it, stage, progress) }
+        }
+        return true
+    }
+
+    /**
+     * A path that opens the same file as [pfd]: its real path when this app can read that one
+     * (checked by inode, so a look-alike can't be swapped in), else the descriptor's /proc link.
+     */
+    private fun seekablePath(pfd: ParcelFileDescriptor): File {
+        val proc = File("/proc/self/fd/${pfd.fd}")
+        try {
+            val real = File(Os.readlink(proc.path))
+            val a = Os.fstat(pfd.fileDescriptor)
+            val b = Os.stat(real.path)
+            if (a.st_dev == b.st_dev && a.st_ino == b.st_ino && real.canRead()) return real
+        } catch (e: Exception) {
+            // Fall through to the /proc link.
+        }
+        return proc
+    }
+
+    private fun extractZipFile(zip: ZipFile, stage: File, progress: Progress?) {
+        // Later entries of the same name win, as when the ZIP is read front to back.
+        val jobs = LinkedHashMap<String, ParallelZip.Extraction>()
+        val folders = LinkedHashSet<File>()
+        val root = stage.canonicalFile
+        for (entry in zip.entries()) {
+            // Entry names are untrusted ("../x"): never write outside the stage folder.
+            val target = ParallelZip.resolveInFreshDir(root, entry.name) ?: continue
+            if (entry.isDirectory) {
+                folders += target
+            } else {
+                target.parentFile?.let { folders += it }
+                jobs.remove(target.path)
+                jobs[target.path] = ParallelZip.Extraction(entry, target)
+            }
+        }
+        for (folder in folders) folder.mkdirs()
+        val total = jobs.size
+        val done = AtomicInteger(0)
+        ParallelZip.extract(
+            zip, ArrayList(jobs.values), WorkerThreads.count(),
+            onBytes = { if (it > MAX_IMPORT_BYTES) throw TransferException(R.string.transfer_error_too_big) },
+            onFileDone = { progress?.onProgress(done.incrementAndGet(), total, it.target.name) },
+        )
     }
 
     /**

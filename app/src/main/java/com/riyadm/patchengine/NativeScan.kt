@@ -4,9 +4,9 @@ import com.riyadm.apkrepacker.utils.WorkerThreads
 import com.riyadm.apkrepacker.utils.common.DLog
 
 /**
- * Native pre-filter (Rust, native/patchscan) for patch rules that search many files: it reads the
- * files on several threads and tells which ones can contain a match, and the rule then runs its
- * own Java code on those files only. The Java code still finds every match and writes every
+ * Native pre-filter (Rust, native/patchscan) for patch rules that search many files, and for the
+ * project text search: it reads the files on several threads and tells which ones can contain a
+ * match, and the rule (or search) then runs its own Java code on those files only. The Java code still finds every match and writes every
  * replacement, so the patched project and the log are the same as without the filter.
  *
  * The filter may keep a file that turns out not to match, never drop one that does: the Java
@@ -67,6 +67,32 @@ object NativeScan {
         }
         return result
     }
+
+    /**
+     * For the project text search: for each of [files] (absolute paths), whether it can contain a
+     * line matching the Java regex [regex] (compiled with CASE_INSENSITIVE when [ignoreCase]).
+     * Only ASCII files are ever ruled out, since the search guesses each file's encoding. Null
+     * when the filter can't be used (a pattern it can't widen, no library); then every file has to
+     * be searched.
+     */
+    @JvmStatic
+    fun textCandidates(files: List<String>, regex: String, ignoreCase: Boolean): BooleanArray? {
+        if (!enabled || files.isEmpty() || !loaded) return null
+        val result = try {
+            textScan(files.toTypedArray(), regex, ignoreCase, WorkerThreads.count())
+        } catch (t: Throwable) {
+            DLog.w(TAG, "native text scan failed: $t")
+            null
+        }
+        if (result == null || result.size != files.size) {
+            DLog.d(TAG, "not used for the search $regex")
+            return null
+        }
+        return result
+    }
+
+    @JvmStatic
+    private external fun textScan(files: Array<String>, regex: String, ignoreCase: Boolean, threads: Int): BooleanArray?
 
     @JvmStatic
     private external fun scan(

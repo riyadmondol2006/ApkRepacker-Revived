@@ -17,7 +17,6 @@
 package com.riyadm.apkrepacker.ui.filemanager.misc
 
 import android.content.Context
-import android.content.pm.PackageManager
 import android.content.pm.PackageManager.MATCH_DEFAULT_ONLY
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -57,17 +56,36 @@ object ThumbnailHelper {
 
     private var sDecoder: ImageDecoder? = null
     private var sDefaultImageOptionsBuilder: DisplayImageOptions.Builder? = null
-    private var sProjectMode = false
 
+    /**
+     * Whether rows of this [type] get a thumbnail. Every other row keeps its type icon, so no
+     * loader task (a delayed thread hop and a file check per row) is started for it.
+     */
+    private fun hasThumbnail(type: FileUtil.FileType, projectMode: Boolean): Boolean = when (type) {
+        FileUtil.FileType.IMAGE, FileUtil.FileType.APK, FileUtil.FileType.TTF -> true
+        // Vector drawables are previewed inside projects only.
+        FileUtil.FileType.XML -> projectMode
+        else -> false
+    }
+
+    /**
+     * Loads [holder]'s thumbnail (image, APK icon, font sample, vector drawable) into [imageView]
+     * off the main thread; decoded thumbnails stay in the loader's memory cache.
+     */
     @JvmStatic
     fun requestIcon(holder: FileHolder, imageView: ImageView, projectMode: Boolean) {
-        sProjectMode = projectMode
+        val loader = ImageLoader.getInstance()
+        if (!hasThumbnail(holder.fileType, projectMode)) {
+            // The view may be recycled from a row whose thumbnail is still loading: it must not land here.
+            loader.cancelDisplayTask(imageView)
+            return
+        }
         val uri = Uri.fromFile(holder.file)
         val options = defaultOptionsBuilder()
                 .extraForDownloader(holder)
                 .build()
 
-        ImageLoader.getInstance().displayImage(decode(uri.toString()), imageView, options)
+        loader.displayImage(decode(uri.toString()), imageView, options)
     }
 
     /**
@@ -99,7 +117,8 @@ object ThumbnailHelper {
     private fun getApkIconDrawable(holder: FileHolder, context: Context): Drawable? {
         val pm = context.packageManager
         val path = holder.file.path
-        val pInfo = pm.getPackageArchiveInfo(path, PackageManager.GET_ACTIVITIES)
+        // Only the application info (for the icon) is needed; listing the activities is extra parsing.
+        val pInfo = pm.getPackageArchiveInfo(path, 0)
         if (pInfo != null) {
             val aInfo = pInfo.applicationInfo!!
 
@@ -135,9 +154,8 @@ object ThumbnailHelper {
                     val holder = idi.extraForDownloader as FileHolder
                     var bitmap: Bitmap? = null
 
-                    if (!holder.file.isDirectory) {
-                        val fileType = FileUtil.FileType.getFileType(holder.file)
-                        when (fileType) {
+                    if (!holder.isDirectory) {
+                        when (holder.fileType) {
                             FileUtil.FileType.IMAGE -> try {
                                 val info = ImageDecodingInfo(
                                         idi.imageKey, idi.imageUri,
@@ -173,7 +191,8 @@ object ThumbnailHelper {
                                 }
                             }
                             FileUtil.FileType.TTF -> bitmap = textToBitmap(context, holder.file)
-                            FileUtil.FileType.XML -> if (sProjectMode) {
+                            // Only requested for project rows (see hasThumbnail).
+                            FileUtil.FileType.XML -> {
                                 val vectorIconDrawable = getVectorIconDrawable(holder, context)
                                 if (vectorIconDrawable != null) {
                                     bitmap = (vectorIconDrawable as BitmapDrawable).bitmap

@@ -8,8 +8,12 @@ import com.jecelyin.common.task.TaskListener
 import com.jecelyin.common.task.TaskResult
 import com.jecelyin.common.utils.DLog
 import com.jecelyin.editor.v2.io.FileEncodingDetector
-import org.apache.commons.io.FileUtils
+import com.riyadm.apkrepacker.ide.editor.text.CharsetDetector
+import com.riyadm.apkrepacker.utils.WorkerThreads
+import com.riyadm.patchengine.NativeScan
+import java.io.BufferedInputStream
 import java.io.BufferedReader
+import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.FileFilter
 import java.io.FileInputStream
@@ -17,6 +21,10 @@ import java.io.FileReader
 import java.io.IOException
 import java.io.InputStreamReader
 import java.util.LinkedList
+import java.util.concurrent.Callable
+import java.util.concurrent.ExecutionException
+import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
@@ -119,15 +127,103 @@ class ExtGrep : Parcelable {
 //        }
     }
 
-    private fun grepFiles(): List<Result> {
-        val results = ArrayList<Result>()
+    /**
+     * Greps every file of [filesToProcess] on [WorkerThreads.count] threads and returns the
+     * results in file order, as one thread would. The native filter first rules out the files
+     * that can't match, so only the others are read here. With [maxResults] > 0 only the first
+     * that many results are kept, but every file is still searched for [Outcome.total] and
+     * [Outcome.files].
+     */
+    private fun grepFiles(maxResults: Int): Outcome {
         // at this point the list was expanded into file names
-        for (f in filesToProcess!!) {
-            if (!f.exists() || !f.canRead())
-                continue
-            results.addAll(grepFile(f)!!)
+        val files = filesToProcess!!
+        val count = files.size
+        // An inverted match can be in any file.
+        val candidates = if (invertMatch) null else NativeScan.textCandidates(files.map { it.path }, grepPattern!!.pattern(), ignoreCase)
+        val found = arrayOfNulls<List<Result>>(count)
+        val matches = IntArray(count)
+        val cap = ResultCap(maxResults)
+        val next = AtomicInteger()
+        val worker = Callable {
+            while (true) {
+                val i = next.getAndIncrement()
+                if (i >= count) break
+                val f = files[i]
+                var results: List<Result> = emptyList()
+                if ((candidates == null || candidates[i]) && f.exists() && f.canRead() && !isBinaryFormat(f)) {
+                    results = grepFile(f) ?: emptyList()
+                }
+                matches[i] = results.size
+                if (!cap.isPast(i)) found[i] = results
+                cap.done(i, results.size)
+            }
         }
-        return results
+        val threads = minOf(WorkerThreads.count(), count)
+        if (threads <= 1) {
+            worker.call()
+        } else {
+            val pool = Executors.newFixedThreadPool(threads)
+            try {
+                // invokeAll waits for every worker; an error in one (OutOfMemoryError) is rethrown.
+                for (task in pool.invokeAll(List(threads) { worker })) {
+                    try {
+                        task.get()
+                    } catch (e: ExecutionException) {
+                        throw e.cause ?: e
+                    }
+                }
+            } finally {
+                pool.shutdownNow()
+            }
+        }
+
+        val results = ArrayList<Result>()
+        val matched = ArrayList<File>()
+        var total = 0
+        for (i in 0 until count) {
+            if (matches[i] == 0) continue
+            total += matches[i]
+            matched.add(files[i])
+            val kept = found[i] ?: continue
+            if (maxResults <= 0) {
+                results.addAll(kept)
+            } else if (results.size < maxResults) {
+                results.addAll(kept.subList(0, minOf(kept.size, maxResults - results.size)))
+            }
+        }
+        return Outcome(results, total, matched)
+    }
+
+    /**
+     * Where the first [max] results end, so the results of later files needn't be kept: the files
+     * are done out of order, and a file is past the cap once the files before it, all done, hold
+     * [max] results.
+     */
+    private class ResultCap(private val max: Int) {
+        private val done = HashMap<Int, Int>()
+        private var prefixEnd = 0
+        private var prefixResults = 0L
+
+        @Volatile
+        private var lastNeeded = Int.MAX_VALUE
+
+        fun isPast(index: Int) = index > lastNeeded
+
+        @Synchronized
+        fun done(index: Int, results: Int) {
+            if (max <= 0 || lastNeeded != Int.MAX_VALUE) return
+            done[index] = results
+            while (true) {
+                val n = done.remove(prefixEnd) ?: break
+                prefixResults += n
+                if (prefixResults >= max) {
+                    lastNeeded = prefixEnd
+                    done.clear()
+                    return
+                }
+                prefixEnd++
+            }
+        }
     }
 
     fun readExcludeFrom(vals: Array<String>) {
@@ -212,7 +308,7 @@ class ExtGrep : Parcelable {
                     }
                 } else if (f.isDirectory) {
                     val suffixs = mExtensions.toTypedArray()
-                    val children = FileUtils.listFiles(f, suffixs, recurseDirectories)
+                    val children = FileListing.listFiles(f, suffixs, recurseDirectories)
                     list.addAll(children)
 //                    if (recurseDirectories) {
 //                        list.addAll(recurseDir(f));
@@ -321,6 +417,12 @@ class ExtGrep : Parcelable {
         return null
     }
 
+    /** [matchAny] with one matcher reused for every line of a file (each new one is a native ICU object). */
+    private fun matchAny(matcher: Matcher, line: CharSequence): Matcher? {
+        matcher.reset(line)
+        return if (matcher.find()) matcher else null
+    }
+
     /**
      * Replaces every match. In plain-text mode the replacement is literal ('$' and '\\' are
      * common in smali). In regex mode an invalid group reference, which is an
@@ -328,8 +430,8 @@ class ExtGrep : Parcelable {
      */
     @Throws(IOException::class)
     fun replaceAll(text: String?, replaceText: String?): String {
-        compilePattern()
-        val m = grepPattern!!.matcher(text!!)
+        // The local pattern: replace in files calls this from several threads.
+        val m = compilePattern().matcher(text!!)
         if (!isUseRegex) {
             return m.replaceAll(Matcher.quoteReplacement(replaceText!!))
         }
@@ -367,14 +469,14 @@ class ExtGrep : Parcelable {
         val afterContextLines: MutableList<String> = LinkedList()
         val results = ArrayList<Result>()
         var bfr: BufferedReader? = null
+        val matcher = grepPattern!!.matcher("")
         try {
-            val encoding = FileEncodingDetector.detectEncoding(file)
-            bfr = BufferedReader(InputStreamReader(FileInputStream(file), encoding), 16000)
+            bfr = openLines(file)
             var line = bfr.readLine()
             while (line != null) {
 
                 lineNumber++
-                val m = matchAny(line)
+                val m = matchAny(matcher, line)
 
                 if (m != null && !invertMatch) {
                     count++
@@ -450,6 +552,20 @@ class ExtGrep : Parcelable {
         return results
     }
 
+    /**
+     * The lines of [file] in its detected encoding. The file is read once, into memory, unless it
+     * is huge; the encoding and the decoding are the same as when reading it twice from disk.
+     */
+    @Throws(IOException::class)
+    private fun openLines(file: File): BufferedReader {
+        if (file.length() > MAX_IN_MEMORY) {
+            val encoding = FileEncodingDetector.detectEncoding(file)
+            return BufferedReader(InputStreamReader(FileInputStream(file), encoding), 16000)
+        }
+        val bytes = file.readBytes()
+        return BufferedReader(InputStreamReader(ByteArrayInputStream(bytes), detectEncoding(bytes)), 16000)
+    }
+
     @SuppressLint("StaticFieldLeak")
     fun grepText(direct: GrepDirect, line: CharSequence, start: Int, listener: TaskListener<MatcherResult>?) {
         object : JecAsyncTask<Int, Void, MatcherResult>() {
@@ -493,7 +609,7 @@ class ExtGrep : Parcelable {
         this.isUseRegex = useRegex
     }
 
-    private fun compilePattern() {
+    private fun compilePattern(): Pattern {
 
 //        int flags = Pattern.COMMENTS;
         var flags = 0
@@ -516,8 +632,7 @@ class ExtGrep : Parcelable {
             }
         }
 
-        grepPattern = Pattern.compile(pattern, flags)
-
+        return Pattern.compile(pattern, flags).also { grepPattern = it }
     }
 
     fun addFile(name: String?) {
@@ -533,16 +648,19 @@ class ExtGrep : Parcelable {
             override fun onRun(taskResult: TaskResult<List<Result>>, vararg params: Void?) {
                 compilePattern()
                 verifyFileList()
-                val results = grepFiles()
+                val results = grepFiles(0).results
                 taskResult.setResult(results)
             }
         }.setTaskListener(listener).execute()
     }
 
-    fun execute(): List<Result> {
+    fun execute(): List<Result> = execute(0).results
+
+    /** Searches, keeping only the first [maxResults] results when it is > 0. */
+    fun execute(maxResults: Int): Outcome {
         compilePattern()
         verifyFileList()
-        return grepFiles()
+        return grepFiles(maxResults)
     }
 
     override fun describeContents(): Int {
@@ -584,6 +702,16 @@ class ExtGrep : Parcelable {
         fun onFinish(results: List<Result>?)
     }
 
+    /**
+     * What a search found: the first [results] (all of them unless capped), how many there are
+     * in all ([total]), and every file with a result, in search order.
+     */
+    class Outcome(
+        @JvmField val results: List<Result>,
+        @JvmField val total: Int,
+        @JvmField val files: List<File>,
+    )
+
     class Result internal constructor() {
         @JvmField
         var file: File? = null
@@ -619,6 +747,60 @@ class ExtGrep : Parcelable {
     }
 
     companion object {
+        /** Bigger files are streamed instead of being read into memory. */
+        private const val MAX_IN_MEMORY = 32L shl 20
+
+        /**
+         * What FileEncodingDetector.detectEncoding gives for a file with these [bytes]. An ASCII
+         * file is always UTF-8 to it: the detector only looks at chunks with a non-ASCII byte.
+         */
+        /**
+         * Images, archives, dex, native libraries, fonts and compiled Android XML, by their first
+         * bytes: the text search skips them. The same rule as is_binary_format in the native
+         * library (native/patchscan/src/scan.rs), for when the library isn't used.
+         */
+        @JvmStatic
+        fun isBinaryFormat(file: File): Boolean {
+            val b = ByteArray(12)
+            val n = try {
+                FileInputStream(file).use { input ->
+                    var read = 0
+                    while (read < b.size) {
+                        val r = input.read(b, read, b.size - read)
+                        if (r < 0) break
+                        read += r
+                    }
+                    read
+                }
+            } catch (e: IOException) {
+                return false
+            }
+            fun starts(vararg bytes: Int) = n >= bytes.size && bytes.indices.all { b[it] == bytes[it].toByte() }
+            fun startsWith(s: String) = starts(*s.map { it.code }.toIntArray())
+            return starts(0x89, 'P'.code, 'N'.code, 'G'.code, 0x0D, 0x0A, 0x1A, 0x0A) ||
+                starts(0xFF, 0xD8, 0xFF) ||
+                startsWith("GIF87a") || startsWith("GIF89a") ||
+                (startsWith("RIFF") && n >= 12 && String(b, 8, 4, Charsets.ISO_8859_1) == "WEBP") ||
+                starts('P'.code, 'K'.code, 3, 4) ||
+                (starts('d'.code, 'e'.code, 'x'.code, 0x0A) && n >= 8 && b[7] == 0.toByte()) ||
+                starts(0x7F, 'E'.code, 'L'.code, 'F'.code) ||
+                starts(0, 1, 0, 0) ||
+                startsWith("OTTO") || startsWith("wOFF") || startsWith("wOF2") ||
+                starts(3, 0, 8, 0) ||
+                starts(2, 0, 0x0C, 0)
+        }
+
+        private fun detectEncoding(bytes: ByteArray): String {
+            if (bytes.all { it >= 0 }) return FileEncodingDetector.DEFAULT_ENCODING
+            var encoding: String? = null
+            try {
+                encoding = CharsetDetector.detect(BufferedInputStream(ByteArrayInputStream(bytes)))
+            } catch (e: Exception) {
+                DLog.e(e)
+            }
+            return if (encoding.isNullOrEmpty()) FileEncodingDetector.DEFAULT_ENCODING else encoding
+        }
+
         @JvmField
         val CREATOR: Parcelable.Creator<ExtGrep> = object : Parcelable.Creator<ExtGrep> {
             override fun createFromParcel(source: Parcel): ExtGrep {

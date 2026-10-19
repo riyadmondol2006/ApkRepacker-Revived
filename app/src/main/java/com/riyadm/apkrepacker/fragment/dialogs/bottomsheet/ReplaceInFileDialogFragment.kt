@@ -11,6 +11,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.jecelyin.editor.v2.io.LocalFileWriter
 import com.riyadm.apkrepacker.R
 import com.riyadm.apkrepacker.databinding.BottomSheetDialogSearchReplaceBinding
+import com.riyadm.apkrepacker.utils.WorkerThreads
 import com.riyadm.apkrepacker.utils.grep.ExtGrep
 import com.riyadm.apkrepacker.utils.grep.GrepBuilder
 import kotlinx.coroutines.Dispatchers
@@ -18,6 +19,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
+import java.util.concurrent.Callable
+import java.util.concurrent.ExecutionException
+import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Bottom sheet that replaces text in one file or, in multi mode, in every file of a search result.
@@ -113,19 +118,41 @@ class ReplaceInFileDialogFragment : BottomSheetDialogFragment() {
         }
     }
 
+    /** Rewrites the files on several threads; the failed ones are listed in [paths] order. */
     private fun replaceInFiles(errorLabel: String, paths: List<String>, grep: ExtGrep, replacement: String): Outcome {
-        var replaced = 0
-        val failed = mutableListOf<String>()
-        for (path in paths) {
-            try {
-                rewrite(File(path), grep, replacement)
-                replaced++
-            } catch (e: IOException) {
-                e.printStackTrace()
-                failed += File(path).name
+        val ok = BooleanArray(paths.size)
+        val next = AtomicInteger()
+        val worker = Callable {
+            while (true) {
+                val i = next.getAndIncrement()
+                if (i >= paths.size) break
+                try {
+                    rewrite(File(paths[i]), grep, replacement)
+                    ok[i] = true
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
             }
         }
-        return if (failed.isEmpty()) Outcome.Done(replaced) else Outcome.Failed("$errorLabel: ${failed.joinToString()}")
+        val threads = minOf(WorkerThreads.count(), paths.size)
+        if (threads <= 1) {
+            worker.call()
+        } else {
+            val pool = Executors.newFixedThreadPool(threads)
+            try {
+                for (task in pool.invokeAll(List(threads) { worker })) {
+                    try {
+                        task.get()
+                    } catch (e: ExecutionException) {
+                        throw e.cause ?: e
+                    }
+                }
+            } finally {
+                pool.shutdownNow()
+            }
+        }
+        val failed = paths.indices.filter { !ok[it] }.map { File(paths[it]).name }
+        return if (failed.isEmpty()) Outcome.Done(ok.count { it }) else Outcome.Failed("$errorLabel: ${failed.joinToString()}")
     }
 
     @Throws(IOException::class)

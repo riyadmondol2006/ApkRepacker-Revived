@@ -149,7 +149,8 @@ class SearchSettingsFragment : Fragment() {
                 setRegex(query, regex)
                 if (recursively) recurseDirectories()
                 setExeption(extensions)
-                addFile(path)
+                // The folder field, like the file name search; the current folder when it's empty.
+                addFile(folder.ifEmpty { path })
             }.build()
             StringUtils.setGreap(grep)
             listener?.let {

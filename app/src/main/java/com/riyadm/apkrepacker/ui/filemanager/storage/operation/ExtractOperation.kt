@@ -180,6 +180,6 @@ class ExtractOperation(private val context: Context) : FileOperation<ExtractArgu
     }
 
     companion object {
-        private const val BUFFER_SIZE = 1024
+        private const val BUFFER_SIZE = 8 * 1024
     }
 }

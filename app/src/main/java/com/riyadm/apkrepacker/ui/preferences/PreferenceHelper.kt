@@ -75,7 +75,8 @@ class PreferenceHelper(private val context: Context) : SharedPreferences.OnShare
         cache[KEY_KEY_TYPE] = 0
         cache[KEY_WHOLE_WORDS_ONLY] = false
         cache[KEY_RECURSIVELY] = true
-        cache[KEY_FILES_MODE] = true
+        // Text in files by default; the switch turns on the file name search.
+        cache[KEY_FILES_MODE] = false
         cache[KEY_EXTENSIONS] = defaultExtensionsJson()
         cache[KEY_KEEP_SCREEN_ON] = false
         cache[KEY_CONFIRM_BUILD] = false

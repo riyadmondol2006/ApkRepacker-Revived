@@ -96,9 +96,11 @@ class FindFragment : Fragment(),
         b.actionClear.springVisible(true)
     }
 
-    fun setStringResult(parentList: List<ParentData>, files: ArrayList<String>?) {
+    /** [note] (results not all shown) goes on a second line under the count. */
+    fun setStringResult(parentList: List<ParentData>, files: ArrayList<String>?, note: String? = null) {
         val b = binding ?: return
         b.findCount(parentList.size)
+        if (note != null) b.searchResultCount.append("\n" + note)
         if (parentList.isEmpty()) {
             b.findList.adapter = null
             showEmpty(true)

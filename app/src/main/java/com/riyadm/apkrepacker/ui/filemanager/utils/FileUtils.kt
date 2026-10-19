@@ -34,6 +34,7 @@ import android.text.format.Formatter
 import com.riyadm.apkrepacker.R
 import com.riyadm.apkrepacker.ui.filemanager.holder.FileHolder
 import com.riyadm.apkrepacker.utils.FileProvider
+import com.riyadm.apkrepacker.utils.WorkerThreads
 import com.riyadm.codeeditor.util.DLog
 import java.io.File
 import java.io.FileNotFoundException
@@ -347,31 +348,14 @@ object FileUtils {
     }
 
     /**
-     * Delete a file or directory along with its children.
+     * Delete a file or directory along with its children, on several threads. Links are deleted
+     * themselves, never followed.
      *
      * @return Whether the operation succeeded.
      */
     @JvmStatic
     fun delete(fileOrDirectory: File): Boolean {
-        var res = true
-
-        // Delete children if directory
-        val children = fileOrDirectory.listFiles()
-        val hasChildren = children != null && children.size != 0
-        if (hasChildren) {
-            for (childFile in children!!) {
-                if (childFile.isDirectory) {
-                    res = res and delete(childFile)
-                } else {
-                    res = res and deleteFile(childFile)
-                }
-            }
-        }
-
-        // Delete the file itself
-        res = res and deleteFile(fileOrDirectory)
-
-        return res
+        return TreeDeleter.delete(fileOrDirectory, WorkerThreads.count()).success
     }
 
     @JvmStatic
@@ -490,13 +474,9 @@ object FileUtils {
         val paths: MutableList<String> = ArrayList()
         if (file.isDirectory) {
             MediaScannerUtils.getPathsOfFolder(paths, file)
-        } else {
+        } else if (MediaScannerUtils.isIndexable(file)) {
             paths.add(file.absolutePath)
         }
         return paths
-    }
-
-    private fun deleteFile(childFile: File): Boolean {
-        return !childFile.exists() || childFile.delete()
     }
 }

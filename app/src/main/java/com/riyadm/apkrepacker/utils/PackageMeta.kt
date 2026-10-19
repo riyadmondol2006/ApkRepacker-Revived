@@ -4,12 +4,12 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
-import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.os.Parcel
 import android.os.Parcelable
 
+/** An installed app as the Apps list shows it. No icon: rows load it on demand (see PackageIcon). */
 class PackageMeta : Parcelable {
 
     @JvmField
@@ -26,8 +26,6 @@ class PackageMeta : Parcelable {
     var versionName: String? = null
     @JvmField
     var iconUri: Uri? = null
-    @JvmField
-    var iconDrawable: Drawable? = null
 
     constructor(packageName: String, label: String?) {
         this.packageName = packageName
@@ -43,7 +41,6 @@ class PackageMeta : Parcelable {
         versionCode = `in`.readLong()
         versionName = `in`.readString()
         iconUri = `in`.readParcelable(Uri::class.java.classLoader)
-        iconDrawable = `in`.readParcelable<Parcelable>(Drawable::class.java.classLoader) as Drawable?
     }
 
     override fun describeContents(): Int {
@@ -58,7 +55,6 @@ class PackageMeta : Parcelable {
         dest.writeLong(versionCode)
         dest.writeString(versionName)
         dest.writeParcelable(iconUri, 0)
-        dest.writeParcelable(iconDrawable as Parcelable?, 0)
     }
 
     class Builder(packageName: String) {
@@ -104,11 +100,6 @@ class PackageMeta : Parcelable {
             return this
         }
 
-        fun setIconDrawable(iconDrawable: Drawable?): Builder {
-            mPackageMeta.iconDrawable = iconDrawable
-            return this
-        }
-
         fun build(): PackageMeta {
             return mPackageMeta
         }
@@ -142,7 +133,6 @@ class PackageMeta : Parcelable {
                         .serVersionCode(if (AppUtils.apiIsAtLeast(Build.VERSION_CODES.P)) packageInfo.longVersionCode else packageInfo.versionCode.toLong())
                         .setVersionName(packageInfo.versionName)
                         .setIcon(applicationInfo.icon)
-                        .setIconDrawable(applicationInfo.loadIcon(pm))
                         .build()
 
             } catch (e: PackageManager.NameNotFoundException) {

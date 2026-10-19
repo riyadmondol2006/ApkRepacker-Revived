@@ -6,10 +6,7 @@ import android.view.inputmethod.InputMethodManager;
 
 import com.riyadm.codeeditor.lang.Language;
 import com.riyadm.codeeditor.util.Lexer;
-import com.riyadm.codeeditor.util.Pair;
 import com.riyadm.codeeditor.util.TextWarriorException;
-
-import java.util.List;
 
 import static com.riyadm.codeeditor.util.DLog.log;
 
@@ -32,10 +29,20 @@ public class TextFieldController implements Lexer.LexCallback {
      * text view when done. The global programming language used is set with
      * the static method Lexer.setLanguage(Language)
      * <p>
+     * Called after every edit, so the lex waits until typing pauses; until
+     * then the old spans are shifted along with the edits.
      * Does nothing if the Lexer language is not a programming language
      */
     public void determineSpans() {
         _lexer.tokenize(mTextField.hDoc);
+    }
+
+    /**
+     * Like determineSpans(), without waiting: for a text that was just
+     * loaded or a language that was just set
+     */
+    public void determineSpansNow() {
+        _lexer.tokenize(mTextField.hDoc, true);
     }
 
     public void cancelSpanning() {
@@ -44,12 +51,14 @@ public class TextFieldController implements Lexer.LexCallback {
 
     @Override
     //This is usually called from a non-UI thread
-    public void lexDone(final List<Pair> results) {
+    public void lexDone(final Lexer.Result result) {
         mTextField.post(new Runnable() {
             @Override
             public void run() {
-                mTextField.hDoc.setSpans(results);
-                mTextField.invalidate();
+                // dropped if the text changed or a newer lex was requested
+                if (result.apply()) {
+                    mTextField.invalidate();
+                }
             }
         });
     }
